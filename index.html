@@ -1,0 +1,960 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nutsa — Catalogue & Commande</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBFAF7;
+    --ink:#1A1A1A;
+    --ink-soft:#5A5A5A;
+    --rule:#E8E4DC;
+    --rule-soft:#F0EDE6;
+    --red:#B6342B;
+    --red-deep:#8E2620;
+    --red-light:#D44A40;
+    --green:#7E9B5C;
+    --green-deep:#4F6B3A;
+    --accent:#C97B4F;
+    --shadow:0 1px 0 rgba(26,26,26,.04), 0 30px 60px -30px rgba(26,26,26,.18);
+    --radius:18px;
+    --display:"Fraunces", ui-serif, Georgia, serif;
+    --body:"Manrope", ui-sans-serif, system-ui, sans-serif;
+    --arabic:"Cairo", "Segoe UI", Tahoma, sans-serif;
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:var(--body);
+    color:var(--ink);
+    background:var(--paper);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+    padding-bottom:110px;
+  }
+
+  a{color:inherit}
+  button{font-family:inherit}
+
+  /* ── Top ticker ─────────────────────────── */
+  .topbar{
+    position:relative;z-index:5;
+    border-bottom:1px solid var(--rule);
+    background:#fff;
+  }
+  .topbar-inner{
+    max-width:1240px;margin:0 auto;
+    padding:12px 28px;
+    display:flex;align-items:center;justify-content:space-between;
+    font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);
+  }
+  .ticker{display:flex;gap:28px}
+  .ticker span::before{content:"●";color:var(--green);margin-right:8px;font-size:8px;vertical-align:middle}
+  .lang{display:flex;gap:14px}
+  .lang a{text-decoration:none;opacity:.5;transition:opacity .15s ease}
+  .lang a.on{opacity:1;color:var(--red);font-weight:700}
+  .lang a:hover{opacity:1}
+
+  /* ── Brand ──────────────────────────────── */
+  header.brand{
+    background:#fff;
+    border-bottom:1px solid var(--rule);
+  }
+  .brand-inner{
+    max-width:1240px;margin:0 auto;
+    padding:24px 28px;
+    display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:24px;
+  }
+  .brand-left,.brand-right{font-size:12px;color:var(--ink-soft);letter-spacing:.06em;text-transform:uppercase}
+  .brand-right{text-align:right}
+  .brand-right strong{color:var(--red);font-weight:700}
+  .logo{
+    text-align:center;
+    font-family:var(--display);
+    font-weight:700;
+    font-size:42px;
+    letter-spacing:-.02em;
+    line-height:1;
+  }
+  .logo em{font-style:italic;color:var(--red);font-weight:500}
+  .logo small{
+    display:block;font-family:var(--body);font-weight:600;
+    font-size:10px;letter-spacing:.4em;text-transform:uppercase;
+    color:var(--ink-soft);margin-top:8px;
+  }
+
+  /* ── Hero ───────────────────────────────── */
+  .hero{
+    max-width:1240px;margin:0 auto;
+    padding:64px 28px 40px;
+    display:grid;grid-template-columns:1.4fr 1fr;gap:48px;align-items:end;
+    border-bottom:1px solid var(--rule);
+  }
+  .hero .kicker{
+    font-size:12px;letter-spacing:.32em;text-transform:uppercase;
+    color:var(--accent);font-weight:600;margin-bottom:16px;
+  }
+  .hero h1{
+    font-family:var(--display);
+    font-weight:300;
+    font-size:clamp(48px, 8vw, 104px);
+    line-height:.9;
+    letter-spacing:-.03em;
+    margin:0;
+    font-variation-settings:"opsz" 144;
+  }
+  .hero h1 .ital{font-style:italic;font-weight:400;color:var(--red)}
+  .hero h1 .ar{
+    display:block;font-family:var(--arabic);font-weight:800;
+    font-size:.42em;color:var(--ink);margin-top:18px;letter-spacing:0;
+    line-height:1.1;
+  }
+  .hero p.lede{
+    font-size:16px;color:var(--ink-soft);max-width:38ch;
+    margin:0 0 6px;
+  }
+  .meta-row{
+    display:flex;gap:18px;flex-wrap:wrap;
+    margin-top:20px;padding-top:20px;border-top:1px solid var(--rule);
+    font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);
+  }
+  .meta-row span{display:inline-flex;align-items:center;gap:8px;font-weight:600}
+  .meta-row span::before{content:"";width:6px;height:6px;background:var(--red);border-radius:50%}
+
+  /* ── Filter chips ───────────────────────── */
+  .filters{
+    max-width:1240px;margin:0 auto;
+    padding:32px 28px 8px;
+    display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+  }
+  .filters .label{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft);margin-right:6px;font-weight:600}
+  .chip{
+    border:1px solid var(--rule);
+    background:#fff;
+    padding:9px 18px;border-radius:999px;
+    font-size:13px;letter-spacing:.03em;
+    cursor:pointer;color:var(--ink);
+    transition:all .2s ease;
+  }
+  .chip:hover{border-color:var(--ink)}
+  .chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  /* ── Product list ───────────────────────── */
+  main{
+    max-width:1240px;margin:0 auto;
+    padding:24px 28px 40px;
+  }
+  .table-wrap{
+    background:#fff;border-radius:var(--radius);border:1px solid var(--rule);
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  .thead{
+    display:grid;grid-template-columns:140px 1.4fr 200px 160px;gap:24px;
+    padding:18px 28px;border-bottom:2px solid var(--red);
+    font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;
+  }
+  .row{
+    display:grid;grid-template-columns:140px 1.4fr 200px 160px;gap:24px;align-items:center;
+    padding:22px 28px;border-top:1px solid var(--rule-soft);
+    transition:background .2s ease;
+  }
+  .row:hover{background:var(--rule-soft)}
+  .row:first-child{border-top:0}
+  .row.selected{background:rgba(182,52,43,.04);border-left:3px solid var(--red)}
+  .row.selected:first-child{border-top:0}
+
+  .thumb{
+    width:120px;height:120px;border-radius:14px;overflow:hidden;
+    background:var(--rule-soft);
+    box-shadow:inset 0 0 0 1px rgba(26,26,26,.06);
+    display:grid;place-items:center;
+  }
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+
+  .info .num{
+    font-family:var(--display);font-style:italic;font-weight:400;
+    font-size:13px;color:var(--accent);letter-spacing:.02em;
+  }
+  .info h3{
+    font-family:var(--display);font-weight:500;
+    font-size:22px;line-height:1.1;letter-spacing:-.01em;
+    margin:2px 0 8px;
+  }
+  .tags{display:flex;gap:6px;flex-wrap:wrap}
+  .tag{
+    font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+    padding:3px 9px;border-radius:999px;border:1px solid var(--rule);color:var(--ink-soft);background:#fff;
+  }
+  .tag.sale{background:var(--red);color:#fff;border-color:var(--red)}
+  .tag.green{background:rgba(126,155,92,.15);border-color:rgba(126,155,92,.35);color:var(--green-deep)}
+
+  .qty{
+    display:flex;align-items:center;
+    border:1.5px solid var(--ink);border-radius:999px;
+    width:max-content;background:#fff;overflow:hidden;
+  }
+  .qty button{
+    width:38px;height:42px;border:0;background:transparent;cursor:pointer;
+    font-size:20px;color:var(--ink);font-weight:600;
+    transition:background .15s ease;
+  }
+  .qty button:hover{background:var(--ink);color:#fff}
+  .qty input{
+    width:54px;height:42px;text-align:center;border:0;background:transparent;
+    font-family:var(--display);font-size:20px;font-weight:600;
+    -moz-appearance:textfield;color:var(--ink);
+    border-left:1px solid var(--rule);border-right:1px solid var(--rule);
+  }
+  .qty input::-webkit-outer-spin-button,
+  .qty input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+
+  .price-stack .now{
+    font-family:var(--display);font-weight:500;font-size:24px;line-height:1.1;
+    font-variant-numeric:tabular-nums;color:var(--ink);transition:color .25s ease;
+  }
+  .price-stack .now.bump{color:var(--red)}
+  .price-stack .was{text-decoration:line-through;color:var(--ink-soft);font-size:13px;font-variant-numeric:tabular-nums}
+  .price-stack .meta{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-top:4px;font-weight:600}
+
+  /* ── STICKY BOTTOM ORDER BAR ─────────── */
+  .order-bar{
+    position:fixed;bottom:0;left:0;right:0;
+    background:#fff;
+    border-top:1px solid var(--rule);
+    box-shadow:0 -8px 40px -8px rgba(26,26,26,.18);
+    z-index:40;
+    padding:14px 28px;
+    transition:transform .3s cubic-bezier(.22,1,.36,1), opacity .3s ease;
+  }
+  .order-bar.hidden{
+    transform:translateY(110%);
+    opacity:0;
+    pointer-events:none;
+  }
+  .order-bar-inner{
+    max-width:1240px;margin:0 auto;
+    display:flex;align-items:center;justify-content:space-between;gap:24px;
+  }
+  .bar-summary{display:flex;flex-direction:column;gap:3px}
+  .bar-summary .bar-count{
+    font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-soft);font-weight:600;
+  }
+  .bar-summary .bar-total{
+    font-family:var(--display);font-size:26px;font-weight:500;
+    font-variant-numeric:tabular-nums;color:var(--ink);
+    line-height:1;
+  }
+  .bar-items-list{
+    flex:1;
+    display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+    padding:0 8px;
+    max-height:60px;overflow:hidden;
+  }
+  .bar-pill{
+    background:var(--rule-soft);border:1px solid var(--rule);
+    border-radius:999px;padding:5px 12px;
+    font-size:12px;color:var(--ink);white-space:nowrap;
+  }
+  .bar-pill strong{font-weight:700;color:var(--red)}
+
+  /* ── BIG RED ARABIC SHAKING BUTTON ──────── */
+  @keyframes shake {
+    0%, 88%, 100% { transform: translate(0,0) rotate(0); }
+    89%  { transform: translate(-2px, 1px) rotate(-1deg); }
+    90%  { transform: translate(3px, -1px) rotate(1.5deg); }
+    91%  { transform: translate(-3px, 2px) rotate(-1.5deg); }
+    92%  { transform: translate(3px, 1px) rotate(1deg); }
+    93%  { transform: translate(-2px, -2px) rotate(-1deg); }
+    94%  { transform: translate(2px, 2px) rotate(.5deg); }
+    95%  { transform: translate(-3px, 1px) rotate(-1deg); }
+    96%  { transform: translate(2px, -1px) rotate(1deg); }
+    97%  { transform: translate(-1px, 1px) rotate(-.5deg); }
+  }
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 6px 0 var(--red-deep), 0 12px 24px -8px rgba(182,52,43,.5); }
+    50%      { box-shadow: 0 6px 0 var(--red-deep), 0 16px 36px -8px rgba(182,52,43,.75), 0 0 0 6px rgba(182,52,43,.12); }
+  }
+  .order-btn{
+    appearance:none;border:0;cursor:pointer;
+    background:linear-gradient(180deg, var(--red-light) 0%, var(--red) 60%, var(--red-deep) 100%);
+    color:#fff;
+    padding:18px 36px;
+    white-space:nowrap;
+    border-radius:14px;
+    font-family:var(--arabic);
+    font-size:22px;font-weight:900;letter-spacing:.02em;
+    direction:rtl;
+    text-shadow:0 1px 0 rgba(0,0,0,.25);
+    box-shadow:0 6px 0 var(--red-deep), 0 12px 24px -8px rgba(182,52,43,.5);
+    animation: shake 3.5s cubic-bezier(.36,.07,.19,.97) infinite, pulse-glow 2.6s ease-in-out infinite;
+    transform-origin:center;
+    transition:transform .12s ease;
+    position:relative;overflow:hidden;
+    flex-shrink:0;
+  }
+  .order-btn::before{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(120deg, transparent 30%, rgba(255,255,255,.35) 50%, transparent 70%);
+    transform:translateX(-100%);transition:transform .6s ease;
+  }
+  .order-btn:hover::before{transform:translateX(100%)}
+  .order-btn:hover{
+    animation-play-state:paused;
+    transform:translateY(-2px);
+    box-shadow:0 8px 0 var(--red-deep), 0 18px 32px -8px rgba(182,52,43,.7);
+  }
+  .order-btn:active{
+    transform:translateY(3px);
+    box-shadow:0 3px 0 var(--red-deep), 0 6px 12px -4px rgba(182,52,43,.5);
+  }
+  .order-btn .icon{display:inline-block;margin-left:10px;font-size:18px;vertical-align:middle}
+
+  /* ── Modal ──────────────────────────────── */
+  .modal-backdrop{
+    position:fixed;inset:0;
+    background:rgba(26,26,26,.6);
+    backdrop-filter:blur(4px);
+    z-index:50;
+    display:none;align-items:center;justify-content:center;
+    padding:20px;
+  }
+  .modal-backdrop.open{display:flex;animation:fade .2s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .modal{
+    background:#fff;
+    border-radius:var(--radius);
+    width:min(580px,100%);
+    max-height:92vh;overflow:auto;
+    box-shadow:0 30px 80px -20px rgba(0,0,0,.4);
+    position:relative;
+    animation:rise .3s cubic-bezier(.22,1,.36,1);
+  }
+  @keyframes rise{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .modal header{
+    padding:28px 32px 18px;border-bottom:1px solid var(--rule);
+  }
+  .eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .modal h2{font-family:var(--display);font-weight:400;font-size:30px;letter-spacing:-.02em;margin:6px 0 0;line-height:1.1}
+  .modal h2 em{font-style:italic;color:var(--red)}
+
+  /* Multi-item summary */
+  .summary-block{
+    margin:18px 32px 0;
+    border:1px solid var(--rule);border-radius:12px;overflow:hidden;
+  }
+  .summary-item{
+    display:flex;justify-content:space-between;align-items:center;gap:16px;
+    padding:12px 16px;background:var(--rule-soft);
+    border-bottom:1px solid var(--rule);
+  }
+  .summary-item:last-child{border-bottom:0}
+  .summary-item .si-left strong{font-family:var(--display);font-weight:500;font-size:15px;display:block}
+  .summary-item .si-left span{font-size:11px;color:var(--ink-soft);letter-spacing:.04em}
+  .summary-item .si-right{font-family:var(--display);font-size:18px;color:var(--red);white-space:nowrap}
+  .summary-total{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 16px;background:#fff;
+    border-top:2px solid var(--red);
+  }
+  .summary-total span:first-child{font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--ink-soft)}
+  .summary-total .grand{font-family:var(--display);font-size:26px;font-weight:500;color:var(--ink)}
+
+  form{padding:18px 32px 28px;display:grid;gap:14px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);font-weight:700}
+  .field input,.field select,.field textarea{
+    font-family:var(--body);font-size:15px;
+    padding:13px 14px;border-radius:10px;
+    border:1px solid var(--rule);
+    background:#fff;color:var(--ink);
+    outline:none;transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .field input:focus,.field select:focus,.field textarea:focus{
+    border-color:var(--ink);box-shadow:0 0 0 3px rgba(26,26,26,.08);
+  }
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+  .delivery{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+  .delivery label{
+    border:1px solid var(--rule);border-radius:12px;
+    padding:12px 14px;cursor:pointer;
+    display:flex;flex-direction:column;gap:2px;
+    transition:all .15s ease;position:relative;
+  }
+  .delivery label:hover{border-color:var(--ink-soft)}
+  .delivery input{position:absolute;opacity:0;pointer-events:none}
+  .delivery label.sel{border-color:var(--red);background:rgba(182,52,43,.04)}
+  .delivery .name{font-weight:700;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+  .delivery .price{font-family:var(--display);font-size:18px;color:var(--red)}
+
+  .submit-row{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:6px}
+  .submit-btn{
+    flex:1;
+    appearance:none;border:0;cursor:pointer;
+    background:var(--red);color:#fff;
+    padding:16px 24px;border-radius:999px;
+    font-family:var(--arabic);font-size:16px;font-weight:800;letter-spacing:.04em;
+    transition:background .2s ease, transform .2s ease;
+  }
+  .submit-btn:hover{background:var(--red-deep);transform:translateY(-1px)}
+  .cancel{background:transparent;border:0;cursor:pointer;padding:14px;color:var(--ink-soft);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+  .cancel:hover{color:var(--ink)}
+
+  .close{
+    position:absolute;top:16px;right:16px;
+    width:36px;height:36px;border-radius:50%;
+    background:var(--rule-soft);border:0;cursor:pointer;
+    font-size:18px;color:var(--ink);
+    display:grid;place-items:center;
+  }
+  .close:hover{background:var(--ink);color:#fff}
+
+  /* ── Success state ──────────────────────── */
+  .success{padding:48px 32px 32px;text-align:center}
+  .success .badge{
+    width:68px;height:68px;border-radius:50%;
+    background:var(--green);color:#fff;
+    display:grid;place-items:center;margin:0 auto 18px;
+    font-size:32px;font-weight:700;
+  }
+  .success h2{font-family:var(--display);font-size:32px;margin:0 0 10px;font-weight:400}
+  .success h2 em{font-style:italic;color:var(--red)}
+  .success p{color:var(--ink-soft);max-width:38ch;margin:0 auto 24px}
+  .success .recap{
+    text-align:left;background:var(--rule-soft);border-radius:12px;
+    padding:18px 20px;margin:0 auto 22px;border:1px solid var(--rule);font-size:14px;
+  }
+  .success .recap div{display:flex;justify-content:space-between;padding:5px 0;gap:14px}
+  .success .recap div + div{border-top:1px dashed var(--rule)}
+  .success .recap span:first-child{color:var(--ink-soft);letter-spacing:.04em}
+
+  /* ── Footer ─────────────────────────────── */
+  footer{
+    border-top:1px solid var(--rule);
+    background:var(--ink);color:var(--paper);
+    padding:48px 28px 28px;margin-top:48px;
+  }
+  .foot-inner{
+    max-width:1240px;margin:0 auto;
+    display:grid;grid-template-columns:2fr 1fr 1fr;gap:48px;align-items:start;
+  }
+  .foot-inner h4{font-family:var(--display);font-weight:400;font-size:32px;margin:0 0 8px;letter-spacing:-.01em}
+  .foot-inner h4 em{font-style:italic;color:var(--red-light)}
+  .foot-inner p{color:rgba(251,250,247,.65);max-width:42ch;font-size:14px}
+  .foot-inner ul{list-style:none;padding:0;margin:0;display:grid;gap:8px;font-size:14px;color:rgba(251,250,247,.85)}
+  .foot-inner h5{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--red-light);margin:0 0 14px;font-weight:700}
+  .foot-bottom{
+    max-width:1240px;margin:32px auto 0;padding-top:20px;
+    border-top:1px solid rgba(251,250,247,.15);
+    display:flex;justify-content:space-between;font-size:12px;color:rgba(251,250,247,.5);
+    letter-spacing:.06em;
+  }
+
+  /* ── Responsive ─────────────────────────── */
+  @media (max-width:980px){
+    .hero{grid-template-columns:1fr;gap:24px;padding:40px 20px 32px}
+    .thead{display:none}
+    .row{
+      grid-template-columns:90px 1fr;
+      grid-template-rows:auto auto auto;
+      gap:14px 16px;padding:18px;
+    }
+    .thumb{width:90px;height:90px}
+    .info{grid-column:2}
+    .qty-cell, .price-cell{
+      grid-column:1 / -1;
+      display:flex;justify-content:space-between;align-items:center;
+      border-top:1px dashed var(--rule);padding-top:12px;
+    }
+    .topbar-inner{flex-direction:column;gap:8px;padding:10px}
+    .ticker{font-size:11px;gap:14px}
+    .brand-inner{grid-template-columns:1fr;text-align:center}
+    .brand-left,.brand-right{display:none}
+    .foot-inner{grid-template-columns:1fr;gap:28px}
+    .field-row,.delivery{grid-template-columns:1fr}
+    .order-bar-inner{flex-wrap:wrap;gap:12px}
+    .bar-items-list{display:none}
+    .order-btn{font-size:20px;padding:16px 24px;width:100%}
+    .bar-summary{flex-direction:row;gap:16px;align-items:baseline}
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── Top ticker ──────────────────────── -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="ticker">
+      <span>Livraison 24 wilayas</span>
+      <span>Paiement à la livraison</span>
+      <span>Gros &amp; détail</span>
+    </div>
+    <div class="lang">
+      <a href="#" class="on">FR</a>
+      <a href="#">AR</a>
+      <a href="#">EN</a>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Brand ──────────────────────────── -->
+<header class="brand">
+  <div class="brand-inner">
+    <div class="brand-left">Nutsa Distribution · Algérie ©</div>
+    <div class="logo">
+      N<em>u</em>ts<em>a</em>
+      <small>Pâtes à tartiner premium</small>
+    </div>
+    <div class="brand-right"><strong>+213 555 00 00 00</strong> · contact@nutsa-dz.com</div>
+  </div>
+</header>
+
+<!-- ─── Hero ───────────────────────────── -->
+<section class="hero">
+  <div>
+    <div class="kicker">Catalogue · Gros &amp; détail</div>
+    <h1>
+      Catalogue<br>
+      <span class="ital">de gros</span> &amp; détail.
+      <span class="ar">اطلب الآن — توصيل لكامل الولايات</span>
+    </h1>
+  </div>
+  <div>
+    <p class="lede">Choisissez vos références, ajustez les quantités, commandez en quelques secondes. Une seule commande pour tout le panier — paiement à la livraison.</p>
+    <div class="meta-row">
+      <span>11 références</span>
+      <span>Stock disponible</span>
+      <span>Expédition 48h</span>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Filters ────────────────────────── -->
+<div class="filters">
+  <div class="label">Filtrer</div>
+  <button class="chip on" data-filter="all">Tout voir</button>
+  <button class="chip" data-filter="choco">Chocolat noisettes</button>
+  <button class="chip" data-filter="pistache">Pistache</button>
+  <button class="chip" data-filter="rocher">Rocher</button>
+</div>
+
+<!-- ─── Product list ───────────────────── -->
+<main>
+  <div class="table-wrap">
+    <div class="thead">
+      <div>Image</div>
+      <div>Product</div>
+      <div>Quantity</div>
+      <div>Price</div>
+    </div>
+    <div id="product-list"><!-- rows render here --></div>
+  </div>
+</main>
+
+<!-- ─── STICKY ORDER BAR ─────────────── -->
+<div class="order-bar hidden" id="order-bar">
+  <div class="order-bar-inner">
+    <div class="bar-summary">
+      <div class="bar-count" id="bar-count">0 article</div>
+      <div class="bar-total" id="bar-total">0 DA</div>
+    </div>
+    <div class="bar-items-list" id="bar-items-list"></div>
+    <button class="order-btn" id="main-order-btn">
+      اطلب الآن <span class="icon">←</span>
+    </button>
+  </div>
+</div>
+
+<!-- ─── Modal ──────────────────────────── -->
+<div class="modal-backdrop" id="modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <button class="close" id="close-modal" aria-label="Fermer">×</button>
+    <div id="form-view">
+      <header>
+        <div class="eyebrow">Paiement à la livraison · COD</div>
+        <h2 id="modal-title">Finalisez votre <em>commande</em></h2>
+      </header>
+
+      <div id="modal-summary-block"></div>
+
+      <form id="order-form" novalidate>
+        <div class="field-row">
+          <div class="field">
+            <label for="f-name">Nom complet</label>
+            <input id="f-name" name="name" type="text" required autocomplete="name" placeholder="الاسم الكامل">
+          </div>
+          <div class="field">
+            <label for="f-phone">Téléphone</label>
+            <input id="f-phone" name="phone" type="tel" required autocomplete="tel" placeholder="0555 12 34 56">
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="f-wilaya">Wilaya</label>
+            <select id="f-wilaya" name="wilaya" required>
+              <option value="" disabled selected>اختر الولاية</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-baladia">Commune (Baladia)</label>
+            <input id="f-baladia" name="baladia" type="text" required placeholder="البلدية">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="f-address">Adresse complète <span style="text-transform:none;color:var(--ink-soft);font-weight:400">(optionnel)</span></label>
+          <input id="f-address" name="address" type="text" placeholder="Rue, numéro, repère…">
+        </div>
+
+        <div class="field">
+          <label>Mode de livraison</label>
+          <div class="delivery">
+            <label class="sel" id="lab-door">
+              <input type="radio" name="delivery" value="door" checked>
+              <span class="name">À domicile</span>
+              <span class="price" id="price-door">600 DA</span>
+            </label>
+            <label id="lab-stop">
+              <input type="radio" name="delivery" value="stop">
+              <span class="name">Stop desk</span>
+              <span class="price" id="price-stop">450 DA</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="f-note">Note <span style="text-transform:none;color:var(--ink-soft);font-weight:400">(optionnel)</span></label>
+          <textarea id="f-note" name="note" rows="2" placeholder="ملاحظات…"></textarea>
+        </div>
+
+        <div class="submit-row">
+          <button type="button" class="cancel" id="cancel-btn">Annuler</button>
+          <button type="submit" class="submit-btn">تأكيد الطلب</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="success-view" style="display:none">
+      <div class="success">
+        <div class="badge">✓</div>
+        <h2>تم تأكيد <em>طلبك</em></h2>
+        <p>سنتصل بك قريباً لتأكيد التوصيل. شكراً لك!</p>
+        <div class="recap" id="success-recap"></div>
+        <button class="submit-btn" id="ok-btn" style="max-width:240px">شكراً</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Footer ─────────────────────────── -->
+<footer>
+  <div class="foot-inner">
+    <div>
+      <h4>Nutsa, <em>la pâte à tartiner</em><br>des professionnels.</h4>
+      <p>Pâtes à tartiner premium pour pâtissiers, hôtels, cafés et particuliers exigeants. Textures maîtrisées, saveurs intenses.</p>
+    </div>
+    <div>
+      <h5>Catalogue</h5>
+      <ul>
+        <li>Chocolat noisettes</li>
+        <li>Pistache</li>
+        <li>Rocher</li>
+        <li>Chococo</li>
+      </ul>
+    </div>
+    <div>
+      <h5>Contact</h5>
+      <ul>
+        <li>contact@nutsa-dz.com</li>
+        <li>+213 555 00 00 00</li>
+        <li>Alger, Algérie</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <span>© Nutsa Distribution Algérie · 2026</span>
+    <span>Catalogue Gros &amp; Détail</span>
+  </div>
+</footer>
+
+<script>
+  // ── Data ───────────────────────────────────
+  const CDN = "https://nutsa-dz.com/cdn/shop/files/";
+  const products = [
+    { id:1,  num:"01", name:"Chococo (raf-aelo)",        weight:"1.5 kg",  cat:"choco",    price:2400, was:2850, img:CDN+"Code_Generated_Image.png?width=400" },
+    { id:2,  num:"02", name:"Chococo",                   weight:"2.5 kg",  cat:"choco",    price:4000, was:null, img:CDN+"B4503433-82FC-4B9C-BEC6-9FBF6DC16E61_1e1d7091-98c6-4370-b200-474ee768e66e.png?width=400" },
+    { id:3,  num:"03", name:"Chocolat noisettes 700 g",  weight:"700g × 6",cat:"choco",    price:5040, was:null, img:CDN+"NUTSA.png?width=400" },
+    { id:4,  num:"04", name:"Chocolat noisettes",        weight:"2.5 kg",  cat:"choco",    price:3000, was:null, img:CDN+"NUTSA-_Choco_Noisette-_2_5_KG.jpg?width=400" },
+    { id:5,  num:"05", name:"Chocolat noisettes",        weight:"12 kg",   cat:"choco",    price:14400,was:null, img:CDN+"NUTSA_-_Choco_Noisette_-_12_KG.jpg?width=400" },
+    { id:6,  num:"06", name:"Pistachio Crock",           weight:"1.5 kg",  cat:"pistache", price:3700, was:null, img:CDN+"Gemini_Generated_Image_fefs1dfefs1dfefs.png?width=400" },
+    { id:7,  num:"07", name:"Pistache",                  weight:"1.5 kg",  cat:"pistache", price:2400, was:2830, img:CDN+"NUTSA-Pistaches-1_5KG.jpg?width=400" },
+    { id:8,  num:"08", name:"Pistache",                  weight:"2.5 kg",  cat:"pistache", price:4000, was:4700, img:CDN+"NUTSA-Pistaches-2_5KG.jpg?width=400" },
+    { id:9,  num:"09", name:"Pistache",                  weight:"12 kg",   cat:"pistache", price:19200,was:22600,img:CDN+"NUTSA_-_Pistaches_-_12_KG.jpg?width=400" },
+    { id:10, num:"10", name:"Rocher",                    weight:"1.5 kg",  cat:"rocher",   price:2700, was:3000, img:CDN+"rocher_2048_1_1_page-0001.jpg?width=400" },
+    { id:11, num:"11", name:"Rocher",                    weight:"2.5 kg",  cat:"rocher",   price:4500, was:null, img:CDN+"Gemini_Generated_Image_gru9n1gru9n1gru9.png?width=400" },
+  ];
+
+  const wilayas = [
+    {code:"02",name:"Chlef",          door:600, stop:450},
+    {code:"06",name:"Béjaia",         door:600, stop:450},
+    {code:"09",name:"Blida",          door:600, stop:450},
+    {code:"10",name:"Bouira",         door:600, stop:450},
+    {code:"12",name:"Tébessa",        door:600, stop:450},
+    {code:"13",name:"Tlemcen",        door:600, stop:450},
+    {code:"15",name:"Tizi Ouzou",     door:600, stop:450},
+    {code:"16",name:"Alger",          door:0,   stop:0  },
+    {code:"17",name:"Djelfa",         door:600, stop:450},
+    {code:"18",name:"Jijel",          door:600, stop:450},
+    {code:"19",name:"Sétif",          door:600, stop:450},
+    {code:"20",name:"Saïda",          door:600, stop:450},
+    {code:"21",name:"Skikda",         door:600, stop:450},
+    {code:"22",name:"Sidi Bel Abbès", door:600, stop:450},
+    {code:"23",name:"Annaba",         door:600, stop:450},
+    {code:"25",name:"Constantine",    door:600, stop:450},
+    {code:"26",name:"Médéa",          door:600, stop:450},
+    {code:"27",name:"Mostaganem",     door:600, stop:450},
+    {code:"29",name:"Mascara",        door:600, stop:450},
+    {code:"31",name:"Oran",           door:600, stop:450},
+    {code:"34",name:"Bordj Bou Arréridj", door:600, stop:450},
+    {code:"35",name:"Boumerdes",      door:600, stop:450},
+    {code:"42",name:"Tipaza",         door:600, stop:450},
+    {code:"43",name:"Mila",           door:600, stop:450},
+  ];
+
+  // ── Render ─────────────────────────────────
+  const fmt = n => new Intl.NumberFormat("fr-DZ").format(n);
+  const list = document.getElementById("product-list");
+
+  function rowHtml(p){
+    const sale = p.was ? `<span class="tag sale">Promo</span>` : "";
+    const cat  = p.cat === "pistache" ? `<span class="tag green">Pistache</span>` :
+                 p.cat === "choco"    ? `<span class="tag">Chocolat</span>` :
+                                        `<span class="tag">${p.cat[0].toUpperCase()+p.cat.slice(1)}</span>`;
+    const was  = p.was ? `<span class="was">${fmt(p.was)} DA</span>` : "";
+    return `
+      <article class="row" data-cat="${p.cat}" data-id="${p.id}">
+        <div class="thumb"><img src="${p.img}" alt="Nutsa ${p.name} ${p.weight}" loading="lazy"></div>
+        <div class="info">
+          <div class="num">No ${p.num}</div>
+          <h3>Nutsa ${p.name}</h3>
+          <div class="tags">
+            <span class="tag">${p.weight}</span>
+            ${cat}
+            ${sale}
+          </div>
+        </div>
+        <div class="qty-cell">
+          <div class="qty">
+            <button type="button" data-act="dec" aria-label="−">−</button>
+            <input type="number" min="0" value="0" data-id="${p.id}" inputmode="numeric">
+            <button type="button" data-act="inc" aria-label="+">+</button>
+          </div>
+        </div>
+        <div class="price-cell">
+          <div class="price-stack">
+            <div class="now" data-total="${p.id}" data-unit="${p.price}">0 DA</div>
+            ${was}
+            <div class="meta" data-meta="${p.id}">${fmt(p.price)} DA / unité</div>
+          </div>
+        </div>
+      </article>`;
+  }
+  list.innerHTML = products.map(rowHtml).join("");
+
+  // ── Quantity interactions ──────────────────
+  list.addEventListener("click", e => {
+    const btn = e.target.closest("[data-act]");
+    if(!btn) return;
+    const row = btn.closest(".row");
+    const input = row.querySelector("input[type=number]");
+    let v = parseInt(input.value || 0, 10);
+    v = btn.dataset.act === "inc" ? v+1 : Math.max(0, v-1);
+    input.value = v;
+    updateRow(row);
+  });
+  list.addEventListener("input", e => {
+    if(e.target.matches("input[type=number]")){
+      const row = e.target.closest(".row");
+      const v = Math.max(0, parseInt(e.target.value || 0, 10) || 0);
+      e.target.value = v;
+      updateRow(row);
+    }
+  });
+
+  function updateRow(row){
+    const id = +row.dataset.id;
+    const p  = products.find(x => x.id === id);
+    const q  = +row.querySelector("input").value || 0;
+    const tot = row.querySelector("[data-total]");
+    const meta = row.querySelector("[data-meta]");
+    tot.textContent = q === 0 ? `0 DA` : `${fmt(p.price * q)} DA`;
+    meta.textContent = q > 1 ? `${q} × ${fmt(p.price)} DA` : `${fmt(p.price)} DA / unité`;
+    if(q > 0){
+      tot.classList.add("bump");
+      setTimeout(()=>tot.classList.remove("bump"), 300);
+    }
+    row.classList.toggle("selected", q > 0);
+    refreshBar();
+  }
+
+  // ── Sticky bar ─────────────────────────────
+  const orderBar    = document.getElementById("order-bar");
+  const barCount    = document.getElementById("bar-count");
+  const barTotal    = document.getElementById("bar-total");
+  const barItemsList= document.getElementById("bar-items-list");
+
+  function getCart(){
+    return products.map(p => {
+      const input = list.querySelector(`input[data-id="${p.id}"]`);
+      const q = input ? (+input.value || 0) : 0;
+      return { product:p, qty:q, subtotal: p.price * q };
+    }).filter(x => x.qty > 0);
+  }
+
+  function refreshBar(){
+    const cart = getCart();
+    const totalItems = cart.reduce((s,x) => s + x.qty, 0);
+    const totalPrice = cart.reduce((s,x) => s + x.subtotal, 0);
+
+    if(totalItems === 0){
+      orderBar.classList.add("hidden");
+      return;
+    }
+    orderBar.classList.remove("hidden");
+    barCount.textContent = `${totalItems} article${totalItems > 1 ? "s" : ""}`;
+    barTotal.textContent = `${fmt(totalPrice)} DA`;
+    barItemsList.innerHTML = cart.map(x =>
+      `<span class="bar-pill">${x.product.name} <strong>×${x.qty}</strong></span>`
+    ).join("");
+  }
+
+  // ── Filters ────────────────────────────────
+  document.querySelectorAll(".chip").forEach(c => {
+    c.addEventListener("click", () => {
+      document.querySelectorAll(".chip").forEach(x => x.classList.remove("on"));
+      c.classList.add("on");
+      const f = c.dataset.filter;
+      document.querySelectorAll(".row").forEach(r => {
+        r.style.display = (f === "all" || r.dataset.cat === f) ? "" : "none";
+      });
+    });
+  });
+
+  // ── Modal / order ──────────────────────────
+  const modal       = document.getElementById("modal");
+  const formView    = document.getElementById("form-view");
+  const successView = document.getElementById("success-view");
+  const wilayaSel   = document.getElementById("f-wilaya");
+  const summaryBlock= document.getElementById("modal-summary-block");
+
+  wilayas.forEach(w => {
+    const o = document.createElement("option");
+    o.value = w.code;
+    o.textContent = `${w.code} — ${w.name}`;
+    o.dataset.door = w.door;
+    o.dataset.stop = w.stop;
+    wilayaSel.appendChild(o);
+  });
+
+  document.getElementById("main-order-btn").addEventListener("click", () => {
+    const cart = getCart();
+    if(!cart.length) return;
+    const productsTotal = cart.reduce((s,x) => s + x.subtotal, 0);
+
+    let itemsHtml = cart.map(x => `
+      <div class="summary-item">
+        <div class="si-left">
+          <strong>Nutsa ${x.product.name} · ${x.product.weight}</strong>
+          <span>${x.qty} ${x.qty > 1 ? "unités" : "unité"} × ${fmt(x.product.price)} DA</span>
+        </div>
+        <div class="si-right">${fmt(x.subtotal)} DA</div>
+      </div>`).join("");
+
+    summaryBlock.innerHTML = `
+      <div class="summary-block">
+        ${itemsHtml}
+        <div class="summary-total">
+          <span>Sous-total</span>
+          <span class="grand">${fmt(productsTotal)} DA</span>
+        </div>
+      </div>`;
+
+    formView.style.display = "";
+    successView.style.display = "none";
+    modal.classList.add("open");
+    document.body.style.overflow = "hidden";
+    setTimeout(()=>document.getElementById("f-name").focus(), 250);
+  });
+
+  function closeModal(){
+    modal.classList.remove("open");
+    document.body.style.overflow = "";
+  }
+  document.getElementById("close-modal").onclick = closeModal;
+  document.getElementById("cancel-btn").onclick = closeModal;
+  modal.addEventListener("click", e => { if(e.target === modal) closeModal(); });
+  document.addEventListener("keydown", e => { if(e.key === "Escape") closeModal(); });
+
+  const labDoor = document.getElementById("lab-door");
+  const labStop = document.getElementById("lab-stop");
+  document.querySelectorAll('input[name="delivery"]').forEach(r => {
+    r.addEventListener("change", () => {
+      const sel = document.querySelector('input[name="delivery"]:checked').value;
+      labDoor.classList.toggle("sel", sel === "door");
+      labStop.classList.toggle("sel", sel === "stop");
+    });
+  });
+
+  wilayaSel.addEventListener("change", () => {
+    const opt = wilayaSel.selectedOptions[0];
+    const door = +opt.dataset.door, stop = +opt.dataset.stop;
+    document.getElementById("price-door").textContent = door === 0 ? "Gratuit" : `${fmt(door)} DA`;
+    document.getElementById("price-stop").textContent = stop === 0 ? "Gratuit" : `${fmt(stop)} DA`;
+  });
+
+  document.getElementById("order-form").addEventListener("submit", e => {
+    e.preventDefault();
+    const cart = getCart();
+    if(!cart.length) return;
+    const fd = new FormData(e.target);
+    const wOpt = wilayaSel.selectedOptions[0];
+    const ship = fd.get("delivery") === "door" ? +wOpt.dataset.door : +wOpt.dataset.stop;
+    const productsTotal = cart.reduce((s,x) => s + x.subtotal, 0);
+    const grand = productsTotal + ship;
+
+    const itemsRecap = cart.map(x =>
+      `<div><span>Nutsa ${x.product.name} · ${x.product.weight}</span><span>${x.qty} × ${fmt(x.product.price)} DA = ${fmt(x.subtotal)} DA</span></div>`
+    ).join("");
+
+    const recap = document.getElementById("success-recap");
+    recap.innerHTML = `
+      ${itemsRecap}
+      <div><span>Sous-total produits</span><span>${fmt(productsTotal)} DA</span></div>
+      <div><span>Livraison · ${fd.get("delivery")==="door"?"À domicile":"Stop desk"}</span><span>${ship===0?"Gratuit":fmt(ship)+" DA"}</span></div>
+      <div><span><strong>Total à payer</strong></span><span><strong>${fmt(grand)} DA</strong></span></div>
+      <div><span>Nom</span><span>${fd.get("name")}</span></div>
+      <div><span>Téléphone</span><span>${fd.get("phone")}</span></div>
+      <div><span>Wilaya</span><span>${wOpt.textContent}</span></div>
+      <div><span>Commune</span><span>${fd.get("baladia")}</span></div>
+    `;
+
+    formView.style.display = "none";
+    successView.style.display = "";
+
+    // Hook for backend:
+    // fetch("/api/orders", { method:"POST", body: JSON.stringify({ cart, ...Object.fromEntries(fd) }) });
+  });
+
+  document.getElementById("ok-btn").onclick = closeModal;
+</script>
+</body>
+</html>
