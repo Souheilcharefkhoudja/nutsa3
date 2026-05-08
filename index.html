@@ -617,14 +617,15 @@
             <label class="sel" id="lab-door">
               <input type="radio" name="delivery" value="door" checked>
               <span class="name">À domicile</span>
-              <span class="price" id="price-door">600 DA</span>
+              <span class="price" id="price-door">— DA</span>
             </label>
             <label id="lab-stop">
               <input type="radio" name="delivery" value="stop">
               <span class="name">Stop desk</span>
-              <span class="price" id="price-stop">450 DA</span>
+              <span class="price" id="price-stop">— DA</span>
             </label>
           </div>
+          <div id="delivery-note" style="font-size:12px;color:var(--ink-soft);margin-top:4px;font-weight:500"></div>
         </div>
 
         <div class="field">
@@ -763,6 +764,28 @@
     {code:"57",name:"El Menia",             door:1000,stop:800},
     {code:"58",name:"El M'Ghair",           door:800, stop:600},
   ];
+
+  // ── Delivery pricing rules ─────────────────
+  // Only single 1.5 kg items pay delivery.
+  // Multiple items (any) → free delivery.
+  // Alger (wilaya 16) → always free.
+  function getDeliveryCost(wilayaCode, cart){
+    // Alger is always free
+    if(wilayaCode === "16") return 0;
+    // Multiple distinct products → free
+    if(cart.length > 1) return 0;
+    // Single item that is NOT 1.5 kg → free
+    const item = cart[0];
+    if(!item) return 0;
+    const w = item.product.weight || "";
+    const is15 = /^1[,.]5\s*kg/i.test(w);
+    if(!is15) return 0;
+    // Single 1.5 kg → pay delivery
+    const wData = wilayas.find(x => x.code === wilayaCode);
+    if(!wData) return 0;
+    // Default to door price; caller can adjust for stop desk
+    return wData.door;
+  }
 
   const communesData = {
     "01":["Adrar","Tamest","Charouine","Reggane","In Zghmir","Tit","Ksar Kaddour","Sali","Bouda","Timokten","Aougrout","Fenoughil","Tamentit","Tamantit","Zaouiet Kounta"],
@@ -960,9 +983,13 @@
     wilayaSel.appendChild(o);
   });
 
+  // Track current cart for live delivery recalculation
+  let currentCart = [];
+
   document.getElementById("main-order-btn").addEventListener("click", () => {
     const cart = getCart();
     if(!cart.length) return;
+    currentCart = cart;
     const productsTotal = cart.reduce((s,x) => s + x.subtotal, 0);
 
     let itemsHtml = cart.map(x => `
@@ -989,7 +1016,8 @@
     modal.classList.add("open");
     document.body.style.overflow = "hidden";
     modal.addEventListener("keydown", trapFocus);
-    setTimeout(()=>document.getElementById("f-name").focus(), 250);
+    // Show delivery line in summary (will compute once wilaya is selected)
+    setTimeout(()=>{ updateModalDeliveryLine(); document.getElementById("f-name").focus(); }, 250);
   });
 
   // ── Focus trap for modal ──
@@ -1031,8 +1059,51 @@
       const sel = document.querySelector('input[name="delivery"]:checked').value;
       labDoor.classList.toggle("sel", sel === "door");
       labStop.classList.toggle("sel", sel === "stop");
+      labDoor.style.borderColor = sel === "door" ? "var(--red)" : "";
+      labDoor.style.background = sel === "door" ? "rgba(182,52,43,.04)" : "";
+      labStop.style.borderColor = sel === "stop" ? "var(--red)" : "";
+      labStop.style.background = sel === "stop" ? "rgba(182,52,43,.04)" : "";
+      // Update the displayed delivery cost in the summary
+      updateModalDeliveryLine();
     });
   });
+
+  // ── Update delivery line in modal summary ──
+  function updateModalDeliveryLine(){
+    const summaryBlock = document.getElementById("modal-summary-block");
+    const existing = summaryBlock.querySelector(".summary-delivery");
+    if(existing) existing.remove();
+
+    const wilayaCode = wilayaSel.value;
+    if(!wilayaCode) return;
+
+    const wOpt = wilayaSel.selectedOptions[0];
+    const deliveryType = document.querySelector('input[name="delivery"]:checked')?.value || "door";
+    const shipCost = deliveryType === "door" ? (+wOpt.dataset.door || 0) : (+wOpt.dataset.stop || 0);
+    const productsTotal = currentCart.reduce((s,x) => s + x.subtotal, 0);
+
+    const deliveryLine = document.createElement("div");
+    deliveryLine.className = "summary-delivery summary-item";
+    deliveryLine.style.background = shipCost === 0 ? "rgba(126,155,92,.06)" : "";
+    deliveryLine.innerHTML = `
+      <div class="si-left">
+        <strong>Livraison · ${deliveryType === "door" ? "À domicile" : "Stop desk"}</strong>
+        <span>${wilayaSel.options[wilayaSel.selectedIndex].textContent}</span>
+      </div>
+      <div class="si-right" style="color:${shipCost === 0 ? "var(--green)" : "var(--red)"}">${shipCost === 0 ? "Gratuit ✓" : fmt(shipCost) + " DA"}</div>
+    `;
+
+    // Insert before the summary-total row
+    const totalRow = summaryBlock.querySelector(".summary-total");
+    if(totalRow){
+      // Update grand total
+      const grandTotal = productsTotal + shipCost;
+      const grandEl = totalRow.querySelector(".grand");
+      if(grandEl) grandEl.textContent = `${fmt(grandTotal)} DA`;
+
+      summaryBlock.querySelector(".summary-block").insertBefore(deliveryLine, totalRow);
+    }
+  }
 
   const baladiaSel = document.getElementById("f-baladia");
   const ANDERSON_API = "https://anderson-ecommerce.ecotrack.dz";
@@ -1059,6 +1130,87 @@
       });
   }
 
+  // ── Compute and display delivery price based on wilaya + cart ──
+  function updateDeliveryDisplay(){
+    const wilayaCode = wilayaSel.value || "";
+    const cart = currentCart;
+    const wData = wilayas.find(w => w.code === wilayaCode);
+    const cartHasMultiple = cart.length > 1;
+    const isAlger = wilayaCode === "16";
+
+    if(!wData || cart.length === 0){
+      document.getElementById("price-door").textContent = "— DA";
+      document.getElementById("price-stop").textContent = "— DA";
+      return;
+    }
+
+    // Compute door & stop prices based on rules
+    let doorPrice, stopPrice;
+
+    if(isAlger){
+      // Alger: always free
+      doorPrice = 0;
+      stopPrice = 0;
+    } else if(cartHasMultiple){
+      // Multiple items: free delivery
+      doorPrice = 0;
+      stopPrice = 0;
+    } else {
+      // Single item
+      const item = cart[0];
+      const w = item.product.weight || "";
+      const is15 = /^1[,.]5\s*kg/i.test(w);
+      if(is15){
+        // 1.5 kg single → pay delivery
+        doorPrice = wData.door;
+        stopPrice = wData.stop;
+      } else {
+        // Non-1.5kg single → free delivery
+        doorPrice = 0;
+        stopPrice = 0;
+      }
+    }
+
+    document.getElementById("price-door").textContent = doorPrice === 0 ? "Gratuit" : `${fmt(doorPrice)} DA`;
+    document.getElementById("price-stop").textContent = stopPrice === 0 ? "Gratuit" : `${fmt(stopPrice)} DA`;
+
+    // Store on options for form submission
+    if(wilayaSel.selectedOptions[0]){
+      wilayaSel.selectedOptions[0].dataset.door = doorPrice;
+      wilayaSel.selectedOptions[0].dataset.stop = stopPrice;
+    }
+
+    // Toggle label styling
+    const doorLabel = document.getElementById("lab-door");
+    const stopLabel = document.getElementById("lab-stop");
+    const delNote = document.getElementById("delivery-note");
+    if(doorPrice === 0 && stopPrice === 0){
+      doorLabel.style.borderColor = "var(--green)";
+      doorLabel.style.background = "rgba(126,155,92,.06)";
+      stopLabel.style.borderColor = "var(--green)";
+      stopLabel.style.background = "rgba(126,155,92,.06)";
+      if(isAlger){
+        delNote.textContent = "✅ Livraison gratuite — Alger";
+        delNote.style.color = "var(--green)";
+      } else if(cartHasMultiple){
+        delNote.textContent = "✅ Livraison gratuite — commande multiple";
+        delNote.style.color = "var(--green)";
+      } else {
+        delNote.textContent = "✅ Livraison gratuite — produit non concerné";
+        delNote.style.color = "var(--green)";
+      }
+    } else {
+      // Reset to default selection styling
+      const sel = document.querySelector('input[name="delivery"]:checked').value;
+      doorLabel.style.borderColor = sel === "door" ? "var(--red)" : "";
+      doorLabel.style.background = sel === "door" ? "rgba(182,52,43,.04)" : "";
+      stopLabel.style.borderColor = sel === "stop" ? "var(--red)" : "";
+      stopLabel.style.background = sel === "stop" ? "rgba(182,52,43,.04)" : "";
+      delNote.textContent = "Livraison payante — produit 1.5 kg (gratuit si plusieurs articles)";
+      delNote.style.color = "var(--ink-soft)";
+    }
+  }
+
   function populateCommunes(wilayaCode){
     baladiaSel.innerHTML = "";
     const loading = document.createElement("option");
@@ -1069,26 +1221,26 @@
 
     fetchWilayaDetails(wilayaCode)
       .then(({communes, hasStopDesk: apiHasStopDesk}) => {
-        // Also update shipping prices from API data if available
+        // Update delivery display using cart-based rules
+        updateDeliveryDisplay();
+
+        // Handle stop desk availability
         const wData = wilayas.find(w => w.code === wilayaCode);
-        if(wData){
-          const door = wData.door, stop = wData.stop;
-          document.getElementById("price-door").textContent = door === 0 ? "Gratuit" : `${fmt(door)} DA`;
-          const stopLabel = document.getElementById("price-stop");
-          const stopContainer = document.getElementById("lab-stop");
-          if(apiHasStopDesk && door > 0){
-            stopLabel.textContent = stop === 0 ? `${fmt(Math.round(door * 0.75))} DA` : `${fmt(stop)} DA`;
-            stopContainer.style.display = "";
-          } else if(!apiHasStopDesk){
-            stopContainer.style.display = "none";
-            // Auto-select door if stop desk not available
-            document.querySelector('input[name="delivery"][value="door"]').checked = true;
-            document.getElementById("lab-door").classList.add("sel");
-            document.getElementById("lab-stop").classList.remove("sel");
-          } else {
-            stopLabel.textContent = stop === 0 ? "Gratuit" : `${fmt(stop)} DA`;
-            stopContainer.style.display = "";
-          }
+        const cartHasMultiple = currentCart.length > 1;
+        const isAlger = wilayaCode === "16";
+        const needsDelivery = !isAlger && !cartHasMultiple && currentCart.length === 1 && /^1[,.]5\s*kg/i.test(currentCart[0].product.weight);
+
+        const stopContainer = document.getElementById("lab-stop");
+        if(apiHasStopDesk && needsDelivery){
+          stopContainer.style.display = "";
+        } else if(!apiHasStopDesk && needsDelivery){
+          stopContainer.style.display = "none";
+          document.querySelector('input[name="delivery"][value="door"]').checked = true;
+          document.getElementById("lab-door").classList.add("sel");
+          document.getElementById("lab-stop").classList.remove("sel");
+        } else {
+          // Free delivery or no delivery needed — still show stop desk option
+          stopContainer.style.display = "";
         }
 
         baladiaSel.innerHTML = "";
@@ -1106,12 +1258,8 @@
       })
       .catch(() => {
         // Fallback to static data
-        const wData = wilayas.find(w => w.code === wilayaCode);
-        if(wData){
-          document.getElementById("price-door").textContent = wData.door === 0 ? "Gratuit" : `${fmt(wData.door)} DA`;
-          document.getElementById("price-stop").textContent = wData.stop === 0 ? "Gratuit" : `${fmt(wData.stop)} DA`;
-          document.getElementById("lab-stop").style.display = "";
-        }
+        updateDeliveryDisplay();
+        document.getElementById("lab-stop").style.display = "";
         const communes = communesData[wilayaCode] || [];
         baladiaSel.innerHTML = "";
         const ph = document.createElement("option");
@@ -1131,6 +1279,8 @@
     const opt = wilayaSel.selectedOptions[0];
     const code = opt.value;
     populateCommunes(code);
+    // Also update delivery line in modal if open
+    updateModalDeliveryLine();
   });
 
   // ── Form validation helper ──
