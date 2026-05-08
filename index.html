@@ -1110,24 +1110,56 @@
   const API_TOKEN = "F0hFG6mjEMNQZFphtiGmqj5Xl48xStDXGxUEm7z1mzt8Ql3FXFuDbGnQWEvh";
 
   function fetchWilayaDetails(wilayaCode){
-    return fetch(`${ANDERSON_API}/api/v1/get/wilaya/${wilayaCode}?api_token=${API_TOKEN}`)
-      .then(r => r.json())
-      .then(data => {
-        let communes = [];
-        let hasStopDesk = false;
-        if(data && data.communes && Array.isArray(data.communes)){
-          communes = data.communes.map(c => ({nom: c.nom || c, hasStopDesk: !!c.has_stop_desk}));
-          hasStopDesk = communes.some(c => c.hasStopDesk);
-        } else if(data && typeof data === "object"){
-          const vals = Object.values(data);
-          communes = vals.map(v => {
-            const nom = typeof v === "object" ? (v.nom || v.commune || "") : String(v);
-            const sd = typeof v === "object" ? !!v.has_stop_desk : false;
-            return {nom, hasStopDesk: sd};
-          }).filter(c => c.nom);
-        }
-        return {communes: communes.sort((a,b) => a.nom.localeCompare(b.nom,"fr")), hasStopDesk};
-      });
+    // Try the API first, but always fall back to static data if anything goes wrong
+    return new Promise((resolve) => {
+      const staticCommunes = communesData[wilayaCode] || [];
+      const staticResult = {
+        communes: staticCommunes.map(c => ({nom: c, hasStopDesk: false})),
+        hasStopDesk: false
+      };
+
+      // Attempt API fetch with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      fetch(`${ANDERSON_API}/api/v1/get/wilaya/${wilayaCode}?api_token=${API_TOKEN}`, {
+        signal: controller.signal
+      })
+        .then(r => {
+          if(!r.ok) throw new Error("HTTP "+r.status);
+          return r.json();
+        })
+        .then(data => {
+          clearTimeout(timeoutId);
+          let communes = [];
+          let hasStopDesk = false;
+          if(data && data.communes && Array.isArray(data.communes) && data.communes.length > 0){
+            communes = data.communes.map(c => ({nom: c.nom || c, hasStopDesk: !!c.has_stop_desk}));
+            hasStopDesk = communes.some(c => c.hasStopDesk);
+          } else if(data && typeof data === "object"){
+            const vals = Object.values(data);
+            if(vals.length > 0){
+              communes = vals.map(v => {
+                const nom = typeof v === "object" ? (v.nom || v.commune || "") : String(v);
+                const sd = typeof v === "object" ? !!v.has_stop_desk : false;
+                return {nom, hasStopDesk: sd};
+              }).filter(c => c.nom);
+              hasStopDesk = communes.some(c => c.hasStopDesk);
+            }
+          }
+          if(communes.length > 0){
+            resolve({communes: communes.sort((a,b) => a.nom.localeCompare(b.nom,"fr")), hasStopDesk});
+          } else {
+            // API returned data but no usable communes — use static fallback
+            resolve(staticResult);
+          }
+        })
+        .catch(() => {
+          clearTimeout(timeoutId);
+          // Network error, timeout, or parse error — use static fallback
+          resolve(staticResult);
+        });
+    });
   }
 
   // ── Compute and display delivery price based on wilaya + cart ──
@@ -1141,6 +1173,8 @@
     if(!wData || cart.length === 0){
       document.getElementById("price-door").textContent = "— DA";
       document.getElementById("price-stop").textContent = "— DA";
+      const stopContainer = document.getElementById("lab-stop");
+      if(stopContainer) stopContainer.style.display = "";
       return;
     }
 
@@ -1158,14 +1192,19 @@
     } else {
       // Single item
       const item = cart[0];
-      const w = item.product.weight || "";
-      const is15 = /^1[,.]5\s*kg/i.test(w);
-      if(is15){
-        // 1.5 kg single → pay delivery
-        doorPrice = wData.door;
-        stopPrice = wData.stop;
+      if(item && item.product){
+        const w = item.product.weight || "";
+        const is15 = /^1[,.]5\s*kg/i.test(w);
+        if(is15){
+          // 1.5 kg single → pay delivery
+          doorPrice = wData.door;
+          stopPrice = wData.stop;
+        } else {
+          // Non-1.5kg single → free delivery
+          doorPrice = 0;
+          stopPrice = 0;
+        }
       } else {
-        // Non-1.5kg single → free delivery
         doorPrice = 0;
         stopPrice = 0;
       }
@@ -1219,56 +1258,27 @@
     baladiaSel.appendChild(loading);
     baladiaSel.disabled = true;
 
+    // Always show both delivery options — never hide Stop desk
+    const stopContainer = document.getElementById("lab-stop");
+    if(stopContainer){
+      stopContainer.style.display = "";
+      stopContainer.style.opacity = "1";
+      stopContainer.style.pointerEvents = "";
+    }
+
     fetchWilayaDetails(wilayaCode)
-      .then(({communes, hasStopDesk: apiHasStopDesk}) => {
+      .then(({communes}) => {
         // Update delivery display using cart-based rules
         updateDeliveryDisplay();
-
-        // Handle stop desk availability
-        const wData = wilayas.find(w => w.code === wilayaCode);
-        const cartHasMultiple = currentCart.length > 1;
-        const isAlger = wilayaCode === "16";
-        const needsDelivery = !isAlger && !cartHasMultiple && currentCart.length === 1 && /^1[,.]5\s*kg/i.test(currentCart[0].product.weight);
-
-        const stopContainer = document.getElementById("lab-stop");
-        if(apiHasStopDesk && needsDelivery){
-          stopContainer.style.display = "";
-        } else if(!apiHasStopDesk && needsDelivery){
-          stopContainer.style.display = "none";
-          document.querySelector('input[name="delivery"][value="door"]').checked = true;
-          document.getElementById("lab-door").classList.add("sel");
-          document.getElementById("lab-stop").classList.remove("sel");
-        } else {
-          // Free delivery or no delivery needed — still show stop desk option
-          stopContainer.style.display = "";
-        }
 
         baladiaSel.innerHTML = "";
         const ph = document.createElement("option");
         ph.value = ""; ph.disabled = true; ph.selected = true;
         ph.textContent = "اختر البلدية";
         baladiaSel.appendChild(ph);
-        if(communes.length === 0) throw new Error("empty");
         communes.forEach(c => {
           const o = document.createElement("option");
           o.value = c.nom; o.textContent = c.nom;
-          baladiaSel.appendChild(o);
-        });
-        baladiaSel.disabled = false;
-      })
-      .catch(() => {
-        // Fallback to static data
-        updateDeliveryDisplay();
-        document.getElementById("lab-stop").style.display = "";
-        const communes = communesData[wilayaCode] || [];
-        baladiaSel.innerHTML = "";
-        const ph = document.createElement("option");
-        ph.value = ""; ph.disabled = true; ph.selected = true;
-        ph.textContent = communes.length ? "اختر البلدية" : "لا توجد بلديات";
-        baladiaSel.appendChild(ph);
-        communes.forEach(c => {
-          const o = document.createElement("option");
-          o.value = c; o.textContent = c;
           baladiaSel.appendChild(o);
         });
         baladiaSel.disabled = false;
