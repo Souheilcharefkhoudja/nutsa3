@@ -1420,30 +1420,34 @@
       } catch(err){ console.warn("localStorage backup failed:", err); }
     };
 
-    // ── Send to Google Apps Script (fire-and-forget) ──
-if(APPS_SCRIPT_URL && APPS_SCRIPT_URL.indexOf("PASTE_YOUR") === -1){
-  saveLocalBackup();
+    // ── Send to Google Apps Script (fire-and-forget — instant UI feedback) ──
+    if(APPS_SCRIPT_URL && APPS_SCRIPT_URL.indexOf("PASTE_YOUR") === -1){
+      saveLocalBackup();
 
-  // Fire the request — don't wait for response
-  fetch(APPS_SCRIPT_URL, {
-    method:    "POST",
-    headers:   {"Content-Type": "text/plain"},
-    body:      JSON.stringify(payload),
-    keepalive: true  // ensures request completes even if user closes the page
-  }).then(r => {
-    console.log("Order sent:", r.status);
-  }).catch(err => {
-    console.warn("Order POST failed (saved in localStorage):", err);
+      // Fire the request — don't wait for the response.
+      // keepalive ensures the browser finishes sending even if the user
+      // closes the page or switches apps right after tapping submit.
+      fetch(APPS_SCRIPT_URL, {
+        method:    "POST",
+        headers:   {"Content-Type": "text/plain"},
+        body:      JSON.stringify(payload),
+        keepalive: true
+      }).then(r => {
+        console.log("Order sent:", r.status);
+      }).catch(err => {
+        console.warn("Order POST failed (saved in localStorage):", err);
+      });
+
+      // Show success immediately — order is on its way to the sheet
+      showSuccess();
+    } else {
+      console.warn("⚠️ APPS_SCRIPT_URL not configured. Order was NOT saved to Google Sheet.");
+      console.log("Payload that would have been sent:", payload);
+      saveLocalBackup();
+      showSuccess();
+    }
   });
 
-  // Show success immediately — order is on its way
-  showSuccess();
-} else {
-  console.warn("⚠️ APPS_SCRIPT_URL not configured. Order was NOT saved to Google Sheet.");
-  console.log("Payload that would have been sent:", payload);
-  saveLocalBackup();
-  showSuccess();
-}
   document.getElementById("ok-btn").onclick = closeModal;
 </script>
 </body>
