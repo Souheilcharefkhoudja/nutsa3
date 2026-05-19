@@ -6,7 +6,8 @@
 <title>Nutsa — Catalogue & Commande</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://nutsa-dz.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Fraunces:ital,wght@0,300;0,400;0,500;0,700;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --paper:#FBFAF7;
@@ -266,9 +267,10 @@
   .bar-pill strong{font-weight:700;color:var(--red)}
 
   /* ── BIG RED ARABIC BUTTON ──────────────── */
+  /* Uses transform/opacity (GPU-accelerated) instead of box-shadow for better mobile perf + battery */
   @keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 6px 0 var(--red-deep), 0 12px 24px -8px rgba(182,52,43,.5); }
-    50%      { box-shadow: 0 6px 0 var(--red-deep), 0 16px 36px -8px rgba(182,52,43,.75), 0 0 0 6px rgba(182,52,43,.12); }
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.025); }
   }
   .order-btn{
     appearance:none;border:0;cursor:pointer;
@@ -282,7 +284,8 @@
     direction:rtl;
     text-shadow:0 1px 0 rgba(0,0,0,.25);
     box-shadow:0 6px 0 var(--red-deep), 0 12px 24px -8px rgba(182,52,43,.5);
-    animation: pulse-glow 2.6s ease-in-out infinite;
+    animation: pulse-glow 4s ease-in-out infinite;
+    will-change: transform;
     transform-origin:center;
     transition:transform .12s ease;
     position:relative;overflow:hidden;
@@ -504,7 +507,7 @@
   <div class="brand-inner">
     <div class="brand-left">Nutsa Distribution · Algérie ©</div>
     <div class="logo">
-      <img src="Logo_Nutsa.svg" alt="Nutsa" style="height:72px;width:auto;display:block;margin:0 auto;">
+      <img src="Logo_Nutsa.svg" alt="Nutsa" width="216" height="72" style="height:72px;width:auto;display:block;margin:0 auto;">
       <small>Pâtes à tartiner premium</small>
     </div>
     <div class="brand-right"><strong>+213 555 00 00 00</strong> · contact@nutsa-dz.com</div>
@@ -579,7 +582,11 @@
 
       <div id="modal-summary-block"></div>
 
-      <form id="order-form">
+      <form id="order-form" autocomplete="on" novalidate>
+        <!-- Honeypot: real users never see or fill this. Bots usually do. -->
+        <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none">
+          <label>Ne pas remplir<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+        </div>
         <div class="field-row">
           <div class="field">
             <label for="f-name">Nom complet</label>
@@ -860,7 +867,7 @@
     const was  = p.was ? `<span class="was">${fmt(p.was)} DA</span>` : "";
     return `
       <article class="row" data-cat="${p.cat}" data-id="${p.id}" role="listitem" aria-label="Nutsa ${p.name} ${p.weight}">
-        <div class="thumb"><img src="${p.img}" alt="Nutsa ${p.name} ${p.weight}" loading="lazy"></div>
+        <div class="thumb"><img src="${p.img}" alt="Nutsa ${p.name} ${p.weight}" width="120" height="120" loading="lazy" decoding="async"></div>
         <div class="info">
           <div class="num">No ${p.num}</div>
           <h3>Nutsa ${p.name}</h3>
@@ -1016,6 +1023,7 @@
     modal.classList.add("open");
     document.body.style.overflow = "hidden";
     modal.addEventListener("keydown", trapFocus);
+    formOpenedAt = Date.now(); // anti-bot timing baseline
     // Show delivery line in summary (will compute once wilaya is selected)
     setTimeout(()=>{ updateModalDeliveryLine(); document.getElementById("f-name").focus(); }, 250);
   });
@@ -1106,59 +1114,18 @@
   }
 
   const baladiaSel = document.getElementById("f-baladia");
-  const ANDERSON_API = "https://anderson-ecommerce.ecotrack.dz";
-  const API_TOKEN = "F0hFG6mjEMNQZFphtiGmqj5Xl48xStDXGxUEm7z1mzt8Ql3FXFuDbGnQWEvh";
 
+  // ── Commune lookup (static, no external API) ──
+  // We previously called an external Ecotrack endpoint here with an API token.
+  // The token was visible to anyone viewing source, so we removed it entirely.
+  // The static `communesData` dictionary above covers all 58 wilayas.
   function fetchWilayaDetails(wilayaCode){
-    // Try the API first, but always fall back to static data if anything goes wrong
-    return new Promise((resolve) => {
-      const staticCommunes = communesData[wilayaCode] || [];
-      const staticResult = {
-        communes: staticCommunes.map(c => ({nom: c, hasStopDesk: false})),
-        hasStopDesk: false
-      };
-
-      // Attempt API fetch with timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-      fetch(`${ANDERSON_API}/api/v1/get/wilaya/${wilayaCode}?api_token=${API_TOKEN}`, {
-        signal: controller.signal
-      })
-        .then(r => {
-          if(!r.ok) throw new Error("HTTP "+r.status);
-          return r.json();
-        })
-        .then(data => {
-          clearTimeout(timeoutId);
-          let communes = [];
-          let hasStopDesk = false;
-          if(data && data.communes && Array.isArray(data.communes) && data.communes.length > 0){
-            communes = data.communes.map(c => ({nom: c.nom || c, hasStopDesk: !!c.has_stop_desk}));
-            hasStopDesk = communes.some(c => c.hasStopDesk);
-          } else if(data && typeof data === "object"){
-            const vals = Object.values(data);
-            if(vals.length > 0){
-              communes = vals.map(v => {
-                const nom = typeof v === "object" ? (v.nom || v.commune || "") : String(v);
-                const sd = typeof v === "object" ? !!v.has_stop_desk : false;
-                return {nom, hasStopDesk: sd};
-              }).filter(c => c.nom);
-              hasStopDesk = communes.some(c => c.hasStopDesk);
-            }
-          }
-          if(communes.length > 0){
-            resolve({communes: communes.sort((a,b) => a.nom.localeCompare(b.nom,"fr")), hasStopDesk});
-          } else {
-            // API returned data but no usable communes — use static fallback
-            resolve(staticResult);
-          }
-        })
-        .catch(() => {
-          clearTimeout(timeoutId);
-          // Network error, timeout, or parse error — use static fallback
-          resolve(staticResult);
-        });
+    const staticCommunes = communesData[wilayaCode] || [];
+    return Promise.resolve({
+      communes: staticCommunes
+        .map(c => ({nom: c, hasStopDesk: false}))
+        .sort((a,b) => a.nom.localeCompare(b.nom, "fr")),
+      hasStopDesk: false
     });
   }
 
@@ -1316,6 +1283,9 @@
     document.querySelectorAll(".field input, .field select, .field textarea").forEach(i => i.style.borderColor = "");
   }
 
+  // ── Track when the form was first shown (used to detect instant bot submits) ──
+  let formOpenedAt = 0;
+
   document.getElementById("order-form").addEventListener("submit", e => {
     e.preventDefault();
     clearAllErrors();
@@ -1323,6 +1293,18 @@
     const cart = getCart();
     if(!cart.length) return;
     const fd = new FormData(e.target);
+
+    // ── Anti-bot: honeypot must be empty, and form must have been open >2s ──
+    // Real humans take seconds to fill a form; bots POST instantly.
+    // We silently "succeed" so bots don't learn what tripped them.
+    const honeypot = (fd.get("website") || "").trim();
+    const elapsed  = Date.now() - formOpenedAt;
+    if(honeypot || (formOpenedAt > 0 && elapsed < 2000)){
+      console.warn("Submission blocked (bot heuristic)");
+      formView.style.display = "none";
+      successView.style.display = "";
+      return;
+    }
 
     // ── Validate required fields ──
     const name    = (fd.get("name")    || "").trim();
@@ -1379,20 +1361,40 @@
     }
     if(cancelBtn) cancelBtn.disabled = true;
 
-    // ── Build success recap upfront (we won't read the opaque response) ──
-    const itemsRecap = cart.map(x =>
-      `<div><span>Nutsa ${x.product.name} · ${x.product.weight}</span><span>${x.qty} × ${fmt(x.product.price)} DA = ${fmt(x.subtotal)} DA</span></div>`
-    ).join("");
-    document.getElementById("success-recap").innerHTML = `
-      ${itemsRecap}
-      <div><span>Sous-total produits</span><span>${fmt(productsTotal)} DA</span></div>
-      <div><span>Livraison · ${fd.get("delivery")==="door"?"À domicile":"Stop desk"}</span><span>${ship===0?"Gratuit":fmt(ship)+" DA"}</span></div>
-      <div><span><strong>Total à payer</strong></span><span><strong>${fmt(grand)} DA</strong></span></div>
-      <div><span>Nom</span><span>${name}</span></div>
-      <div><span>Téléphone</span><span>${phone}</span></div>
-      <div><span>Wilaya</span><span>${wOpt.textContent}</span></div>
-      <div><span>Commune</span><span>${baladia}</span></div>
-    `;
+    // ── Build success recap safely (textContent prevents self-XSS from user input) ──
+    const recapEl = document.getElementById("success-recap");
+    recapEl.innerHTML = ""; // clear
+    const addRecapRow = (labelText, valueText, valueBold) => {
+      const row = document.createElement("div");
+      const l = document.createElement("span");
+      const v = document.createElement("span");
+      l.textContent = labelText;
+      if(valueBold){
+        const b = document.createElement("strong");
+        b.textContent = valueText;
+        v.appendChild(b);
+      } else {
+        v.textContent = valueText;
+      }
+      row.appendChild(l); row.appendChild(v);
+      recapEl.appendChild(row);
+    };
+    cart.forEach(x => {
+      addRecapRow(
+        `Nutsa ${x.product.name} · ${x.product.weight}`,
+        `${x.qty} × ${fmt(x.product.price)} DA = ${fmt(x.subtotal)} DA`
+      );
+    });
+    addRecapRow("Sous-total produits", `${fmt(productsTotal)} DA`);
+    addRecapRow(
+      `Livraison · ${fd.get("delivery")==="door"?"À domicile":"Stop desk"}`,
+      ship===0 ? "Gratuit" : `${fmt(ship)} DA`
+    );
+    addRecapRow("Total à payer", `${fmt(grand)} DA`, true);
+    addRecapRow("Nom",       name);
+    addRecapRow("Téléphone", phone);
+    addRecapRow("Wilaya",    wOpt.textContent);
+    addRecapRow("Commune",   baladia);
 
     const showSuccess = () => {
       formView.style.display = "none";
