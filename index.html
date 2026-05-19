@@ -695,6 +695,11 @@
   // Should look like: https://script.google.com/macros/s/AKfycby...../exec
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxc8Bxw0eFXX595oSEB02OhPaLRSZAHQ7DUC398bfZKwWm82Tlx5dFqGTi2G-33_zt_/exec";
 
+  // ── Shared secret — must match Script Property `INTAKE_SECRET` ──
+  // This isn't real security (anyone can View Source), but stops drive-by spam
+  // from anyone POSTing directly to the Apps Script endpoint.
+  const INTAKE_SECRET = ""nutsa_a8K2p9X4mZqL7vR3bN6fT1yH5wQ8jE";
+
   // ── Data ───────────────────────────────────
   const CDN = "https://nutsa-dz.com/cdn/shop/files/";
   const products = [
@@ -1348,7 +1353,8 @@
       })),
       productsTotal,
       grandTotal:    grand,
-      submittedAt:   new Date().toISOString()
+      submittedAt:   new Date().toISOString(),
+      secret:        INTAKE_SECRET
     };
 
     // ── Disable submit while sending ──
