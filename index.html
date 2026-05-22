@@ -482,6 +482,56 @@
     .order-btn{font-size:20px;padding:16px 24px;width:100%}
     .bar-summary{flex-direction:row;gap:16px;align-items:baseline}
   }
+
+  /* ── En savoir plus button ──────────────── */
+  .btn-info{
+    display:inline-flex;align-items:center;gap:7px;
+    margin-top:12px;
+    padding:9px 18px;border-radius:999px;
+    border:1.5px solid var(--red);
+    background:rgba(182,52,43,.06);color:var(--red);
+    font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;
+    cursor:pointer;transition:all .2s ease;
+    font-family:var(--body);
+    box-shadow:0 2px 8px -2px rgba(182,52,43,.18);
+  }
+  .btn-info:hover{
+    background:var(--red);color:#fff;
+    box-shadow:0 4px 16px -4px rgba(182,52,43,.45);
+    transform:translateY(-1px);
+  }
+  .btn-info:active{transform:translateY(0)}
+  .btn-info svg{width:12px;height:12px;flex-shrink:0}
+
+  /* ── Product detail modal ───────────────── */
+  #detail-modal .modal{width:min(540px,100%)}
+  .detail-img{
+    width:100%;height:220px;object-fit:cover;
+    border-radius:var(--radius) var(--radius) 0 0;
+    display:block;
+  }
+  .detail-body{padding:28px 32px 32px}
+  .detail-num{font-family:var(--display);font-style:italic;font-size:13px;color:var(--accent);margin-bottom:4px}
+  .detail-title{font-family:var(--display);font-weight:500;font-size:28px;letter-spacing:-.02em;line-height:1.1;margin:0 0 6px}
+  .detail-weight{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;margin-bottom:16px}
+  .detail-desc{font-size:15px;color:var(--ink-soft);line-height:1.65;margin-bottom:20px}
+  .detail-points{list-style:none;padding:0;margin:0 0 24px;display:flex;flex-direction:column;gap:8px}
+  .detail-points li{
+    display:flex;align-items:center;gap:10px;
+    font-size:13px;font-weight:600;letter-spacing:.03em;color:var(--ink);
+  }
+  .detail-points li::before{
+    content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--red);flex-shrink:0;
+  }
+  .detail-price{
+    display:flex;align-items:baseline;gap:10px;
+    padding-top:20px;border-top:1px solid var(--rule);
+  }
+  .detail-price .dp-now{font-family:var(--display);font-size:28px;font-weight:500;color:var(--ink)}
+  .detail-price .dp-was{font-size:14px;text-decoration:line-through;color:var(--ink-soft)}
+  .detail-price .dp-unit{font-size:12px;color:var(--ink-soft);letter-spacing:.1em;text-transform:uppercase;margin-left:auto;font-weight:600}
+
 </style>
 </head>
 <body>
@@ -659,6 +709,27 @@
   </div>
 </div>
 
+
+<!-- ─── Product Detail Modal ──────────────── -->
+<div class="modal-backdrop" id="detail-modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+    <button class="close" id="close-detail" aria-label="Fermer">×</button>
+    <img class="detail-img" id="detail-img" src="" alt="">
+    <div class="detail-body">
+      <div class="detail-num" id="detail-num"></div>
+      <h2 class="detail-title" id="detail-title"></h2>
+      <div class="detail-weight" id="detail-weight"></div>
+      <p class="detail-desc" id="detail-desc"></p>
+      <ul class="detail-points" id="detail-points"></ul>
+      <div class="detail-price">
+        <span class="dp-now" id="detail-price-now"></span>
+        <span class="dp-was" id="detail-price-was"></span>
+        <span class="dp-unit">/ unité</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ─── Footer ─────────────────────────── -->
 <footer>
   <div class="foot-inner">
@@ -703,15 +774,31 @@
   // ── Data ───────────────────────────────────
   const CDN = "https://nutsa-dz.com/cdn/shop/files/";
   const products = [
-    { id:1,  num:"01", name:"Chococo (raf-aelo)",        weight:"1.5 kg",  cat:"choco",    price:2400, was:2850, sheetName:"Nutsa Chococo (raf-aelo) 1,5 kg",       img:CDN+"Code_Generated_Image.png?width=400" },
-    { id:2,  num:"02", name:"Chococo",                   weight:"2.5 kg",  cat:"choco",    price:4000, was:null, sheetName:"Nutsa Chococo 2,5 kg",                  img:CDN+"B4503433-82FC-4B9C-BEC6-9FBF6DC16E61_1e1d7091-98c6-4370-b200-474ee768e66e.png?width=400" },
+    { id:1,  num:"01", name:"Chococo (raf-aelo)", weight:"1.5 kg", cat:"choco", price:2400, was:2850, sheetName:"Nutsa Chococo (raf-aelo) 1,5 kg", img:CDN+"Code_Generated_Image.png?width=400",
+      desc:"Une pâte à tartiner au chocolat douce et onctueuse, élaborée à partir d'ingrédients soigneusement sélectionnés. Sa texture légère et sa saveur équilibrée en font le choix idéal pour le petit-déjeuner ou une collation gourmande.",
+      details:["Texture légère et fondante","Saveur chocolat équilibrée","Idéal pour particuliers","Format 1,5 kg"] },
+    { id:2,  num:"02", name:"Chococo", weight:"2.5 kg", cat:"choco", price:4000, was:null, sheetName:"Nutsa Chococo 2,5 kg", img:CDN+"B4503433-82FC-4B9C-BEC6-9FBF6DC16E61_1e1d7091-98c6-4370-b200-474ee768e66e.png?width=400",
+      desc:"La même recette Chococo dans un format plus grand pour ne jamais manquer de gourmandise. Idéale pour les familles nombreuses ou les petits commerces, cette pâte offre une texture soyeuse et une saveur généreuse à chaque tartine.",
+      details:["Texture soyeuse et généreuse","Grand format économique","Idéal familles & petits commerces","Format 2,5 kg"] },
 
-    { id:6,  num:"06", name:"Pistachio Crock",           weight:"1.5 kg",  cat:"pistache", price:3700, was:null, sheetName:"Nutsa Pistachio Crock 1,5 kg",          img:CDN+"Gemini_Generated_Image_fefs1dfefs1dfefs.png?width=400" },
-    { id:7,  num:"07", name:"Pistache",                  weight:"1.5 kg",  cat:"pistache", price:2400, was:2830, sheetName:"Nutsa Pistachio – 1,5 KG",              img:CDN+"NUTSA-Pistaches-1_5KG.jpg?width=400" },
-    { id:8,  num:"08", name:"Pistache",                  weight:"2.5 kg",  cat:"pistache", price:4000, was:4700, sheetName:"Nutsa Pistachio – 2,5 KG",              img:CDN+"NUTSA-Pistaches-2_5KG.jpg?width=400" },
-    { id:9,  num:"09", name:"Pistache",                  weight:"12 kg",   cat:"pistache", price:19200,was:22600,sheetName:"Nutsa Pistachio – 12 KG",               img:CDN+"NUTSA_-_Pistaches_-_12_KG.jpg?width=400" },
-    { id:10, num:"10", name:"Rocher",                    weight:"1.5 kg",  cat:"rocher",   price:2700, was:3000, sheetName:"Nutsa Rocher 1,5kg",                    img:CDN+"rocher_2048_1_1_page-0001.jpg?width=400" },
-    { id:11, num:"11", name:"Rocher",                    weight:"2.5 kg",  cat:"rocher",   price:4500, was:null, sheetName:"Nutsa Rocher 2,5kg",                    img:CDN+"Gemini_Generated_Image_gru9n1gru9n1gru9.png?width=400" },
+    { id:6,  num:"06", name:"Pistachio Crock", weight:"1.5 kg", cat:"pistache", price:3700, was:null, sheetName:"Nutsa Pistachio Crock 1,5 kg", img:CDN+"Gemini_Generated_Image_fefs1dfefs1dfefs.png?width=400",
+      desc:"Une expérience unique : la douceur de la pistache rencontre le croquant des éclats de fruits secs. La Pistachio Crock est une pâte premium à la texture inégalée, idéale pour sublimer vos desserts ou se déguster à la cuillère.",
+      details:["Éclats croquants de pistache","Recette premium haut de gamme","Idéal pour pâtissiers","Format 1,5 kg"] },
+    { id:7,  num:"07", name:"Pistache", weight:"1.5 kg", cat:"pistache", price:2400, was:2830, sheetName:"Nutsa Pistachio – 1,5 KG", img:CDN+"NUTSA-Pistaches-1_5KG.jpg?width=400",
+      desc:"Une pâte à la pistache pure, à l'arôme intense et à la couleur naturelle. Élaborée à partir de pistaches de qualité, elle se distingue par sa texture crémeuse. Parfaite pour garnir vos gâteaux, crêpes ou simplement tartiner.",
+      details:["Arôme pistache intense","Couleur naturelle","Polyvalente en pâtisserie","Format 1,5 kg"] },
+    { id:8,  num:"08", name:"Pistache", weight:"2.5 kg", cat:"pistache", price:4000, was:4700, sheetName:"Nutsa Pistachio – 2,5 KG", img:CDN+"NUTSA-Pistaches-2_5KG.jpg?width=400",
+      desc:"Le format intermédiaire de notre pâte à la pistache, pensé pour les professionnels de la pâtisserie et les grandes familles. Même qualité premium, même saveur authentique — en plus grande quantité pour un meilleur rapport qualité-prix.",
+      details:["Qualité professionnelle","Rapport qualité-prix optimal","Pour pâtissiers & cafés","Format 2,5 kg"] },
+    { id:9,  num:"09", name:"Pistache", weight:"12 kg", cat:"pistache", price:19200, was:22600, sheetName:"Nutsa Pistachio – 12 KG", img:CDN+"NUTSA_-_Pistaches_-_12_KG.jpg?width=400",
+      desc:"Le format professionnel par excellence. Conçu pour les hôtels, boulangeries, pâtisseries et restaurants, ce conditionnement de 12 kg garantit un approvisionnement sans interruption. Qualité constante, livraison sur toute l'Algérie.",
+      details:["Format industriel 12 kg","Pour hôtels, boulangeries, restaurants","Qualité constante & certifiée","Livraison 48h sur toute l'Algérie"] },
+    { id:10, num:"10", name:"Rocher", weight:"1.5 kg", cat:"rocher", price:2700, was:3000, sheetName:"Nutsa Rocher 1,5kg", img:CDN+"rocher_2048_1_1_page-0001.jpg?width=400",
+      desc:"Inspirée du célèbre bonbon au chocolat, la pâte Rocher de Nutsa offre une expérience gustative riche et gourmande. Mélange de chocolat onctueux et d'éclats de noisettes grillées, elle transforme chaque tartine en moment d'exception.",
+      details:["Éclats de noisettes grillées","Saveur chocolat intense","Texture riche et gourmande","Format 1,5 kg"] },
+    { id:11, num:"11", name:"Rocher", weight:"2.5 kg", cat:"rocher", price:4500, was:null, sheetName:"Nutsa Rocher 2,5kg", img:CDN+"Gemini_Generated_Image_gru9n1gru9n1gru9.png?width=400",
+      desc:"La même recette Rocher dans un format plus grand pour les amateurs et les professionnels. Chocolat fondant, noisettes croquantes : une alliance parfaite pour vos préparations sucrées ou pour régaler toute la famille au quotidien.",
+      details:["Même recette Rocher premium","Noisettes croquantes & chocolat fondant","Idéal professionnels & familles","Format 2,5 kg"] },
   ];
 
   const wilayas = [
@@ -879,6 +966,10 @@
             ${cat}
             ${sale}
           </div>
+          <button class="btn-info" data-info="${p.id}">
+            <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 5.5V9M6 3.5V4.5" stroke="currentColor" stroke-linecap="round"/></svg>
+            En savoir plus
+          </button>
         </div>
         <div class="qty-cell">
           <div class="qty">
@@ -1455,6 +1546,51 @@
   });
 
   document.getElementById("ok-btn").onclick = closeModal;
+
+
+  // ── Product detail modal ───────────────────
+  const detailModal   = document.getElementById("detail-modal");
+  const closeDetail   = document.getElementById("close-detail");
+
+  function openDetail(id){
+    const p = products.find(x => x.id === id);
+    if(!p) return;
+    document.getElementById("detail-img").src        = p.img;
+    document.getElementById("detail-img").alt        = "Nutsa " + p.name + " " + p.weight;
+    document.getElementById("detail-num").textContent  = "No " + p.num;
+    document.getElementById("detail-title").textContent = "Nutsa " + p.name;
+    document.getElementById("detail-weight").textContent = p.weight;
+    document.getElementById("detail-desc").textContent  = p.desc || "";
+    const pts = document.getElementById("detail-points");
+    pts.innerHTML = "";
+    (p.details || []).forEach(d => {
+      const li = document.createElement("li");
+      li.textContent = d;
+      pts.appendChild(li);
+    });
+    document.getElementById("detail-price-now").textContent = fmt(p.price) + " DA";
+    const wasEl = document.getElementById("detail-price-was");
+    wasEl.textContent = p.was ? fmt(p.was) + " DA" : "";
+    detailModal.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+
+  closeDetail.addEventListener("click", () => {
+    detailModal.classList.remove("open");
+    document.body.style.overflow = "";
+  });
+  detailModal.addEventListener("click", e => {
+    if(e.target === detailModal){
+      detailModal.classList.remove("open");
+      document.body.style.overflow = "";
+    }
+  });
+
+  list.addEventListener("click", e => {
+    const btn = e.target.closest("[data-info]");
+    if(btn) openDetail(+btn.dataset.info);
+  });
+
 </script>
   <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
