@@ -223,117 +223,1383 @@
   .price-stack .now.bump{color:var(--red)}
   .price-stack .was{text-decoration:line-through;color:var(--ink-soft);font-size:13px;font-variant-numeric:tabular-nums}
   .price-stack .meta{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-top:4px;font-weight:600}
+
+  /* ── STICKY BOTTOM ORDER BAR ─────────── */
+  .order-bar{
+    position:fixed;bottom:0;left:0;right:0;
+    background:#fff;
+    border-top:1px solid var(--rule);
+    box-shadow:0 -8px 40px -8px rgba(26,26,26,.18);
+    z-index:40;
+    padding:14px 28px;
+    transition:transform .3s cubic-bezier(.22,1,.36,1), opacity .3s ease;
+  }
+  .order-bar.hidden{
+    transform:translateY(110%);
+    opacity:0;
+    pointer-events:none;
+  }
+  .order-bar-inner{
+    max-width:1240px;margin:0 auto;
+    display:flex;align-items:center;justify-content:space-between;gap:24px;
+  }
+  .bar-summary{display:flex;flex-direction:column;gap:3px}
+  .bar-summary .bar-count{
+    font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-soft);font-weight:600;
+  }
+  .bar-summary .bar-total{
+    font-family:var(--display);font-size:26px;font-weight:500;
+    font-variant-numeric:tabular-nums;color:var(--ink);
+    line-height:1;
+  }
+  .bar-items-list{
+    flex:1;
+    display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+    padding:0 8px;
+    max-height:60px;overflow:hidden;
+  }
+  .bar-pill{
+    background:var(--rule-soft);border:1px solid var(--rule);
+    border-radius:999px;padding:5px 12px;
+    font-size:12px;color:var(--ink);white-space:nowrap;
+  }
+  .bar-pill strong{font-weight:700;color:var(--red)}
+
+  /* ── BIG RED ARABIC BUTTON ──────────────── */
+  /* Uses transform/opacity (GPU-accelerated) instead of box-shadow for better mobile perf + battery */
+  @keyframes pulse-glow {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.025); }
+  }
+  .order-btn{
+    appearance:none;border:0;cursor:pointer;
+    background:linear-gradient(180deg, var(--red-light) 0%, var(--red) 60%, var(--red-deep) 100%);
+    color:#fff;
+    padding:18px 36px;
+    white-space:nowrap;
+    border-radius:14px;
+    font-family:var(--arabic);
+    font-size:22px;font-weight:900;letter-spacing:.02em;
+    direction:rtl;
+    text-shadow:0 1px 0 rgba(0,0,0,.25);
+    box-shadow:0 6px 0 var(--red-deep), 0 12px 24px -8px rgba(182,52,43,.5);
+    animation: pulse-glow 4s ease-in-out infinite;
+    will-change: transform;
+    transform-origin:center;
+    transition:transform .12s ease;
+    position:relative;overflow:hidden;
+    flex-shrink:0;
+  }
+  .order-btn::before{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(120deg, transparent 30%, rgba(255,255,255,.35) 50%, transparent 70%);
+    transform:translateX(-100%);transition:transform .6s ease;
+  }
+  .order-btn:hover::before{transform:translateX(100%)}
+  .order-btn:hover{
+    animation-play-state:paused;
+    transform:translateY(-2px);
+    box-shadow:0 8px 0 var(--red-deep), 0 18px 32px -8px rgba(182,52,43,.7);
+  }
+  .order-btn:active{
+    transform:translateY(3px);
+    box-shadow:0 3px 0 var(--red-deep), 0 6px 12px -4px rgba(182,52,43,.5);
+  }
+  .order-btn .icon{display:inline-block;margin-left:10px;font-size:18px;vertical-align:middle}
+
+  /* ── Field validation errors ─────────────── */
+  .field-error{
+    font-size:12px;color:var(--red);margin-top:4px;font-weight:600;
+    animation: fade .2s ease;
+  }
+
+  /* ── Modal ──────────────────────────────── */
+  .modal-backdrop{
+    position:fixed;inset:0;
+    background:rgba(26,26,26,.6);
+    backdrop-filter:blur(4px);
+    z-index:50;
+    display:none;align-items:center;justify-content:center;
+    padding:20px;
+  }
+  .modal-backdrop.open{display:flex;animation:fade .2s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .modal{
+    background:#fff;
+    border-radius:var(--radius);
+    width:min(580px,100%);
+    max-height:92vh;overflow:auto;
+    box-shadow:0 30px 80px -20px rgba(0,0,0,.4);
+    position:relative;
+    animation:rise .3s cubic-bezier(.22,1,.36,1);
+  }
+  @keyframes rise{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .modal header{
+    padding:28px 32px 18px;border-bottom:1px solid var(--rule);
+  }
+  .eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .modal h2{font-family:var(--display);font-weight:400;font-size:30px;letter-spacing:-.02em;margin:6px 0 0;line-height:1.1}
+  .modal h2 em{font-style:italic;color:var(--red)}
+
+  /* Multi-item summary */
+  .summary-block{
+    margin:18px 32px 0;
+    border:1px solid var(--rule);border-radius:12px;overflow:hidden;
+  }
+  .summary-item{
+    display:flex;justify-content:space-between;align-items:center;gap:16px;
+    padding:12px 16px;background:var(--rule-soft);
+    border-bottom:1px solid var(--rule);
+  }
+  .summary-item:last-child{border-bottom:0}
+  .summary-item .si-left strong{font-family:var(--display);font-weight:500;font-size:15px;display:block}
+  .summary-item .si-left span{font-size:11px;color:var(--ink-soft);letter-spacing:.04em}
+  .summary-item .si-right{font-family:var(--display);font-size:18px;color:var(--red);white-space:nowrap}
+  .summary-total{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 16px;background:#fff;
+    border-top:2px solid var(--red);
+  }
+  .summary-total span:first-child{font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--ink-soft)}
+  .summary-total .grand{font-family:var(--display);font-size:26px;font-weight:500;color:var(--ink)}
+
+  form{padding:18px 32px 28px;display:grid;gap:14px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);font-weight:700}
+  .field input,.field select,.field textarea{
+    font-family:var(--body);font-size:15px;
+    padding:13px 14px;border-radius:10px;
+    border:1px solid var(--rule);
+    background:#fff;color:var(--ink);
+    outline:none;transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .field input:focus,.field select:focus,.field textarea:focus{
+    border-color:var(--ink);box-shadow:0 0 0 3px rgba(26,26,26,.08);
+  }
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+  .delivery{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+  .delivery label{
+    border:1px solid var(--rule);border-radius:12px;
+    padding:12px 14px;cursor:pointer;
+    display:flex;flex-direction:column;gap:2px;
+    transition:all .15s ease;position:relative;
+  }
+  .delivery label:hover{border-color:var(--ink-soft)}
+  .delivery input{position:absolute;opacity:0;pointer-events:none}
+  .delivery label.sel{border-color:var(--red);background:rgba(182,52,43,.04)}
+  .delivery .name{font-weight:700;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+  .delivery .price{font-family:var(--display);font-size:18px;color:var(--red)}
+
+  .submit-row{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:6px}
+  .submit-btn{
+    flex:1;
+    appearance:none;border:0;cursor:pointer;
+    background:var(--red);color:#fff;
+    padding:16px 24px;border-radius:999px;
+    font-family:var(--arabic);font-size:16px;font-weight:800;letter-spacing:.04em;
+    transition:background .2s ease, transform .2s ease;
+  }
+  .submit-btn:hover{background:var(--red-deep);transform:translateY(-1px)}
+  .cancel{background:transparent;border:0;cursor:pointer;padding:14px;color:var(--ink-soft);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+  .cancel:hover{color:var(--ink)}
+
+  .close{
+    position:absolute;top:16px;right:16px;
+    width:36px;height:36px;border-radius:50%;
+    background:var(--rule-soft);border:0;cursor:pointer;
+    font-size:18px;color:var(--ink);
+    display:grid;place-items:center;
+  }
+  .close:hover{background:var(--ink);color:#fff}
+
+  /* ── Success state ──────────────────────── */
+  .success{padding:48px 32px 32px;text-align:center}
+  .success .badge{
+    width:68px;height:68px;border-radius:50%;
+    background:var(--green);color:#fff;
+    display:grid;place-items:center;margin:0 auto 18px;
+    font-size:32px;font-weight:700;
+  }
+  .success h2{font-family:var(--display);font-size:32px;margin:0 0 10px;font-weight:400}
+  .success h2 em{font-style:italic;color:var(--red)}
+  .success p{color:var(--ink-soft);max-width:38ch;margin:0 auto 24px}
+  .success .recap{
+    text-align:left;background:var(--rule-soft);border-radius:12px;
+    padding:18px 20px;margin:0 auto 22px;border:1px solid var(--rule);font-size:14px;
+  }
+  .success .recap div{display:flex;justify-content:space-between;padding:5px 0;gap:14px}
+  .success .recap div + div{border-top:1px dashed var(--rule)}
+  .success .recap span:first-child{color:var(--ink-soft);letter-spacing:.04em}
+
+  /* ── Footer ─────────────────────────────── */
+  footer{
+    border-top:1px solid var(--rule);
+    background:var(--ink);color:var(--paper);
+    padding:48px 28px 28px;margin-top:48px;
+  }
+  .foot-inner{
+    max-width:1240px;margin:0 auto;
+    display:grid;grid-template-columns:2fr 1fr 1fr;gap:48px;align-items:start;
+  }
+  .foot-inner h4{font-family:var(--display);font-weight:400;font-size:32px;margin:0 0 8px;letter-spacing:-.01em}
+  .foot-inner h4 em{font-style:italic;color:var(--red-light)}
+  .foot-inner p{color:rgba(251,250,247,.65);max-width:42ch;font-size:14px}
+  .foot-inner ul{list-style:none;padding:0;margin:0;display:grid;gap:8px;font-size:14px;color:rgba(251,250,247,.85)}
+  .foot-inner h5{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--red-light);margin:0 0 14px;font-weight:700}
+  .foot-bottom{
+    max-width:1240px;margin:32px auto 0;padding-top:20px;
+    border-top:1px solid rgba(251,250,247,.15);
+    display:flex;justify-content:space-between;font-size:12px;color:rgba(251,250,247,.5);
+    letter-spacing:.06em;
+  }
+
+  /* ── Responsive ─────────────────────────── */
+  @media (max-width:980px){
+    .hero{grid-template-columns:1fr;gap:24px;padding:40px 20px 32px}
+    .thead{display:none}
+    .row{
+      grid-template-columns:90px 1fr;
+      grid-template-rows:auto auto auto;
+      gap:14px 16px;padding:18px;
+    }
+    .thumb{width:90px;height:90px}
+    .info{grid-column:2}
+    .qty-cell, .price-cell{
+      grid-column:1 / -1;
+      display:flex;justify-content:space-between;align-items:center;
+      border-top:1px dashed var(--rule);padding-top:12px;
+    }
+    .topbar-inner{flex-direction:column;gap:8px;padding:10px}
+    .ticker{font-size:11px;gap:14px}
+    .brand-inner{grid-template-columns:1fr;text-align:center}
+    .brand-left,.brand-right{display:none}
+    .foot-inner{grid-template-columns:1fr;gap:28px}
+    .field-row,.delivery{grid-template-columns:1fr}
+    .order-bar-inner{flex-wrap:wrap;gap:12px}
+    .bar-items-list{display:none}
+    .order-btn{font-size:20px;padding:16px 24px;width:100%}
+    .bar-summary{flex-direction:row;gap:16px;align-items:baseline}
+  }
+
+  /* ── En savoir plus button ──────────────── */
+  .btn-info{
+    display:inline-flex;align-items:center;gap:7px;
+    margin-top:12px;
+    padding:9px 18px;border-radius:999px;
+    border:1.5px solid var(--red);
+    background:rgba(182,52,43,.06);color:var(--red);
+    font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;
+    cursor:pointer;transition:all .2s ease;
+    font-family:var(--body);
+    box-shadow:0 2px 8px -2px rgba(182,52,43,.18);
+  }
+  .btn-info:hover{
+    background:var(--red);color:#fff;
+    box-shadow:0 4px 16px -4px rgba(182,52,43,.45);
+    transform:translateY(-1px);
+  }
+  .btn-info:active{transform:translateY(0)}
+  .btn-info svg{width:12px;height:12px;flex-shrink:0}
+
+  /* ── Product detail modal ───────────────── */
+  #detail-modal .modal{width:min(540px,100%)}
+  .detail-img{
+    width:100%;height:220px;object-fit:cover;
+    border-radius:var(--radius) var(--radius) 0 0;
+    display:block;
+  }
+  .detail-body{padding:28px 32px 32px}
+  .detail-num{font-family:var(--display);font-style:italic;font-size:13px;color:var(--accent);margin-bottom:4px}
+  .detail-title{font-family:var(--display);font-weight:500;font-size:28px;letter-spacing:-.02em;line-height:1.1;margin:0 0 6px}
+  .detail-weight{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;margin-bottom:16px}
+  .detail-desc{font-size:15px;color:var(--ink-soft);line-height:1.65;margin-bottom:20px}
+  .detail-points{list-style:none;padding:0;margin:0 0 24px;display:flex;flex-direction:column;gap:8px}
+  .detail-points li{
+    display:flex;align-items:center;gap:10px;
+    font-size:13px;font-weight:600;letter-spacing:.03em;color:var(--ink);
+  }
+  .detail-points li::before{
+    content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--red);flex-shrink:0;
+  }
+  .detail-price{
+    display:flex;align-items:baseline;gap:10px;
+    padding-top:20px;border-top:1px solid var(--rule);
+  }
+  .detail-price .dp-now{font-family:var(--display);font-size:28px;font-weight:500;color:var(--ink)}
+  .detail-price .dp-was{font-size:14px;text-decoration:line-through;color:var(--ink-soft)}
+  .detail-price .dp-unit{font-size:12px;color:var(--ink-soft);letter-spacing:.1em;text-transform:uppercase;margin-left:auto;font-weight:600}
+
 </style>
 </head>
 <body>
 
+<!-- ─── Top ticker ──────────────────────── -->
 <div class="topbar">
   <div class="topbar-inner">
     <div class="ticker">
-      <span>Commande en ligne</span>
-      <span>Livraison partout</span>
+      <span>Livraison 24 wilayas</span>
+      <span>Paiement à la livraison</span>
+      <span>Gros &amp; détail</span>
     </div>
     <div class="lang">
       <a href="#" class="on">FR</a>
       <a href="#">AR</a>
+      <a href="#">EN</a>
     </div>
   </div>
 </div>
 
+<!-- ─── Brand ──────────────────────────── -->
 <header class="brand">
   <div class="brand-inner">
-    <div class="brand-left">Depuis 2015</div>
+    <div class="brand-left">Nutsa Distribution · Algérie ©</div>
     <div class="logo">
-      Nutsa<em>.</em><small>Produits Premium</small>
+      <img src="Logo_Nutsa.svg" alt="Nutsa" width="216" height="72" style="height:72px;width:auto;display:block;margin:0 auto;">
+      <small>Pâtes à tartiner premium</small>
     </div>
-    <div class="brand-right">Fabriqué en <strong>Algérie</strong></div>
+    <div class="brand-right"><strong>05 5543 33 22</strong></strong> · contact@nutsa-dz.com</div>
   </div>
 </header>
 
+<!-- ─── Hero ───────────────────────────── -->
 <section class="hero">
   <div>
-    <div class="kicker">Découvrez</div>
-    <h1>Nos <span class="ital">produits</span><span class="ar">منتجاتنا</span></h1>
-    <p class="lede">Sélectionnez vos produits, choisissez votre mode de livraison et confirmez votre commande. Livraison garantie.</p>
+    <div class="kicker">Catalogue · Gros &amp; détail</div>
+    <h1>
+      Catalogue<br>
+      <span class="ital">de gros</span> &amp; détail.
+      <span class="ar">اطلب الآن — توصيل لكامل الولايات</span>
+    </h1>
+  </div>
+  <div>
+    <p class="lede">Choisissez vos références, ajustez les quantités, commandez en quelques secondes. Une seule commande pour tout le panier — paiement à la livraison.</p>
     <div class="meta-row">
-      <span>100% naturel</span>
-      <span>Qualité Premium</span>
+      <span>8 références</span>
+      <span>Stock disponible</span>
+      <span>Expédition 48h</span>
     </div>
   </div>
 </section>
 
+<!-- ─── Filters ────────────────────────── -->
 <div class="filters">
-  <span class="label">Filtrer:</span>
-  <button class="chip on">Tous les produits</button>
-  <button class="chip">En promotion</button>
-  <button class="chip">Nouveautés</button>
+  <div class="label">Filtrer</div>
+  <button class="chip on" data-filter="all">Tout voir</button>
+  <button class="chip" data-filter="choco">Chocolat noisettes</button>
+  <button class="chip" data-filter="pistache">Pistache</button>
+  <button class="chip" data-filter="rocher">Rocher</button>
 </div>
 
+<!-- ─── Product list ───────────────────── -->
 <main>
   <div class="table-wrap">
     <div class="thead">
-      <div>Photo</div>
-      <div>Produit</div>
-      <div>Quantité</div>
-      <div>Prix</div>
+      <div>Image</div>
+      <div>Product</div>
+      <div>Quantity</div>
+      <div>Price</div>
     </div>
-    <div id="product-list"></div>
+    <div id="product-list"><!-- rows render here --></div>
   </div>
 </main>
 
-<script>
-const INTAKE_SECRET = "nutsa_secret_key_here";
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxc8Bxw0eFXX595oSEB02OhPaLRSZAHQ7DUC398bfZKwWm82Tlx5dFqGTi2G-33_zt_/exec";
+<!-- ─── STICKY ORDER BAR ─────────────── -->
+<div class="order-bar hidden" id="order-bar">
+  <div class="order-bar-inner">
+    <div class="bar-summary">
+      <div class="bar-count" id="bar-count">0 article</div>
+      <div class="bar-total" id="bar-total">0 DA</div>
+    </div>
+    <div class="bar-items-list" id="bar-items-list"></div>
+    <button class="order-btn" id="main-order-btn">
+      اطلب الآن <span class="icon">←</span>
+    </button>
+  </div>
+</div>
 
-const products = [
-  { id: 1, num: "001", name: "Café Premium", weight: "250g", price: 1200, desc: "Café arabica de haute qualité", img: "https://via.placeholder.com/120", details: ["Grain entier", "Torréfaction artisanale"] },
-  { id: 2, num: "002", name: "Miel Pur", weight: "500g", price: 950, desc: "Miel naturel non traité", img: "https://via.placeholder.com/120", details: ["Sans additifs", "Récolte locale"] }
-];
+<!-- ─── Modal ──────────────────────────── -->
+<div class="modal-backdrop" id="modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <button class="close" id="close-modal" aria-label="Fermer">×</button>
+    <div id="form-view">
+      <header>
+        <div class="eyebrow">Paiement à la livraison · COD</div>
+        <h2 id="modal-title">Finalisez votre <em>commande</em></h2>
+      </header>
 
-const cart = [];
-let selectedProducts = {};
+      <div id="modal-summary-block"></div>
 
-function fmt(n) {
-  return new Intl.NumberFormat('fr-DZ').format(n);
-}
-
-function initProducts() {
-  const list = document.getElementById('product-list');
-  products.forEach(p => {
-    const row = document.createElement('div');
-    row.className = 'row';
-    row.innerHTML = `
-      <div class="thumb">
-        <img src="${p.img}" alt="Nutsa ${p.name}">
-      </div>
-      <div class="info">
-        <div class="num">No ${p.num}</div>
-        <h3>${p.name}</h3>
-        <div class="tags">
-          <span class="tag">${p.weight}</span>
-          <span class="tag green">Stock</span>
+      <form id="order-form" autocomplete="on" novalidate>
+        <!-- Honeypot: real users never see or fill this. Bots usually do. -->
+        <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none">
+          <label>Ne pas remplir<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
         </div>
-      </div>
-      <div class="qty">
-        <button>−</button>
-        <input type="number" value="0" min="0">
-        <button>+</button>
-      </div>
-      <div class="price-stack">
-        <div class="now">${fmt(p.price)} DA</div>
-      </div>
-    `;
-    list.appendChild(row);
-  });
-}
+        <div class="field-row">
+          <div class="field">
+            <label for="f-name">Nom complet</label>
+            <input id="f-name" name="name" type="text" required autocomplete="name" placeholder="الاسم الكامل">
+          </div>
+          <div class="field">
+            <label for="f-phone">Téléphone</label>
+            <input id="f-phone" name="phone" type="tel" required autocomplete="tel" placeholder="0555 12 34 56">
+          </div>
+        </div>
 
-document.addEventListener('DOMContentLoaded', initProducts);
+        <div class="field-row">
+          <div class="field">
+            <label for="f-wilaya">Wilaya</label>
+            <select id="f-wilaya" name="wilaya" required>
+              <option value="" disabled selected>اختر الولاية</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-baladia">Commune</label>
+            <select id="f-baladia" name="baladia" required>
+              <option value="" disabled selected>Sélectionnez d'abord une wilaya</option>
+            </select>
+          </div>
+        </div>
 
-window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-</script>
+        <div class="field">
+          <label for="f-address">Adresse complète <span style="text-transform:none;color:var(--ink-soft);font-weight:400">(optionnel)</span></label>
+          <input id="f-address" name="address" type="text" placeholder="Rue, numéro, repère…">
+        </div>
+
+        <div class="field">
+          <label>Mode de livraison</label>
+          <div class="delivery">
+            <label class="sel" id="lab-door">
+              <input type="radio" name="delivery" value="door" checked>
+              <span class="name">À domicile</span>
+              <span class="price" id="price-door">— DA</span>
+            </label>
+            <label id="lab-stop">
+              <input type="radio" name="delivery" value="stop">
+              <span class="name">Stop desk</span>
+              <span class="price" id="price-stop">— DA</span>
+            </label>
+          </div>
+          <div id="delivery-note" style="font-size:12px;color:var(--ink-soft);margin-top:4px;font-weight:500"></div>
+        </div>
+
+        <div class="field">
+          <label for="f-note">Note <span style="text-transform:none;color:var(--ink-soft);font-weight:400">(optionnel)</span></label>
+          <textarea id="f-note" name="note" rows="2" placeholder="ملاحظات…"></textarea>
+        </div>
+
+        <div class="submit-row">
+          <button type="button" class="cancel" id="cancel-btn">Annuler</button>
+          <button type="submit" class="submit-btn">تأكيد الطلب</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="success-view" style="display:none">
+      <div class="success">
+        <div class="badge">✓</div>
+        <h2>تم تأكيد <em>طلبك</em></h2>
+        <p>سنتصل بك قريباً لتأكيد التوصيل. شكراً لك!</p>
+        <div class="recap" id="success-recap"></div>
+        <button class="submit-btn" id="ok-btn" style="max-width:240px">شكراً</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ─── Product Detail Modal ──────────────── -->
+<div class="modal-backdrop" id="detail-modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+    <button class="close" id="close-detail" aria-label="Fermer">×</button>
+    <img class="detail-img" id="detail-img" src="" alt="">
+    <div class="detail-body">
+      <div class="detail-num" id="detail-num"></div>
+      <h2 class="detail-title" id="detail-title"></h2>
+      <div class="detail-weight" id="detail-weight"></div>
+      <p class="detail-desc" id="detail-desc"></p>
+      <ul class="detail-points" id="detail-points"></ul>
+      <div class="detail-price">
+        <span class="dp-now" id="detail-price-now"></span>
+        <span class="dp-was" id="detail-price-was"></span>
+        <span class="dp-unit">/ unité</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Footer ─────────────────────────── -->
+<footer>
+  <div class="foot-inner">
+    <div>
+      <h4>Nutsa, <em>la pâte à tartiner</em><br>des professionnels.</h4>
+      <p>Pâtes à tartiner premium pour pâtissiers, hôtels, cafés et particuliers exigeants. Textures maîtrisées, saveurs intenses.</p>
+    </div>
+    <div>
+      <h5>Catalogue</h5>
+      <ul>
+        <li>Chocolat noisettes</li>
+        <li>Pistache</li>
+        <li>Rocher</li>
+        <li>Chococo</li>
+      </ul>
+    </div>
+    <div>
+      <h5>Contact</h5>
+      <ul>
+        <li>contact@nutsa-dz.com</li>
+        <li>+213 555 00 00 00</li>
+        <li>Alger, Algérie</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <span>© Nutsa Distribution Algérie · 2026</span>
+    <span>Catalogue Gros &amp; Détail</span>
+  </div>
+</footer>
 
 <script>
+  // ── Apps Script endpoint (paste your Web App URL here after deploying) ──
+  // Should look like: https://script.google.com/macros/s/AKfycby...../exec
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxc8Bxw0eFXX595oSEB02OhPaLRSZAHQ7DUC398bfZKwWm82Tlx5dFqGTi2G-33_zt_/exec";
+
+  // ── Shared secret — must match Script Property `INTAKE_SECRET` ──
+  // This isn't real security (anyone can View Source), but stops drive-by spam
+  // from anyone POSTing directly to the Apps Script endpoint.
+  const INTAKE_SECRET = "nutsa_a8K2p9X4mZqL7vR3bN6fT1yH5wQ8jE";
+
+  // ── Data ───────────────────────────────────
+  const CDN = "https://nutsa-dz.com/cdn/shop/files/";
+  const products = [
+    { id:1,  num:"01", name:"Chococo (raf-aelo)", weight:"1.5 kg", cat:"choco", price:2400, was:2850, sheetName:"Nutsa Chococo (raf-aelo) 1,5 kg", img:CDN+"Code_Generated_Image.png?width=400",
+      desc:"Une pâte à tartiner au chocolat douce et onctueuse, élaborée à partir d'ingrédients soigneusement sélectionnés. Sa texture légère et sa saveur équilibrée en font le choix idéal pour le petit-déjeuner ou une collation gourmande.",
+      details:["Texture légère et fondante","Saveur chocolat équilibrée","Idéal pour particuliers","Format 1,5 kg"] },
+    { id:2,  num:"02", name:"Chococo", weight:"2.5 kg", cat:"choco", price:4000, was:null, sheetName:"Nutsa Chococo 2,5 kg", img:CDN+"B4503433-82FC-4B9C-BEC6-9FBF6DC16E61_1e1d7091-98c6-4370-b200-474ee768e66e.png?width=400",
+      desc:"La même recette Chococo dans un format plus grand pour ne jamais manquer de gourmandise. Idéale pour les familles nombreuses ou les petits commerces, cette pâte offre une texture soyeuse et une saveur généreuse à chaque tartine.",
+      details:["Texture soyeuse et généreuse","Grand format économique","Idéal familles & petits commerces","Format 2,5 kg"] },
+
+    { id:6,  num:"06", name:"Pistachio Crock", weight:"1.5 kg", cat:"pistache", price:3700, was:null, sheetName:"Nutsa Pistachio Crock 1,5 kg", img:CDN+"Gemini_Generated_Image_fefs1dfefs1dfefs.png?width=400",
+      desc:"Une expérience unique : la douceur de la pistache rencontre le croquant des éclats de fruits secs. La Pistachio Crock est une pâte premium à la texture inégalée, idéale pour sublimer vos desserts ou se déguster à la cuillère.",
+      details:["Éclats croquants de pistache","Recette premium haut de gamme","Idéal pour pâtissiers","Format 1,5 kg"] },
+    { id:7,  num:"07", name:"Pistache", weight:"1.5 kg", cat:"pistache", price:2400, was:2830, sheetName:"Nutsa Pistachio – 1,5 KG", img:CDN+"NUTSA-Pistaches-1_5KG.jpg?width=400",
+      desc:"Une pâte à la pistache pure, à l'arôme intense et à la couleur naturelle. Élaborée à partir de pistaches de qualité, elle se distingue par sa texture crémeuse. Parfaite pour garnir vos gâteaux, crêpes ou simplement tartiner.",
+      details:["Arôme pistache intense","Couleur naturelle","Polyvalente en pâtisserie","Format 1,5 kg"] },
+    { id:8,  num:"08", name:"Pistache", weight:"2.5 kg", cat:"pistache", price:4000, was:4700, sheetName:"Nutsa Pistachio – 2,5 KG", img:CDN+"NUTSA-Pistaches-2_5KG.jpg?width=400",
+      desc:"Le format intermédiaire de notre pâte à la pistache, pensé pour les professionnels de la pâtisserie et les grandes familles. Même qualité premium, même saveur authentique — en plus grande quantité pour un meilleur rapport qualité-prix.",
+      details:["Qualité professionnelle","Rapport qualité-prix optimal","Pour pâtissiers & cafés","Format 2,5 kg"] },
+    { id:9,  num:"09", name:"Pistache", weight:"12 kg", cat:"pistache", price:19200, was:22600, sheetName:"Nutsa Pistachio – 12 KG", img:CDN+"NUTSA_-_Pistaches_-_12_KG.jpg?width=400",
+      desc:"Le format professionnel par excellence. Conçu pour les hôtels, boulangeries, pâtisseries et restaurants, ce conditionnement de 12 kg garantit un approvisionnement sans interruption. Qualité constante, livraison sur toute l'Algérie.",
+      details:["Format industriel 12 kg","Pour hôtels, boulangeries, restaurants","Qualité constante & certifiée","Livraison 48h sur toute l'Algérie"] },
+    { id:10, num:"10", name:"Rocher", weight:"1.5 kg", cat:"rocher", price:2700, was:3000, sheetName:"Nutsa Rocher 1,5kg", img:CDN+"rocher_2048_1_1_page-0001.jpg?width=400",
+      desc:"Inspirée du célèbre bonbon au chocolat, la pâte Rocher de Nutsa offre une expérience gustative riche et gourmande. Mélange de chocolat onctueux et d'éclats de noisettes grillées, elle transforme chaque tartine en moment d'exception.",
+      details:["Éclats de noisettes grillées","Saveur chocolat intense","Texture riche et gourmande","Format 1,5 kg"] },
+    { id:11, num:"11", name:"Rocher", weight:"2.5 kg", cat:"rocher", price:4500, was:null, sheetName:"Nutsa Rocher 2,5kg", img:CDN+"Gemini_Generated_Image_gru9n1gru9n1gru9.png?width=400",
+      desc:"La même recette Rocher dans un format plus grand pour les amateurs et les professionnels. Chocolat fondant, noisettes croquantes : une alliance parfaite pour vos préparations sucrées ou pour régaler toute la famille au quotidien.",
+      details:["Même recette Rocher premium","Noisettes croquantes & chocolat fondant","Idéal professionnels & familles","Format 2,5 kg"] },
+  ];
+
+  const wilayas = [
+    {code:"01",name:"Adrar",                door:800, stop:600},
+    {code:"02",name:"Chlef",                door:600, stop:450},
+    {code:"03",name:"Laghouat",             door:800, stop:600},
+    {code:"04",name:"Oum El Bouaghi",       door:600, stop:450},
+    {code:"05",name:"Batna",                door:600, stop:450},
+    {code:"06",name:"Béjaia",               door:600, stop:450},
+    {code:"07",name:"Biskra",               door:700, stop:500},
+    {code:"08",name:"Béchar",               door:900, stop:700},
+    {code:"09",name:"Blida",                door:600, stop:450},
+    {code:"10",name:"Bouira",               door:600, stop:450},
+    {code:"11",name:"Tamanrasset",          door:1200,stop:900},
+    {code:"12",name:"Tébessa",              door:600, stop:450},
+    {code:"13",name:"Tlemcen",              door:600, stop:450},
+    {code:"14",name:"Tiaret",               door:600, stop:450},
+    {code:"15",name:"Tizi Ouzou",           door:600, stop:450},
+    {code:"16",name:"Alger",                door:0,   stop:0  },
+    {code:"17",name:"Djelfa",               door:700, stop:500},
+    {code:"18",name:"Jijel",                door:600, stop:450},
+    {code:"19",name:"Sétif",                door:600, stop:450},
+    {code:"20",name:"Saïda",                door:600, stop:450},
+    {code:"21",name:"Skikda",               door:600, stop:450},
+    {code:"22",name:"Sidi Bel Abbès",       door:600, stop:450},
+    {code:"23",name:"Annaba",               door:600, stop:450},
+    {code:"24",name:"Guelma",               door:600, stop:450},
+    {code:"25",name:"Constantine",          door:600, stop:450},
+    {code:"26",name:"Médéa",                door:600, stop:450},
+    {code:"27",name:"Mostaganem",           door:600, stop:450},
+    {code:"28",name:"M'Sila",               door:700, stop:500},
+    {code:"29",name:"Mascara",              door:600, stop:450},
+    {code:"30",name:"Ouargla",              door:800, stop:600},
+    {code:"31",name:"Oran",                 door:600, stop:450},
+    {code:"32",name:"El Bayadh",            door:800, stop:600},
+    {code:"33",name:"Illizi",               door:1200,stop:900},
+    {code:"34",name:"Bordj Bou Arréridj",   door:600, stop:450},
+    {code:"35",name:"Boumerdes",            door:600, stop:450},
+    {code:"36",name:"El Tarf",              door:600, stop:450},
+    {code:"37",name:"Tindouf",              door:1200,stop:900},
+    {code:"38",name:"Tissemsilt",           door:600, stop:450},
+    {code:"39",name:"El Oued",              door:800, stop:600},
+    {code:"40",name:"Khenchela",            door:600, stop:450},
+    {code:"41",name:"Souk Ahras",           door:600, stop:450},
+    {code:"42",name:"Tipaza",               door:600, stop:450},
+    {code:"43",name:"Mila",                 door:600, stop:450},
+    {code:"44",name:"Aïn Defla",            door:600, stop:450},
+    {code:"45",name:"Naama",                door:800, stop:600},
+    {code:"46",name:"Aïn Témouchent",       door:600, stop:450},
+    {code:"47",name:"Ghardaïa",             door:800, stop:600},
+    {code:"48",name:"Relizane",             door:600, stop:450},
+    {code:"49",name:"Timimoun",             door:900, stop:700},
+    {code:"50",name:"Bordj Badji Mokhtar",  door:1200,stop:900},
+    {code:"51",name:"Ouled Djellal",        door:700, stop:500},
+    {code:"52",name:"Béni Abbès",           door:1000,stop:800},
+    {code:"53",name:"In Salah",             door:1200,stop:900},
+    {code:"54",name:"In Guezzam",           door:1200,stop:900},
+    {code:"55",name:"Touggourt",            door:800, stop:600},
+    {code:"56",name:"Djanet",               door:1200,stop:900},
+    {code:"57",name:"El Menia",             door:1000,stop:800},
+    {code:"58",name:"El M'Ghair",           door:800, stop:600},
+  ];
+
+  // ── Delivery pricing rules ─────────────────
+  // Only single 1.5 kg items pay delivery.
+  // Multiple items (any) → free delivery.
+  // Alger (wilaya 16) → always free.
+  function getDeliveryCost(wilayaCode, cart){
+    // Alger is always free
+    if(wilayaCode === "16") return 0;
+    // Multiple distinct products → free
+    if(cart.length > 1) return 0;
+    // Single item that is NOT 1.5 kg → free
+    const item = cart[0];
+    if(!item) return 0;
+    const w = item.product.weight || "";
+    const is15 = /^1[,.]5\s*kg/i.test(w);
+    if(!is15) return 0;
+    // Single 1.5 kg → pay delivery
+    const wData = wilayas.find(x => x.code === wilayaCode);
+    if(!wData) return 0;
+    // Default to door price; caller can adjust for stop desk
+    return wData.door;
+  }
+
+  const communesData = {
+    "01":["Adrar","Tamest","Charouine","Reggane","In Zghmir","Tit","Ksar Kaddour","Sali","Bouda","Timokten","Aougrout","Fenoughil","Tamentit","Tamantit","Zaouiet Kounta"],
+    "02":["Chlef","Tenes","Benairia","El Karimia","Taougrit","Beni Haoua","Sobha","Harchoun","Ouled Fares","Sidi Akkacha","Boukadir","Beni Rached","Talassa","Herenfa","Oued Goussine"],
+    "03":["Laghouat","Ksar El Hirane","El Kihia","Sidi Makhlouf","Hassi R'Mel","Aflou","El Ghicha","Oued Morra","Hassi Delaa","Tadjemout","Tadjrouna","Brida","El Assafia","Kheneg","Gueltat Sidi Saad"],
+    "04":["Oum El Bouaghi","Ain Beida","Ain M'lila","F'Kirina","Ain Babouche","Ksar Sbahi","Dhalaa","Sigus","Ain Diss","Ain Kercha","Meskiana","Souk Naamane","Telerghma","Gosbat","Oued Nini"],
+    "05":["Batna","Ghassira","Maafa","Merouana","Tazoult","N'Gaous","Seggana","Arris","Timgad","Ichmoul","Fesdis","Rahouia","Ain Yagout","Bouzina","Chemora"],
+    "06":["Bejaia","Amizour","Ferraoun","Taourirt Ighil","Chemini","Taskriout","Tamokra","Draa El Caid","Kherraga","Sidi Aich","El Kseur","Melbou","Akfadou","Toudja","Tifra","Souk El Tenine","Mekla","Boudjellil","Tazmalt"],
+    "07":["Biskra","Ouled Djellal","Sidi Okba","M'Chouneche","El Kantara","Ain Zaatout","Tolga","Zeribet El Oued","El Outaya","Branis","Djemorah","Tanthelik","Ain Naga","Lioua","Lichana"],
+    "08":["Bechar","Meridja","Lahmar","Boukais","Mogheul","Abadla","Taghit","Erg Ferradj","Beni Ounif","Kenadsa","Igli","El Ouata","Tabelbala","Ouled Khoudir","Kerzaz"],
+    "09":["Blida","Boufarik","Bougara","El Affroun","Oued El Alleug","Mouzaia","Meftah","Larbaa","Bouinan","Guerrouaou","Ain Romana","Soumaa","Bouarfa","Chiffa","Ouled Yaich"],
+    "10":["Bouira","Aïn Bessem","Bir Ghbalou","Lakhdaria","El Hachimia","Souk El Khemis","Kadiria","Haizer","Taghzout","M'Chedellah","Ridane","Maala","Aomar","Djebahia","Bouderbala"],
+    "11":["Tamanrasset","Abalessa","Idles","Tazrouk","In Ghar","In Amguel","Aguemoun","In Guezzam","Tin Zaouatine","In Salah","Arak","Foggaret Ezzaouia"],
+    "12":["Tebessa","Bir El Ater","Cheria","Stah Guentis","El Aouinet","El Ogla","Safsaf El Ouesra","Hammamet","Ain Zerga","Negrine","Bir El Mokadem","El Kouif","Morsott","El Ogla Malha","Oum Ali","Ouenza","Ferkane"],
+    "13":["Tlemcen","Sebdou","Ghazaouet","Remchi","Beni Snous","Maghnia","Hennaya","Bensekrane","Ouled Mimoun","Ain Youcef","Bab El Assa","Chetouane","Fellaoucene","Ain Fezza","Aïn Nehala","Marhoum","Amieur","Marsa Ben M'Hidi"],
+    "14":["Tiaret","Medroussa","Ain Bouchekif","Sidi Ali Mellal","Ain Zair","Dahmouni","Rahouia","Sougueur","Mellakou","Ksar Chellala","Frenda","Takhemaret","Hamadia","Serghine","Nadorah"],
+    "15":["Tizi Ouzou","Ain El Hammam","Larba Nath Irathen","Mekla","Beni Douala","Boghni","Draa El Mizan","Ouacif","Azeffoun","Tizi Ghenif","Iferhounene","Bouzguen","Yakouren","Freha","Tadmait","Aghribs","Ifigha","Zekri","Assi Youcef"],
+    "16":["Alger Centre","Sidi M'Hamed","El Madania","Bab El Oued","Bologhine","Casbah","Oued Koriche","Bir Mourad Rais","El Biar","Bouzareah","Birkhadem","El Harrach","Baraki","Oued Smar","Bachdjerrah","Hussein Dey","Kouba","Bourouba","Dar El Beida","Bab Ezzouar","Ben Aknoun","Dely Ibrahim","Hammamet","Rais Hamidou","Djasr Kasentina","El Mouradia","Hydra","Mohammadia","Bordj El Kiffan","El Magharia","Beni Messous","Les Eucalyptus","Birtouta","Tessala El Merdja","Ouled Chebel","Sidi Moussa","Ain Taya","Bordj El Bahri","El Marsa","H'Raoua","Rouiba","Reghaia","Ain Benian","Staoueli","Zeralda","Mahelma","Rahmania","Souidania","Cheraga","Ouled Fayet","El Achour","Draria","Douera","Baba Hassen","Khraicia","Saoula"],
+    "17":["Djelfa","Messaad","Hassi Bahbah","Ain Maabed","Dar Chioukh","Sidi Ladjel","Charef","El Idrissia","Beni Yenni","Guettara","Birine","Ain El Ibel","Hassi El Euch","M'Liliha","Ain Feka"],
+    "18":["Jijel","Taher","El Aouana","Chekfa","Settara","El Milia","Sidi Maarouf","Erraguene","Ziama Mansouriah","El Kennar","Ghebala","Ouled Yahia Khedrouce","Texenna","Djemaa Beni Habibi","Bordj T'har"],
+    "19":["Setif","El Eulma","Ain Arnat","Guidjel","Beni Aziz","Amoucha","Babor","Ain Oulmene","Bouandas","Tizi N'Bechar","Hammam Guergour","Salah Bey","Bir El Arch","Maoklane","Boutaleb"],
+    "20":["Saida","Sidi Boubekeur","Ouled Brahim","Tircount","Ain Soltane","Ouled Khaled","Youb","Moulay Larbi","Maamora","Ain Hadjar","Hounet","Sidi Khaled","Sidi Amar","Ain Sekhouna","Thala"],
+    "21":["Skikda","El Hadaik","Azzaba","Ben Azzouz","Collo","Tamalous","Filfila","Sidi Mezghiche","Ain Bouziane","Zerdezas","Ouled Habbaba","Ramdane Djamel","Oued Zitoun","Ouldja Boulballout","Kanoua"],
+    "22":["Sidi Bel Abbes","Tessala","Sidi Brahim","Mostefa Ben Brahim","Telagh","Sidi Ali Boussidi","Maroufia","Sidi Lahcene","Tenira","Moulay Slissen","Mezaourou","Redjem Demouche","Ain Tindamine","Tilmouni","Badredine El Mokrani"],
+    "23":["Annaba","Seraidi","Berrahel","El Hadjar","El Bouni","Ain Berda","Chetaibi","Sidi Amar","Treat","Oued El Aneb","Eulma","El Ain Ragouba"],
+    "24":["Guelma","Hammam Debagh","Bouchegouf","Djeballah Khemissi","Ain Makhlouf","Oued Zenati","Ain Ben Beida","Bouati Mahmoud","Medjez Sfa","Hammam N'Bail","Boumahra Ahmed","Guelaat Bou Sbaa","Nechmaya","Ain Lahdjar","Khezara"],
+    "25":["Constantine","El Khroub","Hamma Bouziane","Ibn Ziad","Zighoud Youcef","Ain Abid","Messaoud Boudjriou","Beni Hamiden","Didouche Mourad","Draa Ben Khedda"],
+    "26":["Medea","Berrouaghia","Ouzera","El Omaria","Souagui","Ksar El Boukhari","Aziz","Chabounia","Tablat","Mezerana","Tamesguida","Benchicao","Seghouane","Boghar","Sidi Naamane"],
+    "27":["Mostaganem","Ain Nouicy","Hassi Mamach","Stidia","Ain Tedles","Sour","Mesra","Ain Sidi Cherif","Bouguirat","Kheir Eddine","Sidi Lakhdar","Mansourah","Ouled Boughalem","Djidiouia","Sidi Bellater"],
+    "28":["M'Sila","Medjedel","Hammam Dhalaa","Ouled Derradj","Ain El Hadjel","Khoubana","Ouled Addi Guebala","Tarmount","Sidi Ameur","Maadid","Ain El Melh","Beni Ilmane","Oultene","Djebel Messaad","Sidi M'Hamed"],
+    "29":["Mascara","Sig","Bou Henni","El Bordj","Mohammadia","Tighenif","Oued Taria","Ain Fekan","Hachem","Ghriss","Zahana","Hanacha","Maoussa","Oued El Abtal","Ferraguig"],
+    "30":["Ouargla","Hassi Messaoud","N'Goussa","Rouissat","Ain Beida","El Borma","Tebesbest","Nezla","Sidi Slimane","Touggourt","Balidat Ameur","Taibet","Temacine","El Harihira","Megarine"],
+    "31":["Oran","Es Senia","Bir El Djir","Sidi Chami","Gdyel","Marsa","Boufatis","Ain El Turk","El Kala","Arzew","Bethioua","Ain El Kerma","Hassi Ben Okba","Misserghin","Mers El Kebir","Oued Tlelat","Tafraoui","Bousfer","El Ancor"],
+    "32":["El Bayadh","Brezina","Rogassa","El Abiodh Sidi Cheikh","Ghassoul","Boualem","Sidi Ameur","Chellala","Arbaouat","Sidi Slimane","Sidi Tifour","Kef El Ahmar","El Bnoud","Ain El Orak","Cheguig"],
+    "33":["Illizi","Djanet","Debdeb","Bordj Omar Driss","Tin Fouye Tabankort","In Amenas","Bordj El Haouass"],
+    "34":["Bordj Bou Arreridj","Ras El Oued","Bordj Zemoura","Mansoura","El M'hir","Ben Daoud","El Achir","Ain Taghrout","Sidi Embarek","Belimour","Medjana","Teniet En Nasr","Djaafra","Tixter","Bir Kasdali"],
+    "35":["Boumerdes","Boudouaou","Bordj Menaiel","Issers","Naciria","Thenia","Dellys","Baghlia","Sidi Daoud","Khemis El Khechna","Chabet El Ameur","Taourga","Ouled Hedadj","Zemmouri","Laghata"],
+    "36":["El Tarf","El Kala","Bouhadjar","Ben M'Hidi","El Aioun","Souarekh","Zerizer","Boutheldja","Ain El Assel","Berrihane","Lac des Oiseaux","Oued Zitoun","Hammam Beni Salah","Asfour"],
+    "37":["Tindouf","Oum El Assel"],
+    "38":["Tissemsilt","Theniet El Had","Bordj Emir Abdelkader","Lardjem","Beni Chaib","Ammari","Ouled Bessam","Maacem","Bordj Bounaama","Sidi Slimane","Melaab","Sidi Lantri","Khemisti","Layoune","Youssoufia"],
+    "39":["El Oued","Robbah","Oued El Alenda","Beni Guecha","Nakhla","Guemar","Hamraia","Reguiba","Debila","Magrane","Mih Ouansa","Hassi Khalifa","Trifaoui","Taleb Larbi","Bayadha"],
+    "40":["Khenchela","Kais","El Hamma","Ain Touila","Taouzianat","Baghai","Chelia","Babar","Fais","Djellal","Ouled Rechache","M'Toussa","Bouhmama","El Oueldja","Remila"],
+    "41":["Souk Ahras","Sedrata","Haddada","Mechroha","Ain Soltane","Ouled Drareb","Tiffech","Taoura","Zaarouria","Bir Bouhouche","Madjer","Sidi Fredj","Oum El Adhaim","Kheiter","M'Daourouch"],
+    "42":["Tipaza","Hadjout","Sidi Amar","Gouraya","Cherchell","Damous","Menaceur","Fouka","Bou Ismail","Kolea","Attatba","Ahmar El Ain","Sidi Ghiles","Bou Haroun","Nador"],
+    "43":["Mila","Ferdjioua","Chelghab Laid","Tassadane Haddada","Teleghma","Oued Athmania","Tadjenanet","Grarem Gouga","Terraiibana","Ahmed Rached","Rouached","Aïn Mellouk","Mihoub","Sidi Merouane","Ghebala"],
+    "44":["Ain Defla","Mekhatria","Bathia","Aïn Bouyahia","Tiberkanine","Khemis Miliana","Hoceinia","Rouina","Boumedfaa","Aïn Lechiakh","Djemaa Ouled Cheikh","Abi El Khasibs","Tacheta Zegagha","Ain Soltane","El Attaf"],
+    "45":["Naama","Mecheria","Aïn Séfra","Tiout","Sfissifa","Moghrar","Djéniane Bourzeg","Kasdir","El Biodh","Ain Ben Khelil"],
+    "46":["Ain Temouchent","Hammam Bouhadjar","Aghlal","Ain El Arbaa","Ain Kihel","Beni Saf","Ouled Boudjemaa","Chentouf","Sidi Safi","Terga","Aoubellil","Ain Tolba","Sidi Ben Adda","Hassi El Ghella","Bou Zedjar"],
+    "47":["Ghardaia","El Meniaa","Berriane","Metlili","El Atteuf","Zelfana","Sebseb","Bounoura","Mansoura","Hassi Fehal","Dhayet Bendhahoua","Igrarene","Taghrdait"],
+    "48":["Relizane","Bendaoud","Sidi M'Hamed Ben Ali","El H'Madna","Ain Tarik","Oued Righ","Mediouna","Oued El Djemaa","Mazouna","Ramka","Matmar","Zemmoura","Sidi Khettab","Beni Dergoun","Sidi Lazreg"],
+    "49":["Timimoun","Ouled Said","Tinerkouk","Ksar Kaddour","Metarfa","Talmine","Charouine","Aougrout","Deldoul","Ksabi"],
+    "50":["Bordj Badji Mokhtar","Timiaouine","In Zghmir"],
+    "51":["Ouled Djellal","Sidi Khaled","Ras El Miad","Besbes","Chaiba","Doucen","Beni Ikhlef","M'Liliha"],
+    "52":["Beni Abbes","Tabelbala","Igli","Kerzaz","Ouled Khoudir","Tamtert","Timoudi","Ksar El Maadjed","El Ouata"],
+    "53":["In Salah","In Ghar","Foggaret Ezzaouia","Tin Amzi","Ain Salah"],
+    "54":["In Guezzam","Tin Zaouatine","Ain Amguel"],
+    "55":["Touggourt","Taibet","Temacine","Megarine","El Harihira","Balidat Ameur","M'Naguer","Benaceur","Sidi Slimane","Blidet Amor"],
+    "56":["Djanet","El Mihan","Bordj El Haouass"],
+    "57":["El Menia","Hassi Fehal","Hassi Gara","Tin El Koum"],
+    "58":["El M'Ghair","Oum Touyour","Sidi Khelil","Still","Djamaa","M'Rara","Tendla","Sidi Amrane","Ouled Djellal","Mih Ouensa"]
+  };
+
+  // ── Render ─────────────────────────────────
+  const fmt = n => new Intl.NumberFormat("fr-DZ").format(n);
+  const list = document.getElementById("product-list");
+
+  function rowHtml(p){
+    const sale = p.was ? `<span class="tag sale">Promo</span>` : "";
+    const cat  = p.cat === "pistache" ? `<span class="tag green">Pistache</span>` :
+                 p.cat === "choco"    ? `<span class="tag">Chocolat</span>` :
+                                        `<span class="tag">${p.cat[0].toUpperCase()+p.cat.slice(1)}</span>`;
+    const was  = p.was ? `<span class="was">${fmt(p.was)} DA</span>` : "";
+    return `
+      <article class="row" data-cat="${p.cat}" data-id="${p.id}" role="listitem" aria-label="Nutsa ${p.name} ${p.weight}">
+        <div class="thumb"><img src="${p.img}" alt="Nutsa ${p.name} ${p.weight}" width="120" height="120" loading="lazy" decoding="async"></div>
+        <div class="info">
+          <div class="num">No ${p.num}</div>
+          <h3>Nutsa ${p.name}</h3>
+          <div class="tags">
+            <span class="tag">${p.weight}</span>
+            ${cat}
+            ${sale}
+          </div>
+          <button class="btn-info" data-info="${p.id}">
+            <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 5.5V9M6 3.5V4.5" stroke="currentColor" stroke-linecap="round"/></svg>
+            En savoir plus
+          </button>
+        </div>
+        <div class="qty-cell">
+          <div class="qty">
+            <button type="button" data-act="dec" aria-label="Diminuer quantité Nutsa ${p.name}">−</button>
+            <input type="number" min="0" value="0" data-id="${p.id}" inputmode="numeric" aria-label="Quantité Nutsa ${p.name}" id="qty-${p.id}">
+            <button type="button" data-act="inc" aria-label="Augmenter quantité Nutsa ${p.name}">+</button>
+          </div>
+        </div>
+        <div class="price-cell">
+          <div class="price-stack">
+            <div class="now" data-total="${p.id}" data-unit="${p.price}">0 DA</div>
+            ${was}
+            <div class="meta" data-meta="${p.id}">${fmt(p.price)} DA / unité</div>
+          </div>
+        </div>
+      </article>`;
+  }
+  list.innerHTML = products.map(rowHtml).join("");
+
+  // ── Quantity interactions ──────────────────
+  list.addEventListener("click", e => {
+    const btn = e.target.closest("[data-act]");
+    if(!btn) return;
+    const row = btn.closest(".row");
+    const input = row.querySelector("input[type=number]");
+    let v = parseInt(input.value || 0, 10);
+    v = btn.dataset.act === "inc" ? v+1 : Math.max(0, v-1);
+    input.value = v;
+    updateRow(row);
+  });
+  list.addEventListener("input", e => {
+    if(e.target.matches("input[type=number]")){
+      const row = e.target.closest(".row");
+      const v = Math.max(0, parseInt(e.target.value || 0, 10) || 0);
+      e.target.value = v;
+      updateRow(row);
+    }
+  });
+
+  function updateRow(row){
+    const id = +row.dataset.id;
+    const p  = products.find(x => x.id === id);
+    const q  = +row.querySelector("input").value || 0;
+    const tot = row.querySelector("[data-total]");
+    const meta = row.querySelector("[data-meta]");
+    tot.textContent = q === 0 ? `0 DA` : `${fmt(p.price * q)} DA`;
+    meta.textContent = q > 1 ? `${q} × ${fmt(p.price)} DA` : `${fmt(p.price)} DA / unité`;
+    if(q > 0){
+      tot.classList.add("bump");
+      setTimeout(()=>tot.classList.remove("bump"), 300);
+    }
+    row.classList.toggle("selected", q > 0);
+    refreshBar();
+  }
+
+  // ── Sticky bar ─────────────────────────────
+  const orderBar    = document.getElementById("order-bar");
+  const barCount    = document.getElementById("bar-count");
+  const barTotal    = document.getElementById("bar-total");
+  const barItemsList= document.getElementById("bar-items-list");
+
+  function getCart(){
+    return products.map(p => {
+      const input = list.querySelector(`input[data-id="${p.id}"]`);
+      const q = input ? (+input.value || 0) : 0;
+      return { product:p, qty:q, subtotal: p.price * q };
+    }).filter(x => x.qty > 0);
+  }
+
+  function refreshBar(){
+    const cart = getCart();
+    const totalItems = cart.reduce((s,x) => s + x.qty, 0);
+    const totalPrice = cart.reduce((s,x) => s + x.subtotal, 0);
+
+    if(totalItems === 0){
+      orderBar.classList.add("hidden");
+      return;
+    }
+    orderBar.classList.remove("hidden");
+    barCount.textContent = `${totalItems} article${totalItems > 1 ? "s" : ""}`;
+    barTotal.textContent = `${fmt(totalPrice)} DA`;
+    barItemsList.innerHTML = cart.map(x =>
+      `<span class="bar-pill">${x.product.name} <strong>×${x.qty}</strong></span>`
+    ).join("");
+  }
+
+  // ── Filters ────────────────────────────────
+  document.querySelectorAll(".chip").forEach(c => {
+    c.addEventListener("click", () => {
+      document.querySelectorAll(".chip").forEach(x => x.classList.remove("on"));
+      c.classList.add("on");
+      const f = c.dataset.filter;
+      document.querySelectorAll(".row").forEach(r => {
+        r.style.display = (f === "all" || r.dataset.cat === f) ? "" : "none";
+      });
+    });
+  });
+
+  // ── Modal / order ──────────────────────────
+  const modal       = document.getElementById("modal");
+  const formView    = document.getElementById("form-view");
+  const successView = document.getElementById("success-view");
+  const wilayaSel   = document.getElementById("f-wilaya");
+  const summaryBlock= document.getElementById("modal-summary-block");
+
+  wilayas.forEach(w => {
+    const o = document.createElement("option");
+    o.value = w.code;
+    o.textContent = `${w.code} — ${w.name}`;
+    o.dataset.door = w.door;
+    o.dataset.stop = w.stop;
+    wilayaSel.appendChild(o);
+  });
+
+  // Track current cart for live delivery recalculation
+  let currentCart = [];
+
+  document.getElementById("main-order-btn").addEventListener("click", () => {
+    const cart = getCart();
+    if(!cart.length) return;
+    currentCart = cart;
+    const productsTotal = cart.reduce((s,x) => s + x.subtotal, 0);
+
+    let itemsHtml = cart.map(x => `
+      <div class="summary-item">
+        <div class="si-left">
+          <strong>Nutsa ${x.product.name} · ${x.product.weight}</strong>
+          <span>${x.qty} ${x.qty > 1 ? "unités" : "unité"} × ${fmt(x.product.price)} DA</span>
+        </div>
+        <div class="si-right">${fmt(x.subtotal)} DA</div>
+      </div>`).join("");
+
+    summaryBlock.innerHTML = `
+      <div class="summary-block">
+        ${itemsHtml}
+        <div class="summary-total">
+          <span>Sous-total</span>
+          <span class="grand">${fmt(productsTotal)} DA</span>
+        </div>
+      </div>`;
+
+    lastActiveElement = document.activeElement;
+    formView.style.display = "";
+    successView.style.display = "none";
+    modal.classList.add("open");
+    document.body.style.overflow = "hidden";
+    modal.addEventListener("keydown", trapFocus);
+    formOpenedAt = Date.now(); // anti-bot timing baseline
+    // Show delivery line in summary (will compute once wilaya is selected)
+    setTimeout(()=>{ updateModalDeliveryLine(); document.getElementById("f-name").focus(); }, 250);
+  });
+
+  // ── Focus trap for modal ──
+  const focusableSel = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+  let lastActiveElement = null;
+
+  function getFocusable(){
+    return Array.from(modal.querySelectorAll(focusableSel)).filter(el => el.offsetParent !== null);
+  }
+
+  function trapFocus(e){
+    if(e.key !== "Tab") return;
+    const focusable = getFocusable();
+    if(!focusable.length) return;
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    if(e.shiftKey){
+      if(document.activeElement === first){ e.preventDefault(); last.focus(); }
+    } else {
+      if(document.activeElement === last){ e.preventDefault(); first.focus(); }
+    }
+  }
+
+  function closeModal(){
+    modal.classList.remove("open");
+    document.body.style.overflow = "";
+    modal.removeEventListener("keydown", trapFocus);
+    // Restore focus to the element that opened the modal
+    if(lastActiveElement) lastActiveElement.focus();
+  }
+  document.getElementById("close-modal").onclick = closeModal;
+  document.getElementById("cancel-btn").onclick = closeModal;
+  modal.addEventListener("click", e => { if(e.target === modal) closeModal(); });
+  document.addEventListener("keydown", e => { if(e.key === "Escape") closeModal(); });
+
+  const labDoor = document.getElementById("lab-door");
+  const labStop = document.getElementById("lab-stop");
+  document.querySelectorAll('input[name="delivery"]').forEach(r => {
+    r.addEventListener("change", () => {
+      const sel = document.querySelector('input[name="delivery"]:checked').value;
+      labDoor.classList.toggle("sel", sel === "door");
+      labStop.classList.toggle("sel", sel === "stop");
+      labDoor.style.borderColor = sel === "door" ? "var(--red)" : "";
+      labDoor.style.background = sel === "door" ? "rgba(182,52,43,.04)" : "";
+      labStop.style.borderColor = sel === "stop" ? "var(--red)" : "";
+      labStop.style.background = sel === "stop" ? "rgba(182,52,43,.04)" : "";
+      // Update the displayed delivery cost in the summary
+      updateModalDeliveryLine();
+    });
+  });
+
+  // ── Update delivery line in modal summary ──
+  function updateModalDeliveryLine(){
+    const summaryBlock = document.getElementById("modal-summary-block");
+    const existing = summaryBlock.querySelector(".summary-delivery");
+    if(existing) existing.remove();
+
+    const wilayaCode = wilayaSel.value;
+    if(!wilayaCode) return;
+
+    const wOpt = wilayaSel.selectedOptions[0];
+    const deliveryType = document.querySelector('input[name="delivery"]:checked')?.value || "door";
+    const shipCost = deliveryType === "door" ? (+wOpt.dataset.door || 0) : (+wOpt.dataset.stop || 0);
+    const productsTotal = currentCart.reduce((s,x) => s + x.subtotal, 0);
+
+    const deliveryLine = document.createElement("div");
+    deliveryLine.className = "summary-delivery summary-item";
+    deliveryLine.style.background = shipCost === 0 ? "rgba(126,155,92,.06)" : "";
+    deliveryLine.innerHTML = `
+      <div class="si-left">
+        <strong>Livraison · ${deliveryType === "door" ? "À domicile" : "Stop desk"}</strong>
+        <span>${wilayaSel.options[wilayaSel.selectedIndex].textContent}</span>
+      </div>
+      <div class="si-right" style="color:${shipCost === 0 ? "var(--green)" : "var(--red)"}">${shipCost === 0 ? "Gratuit ✓" : fmt(shipCost) + " DA"}</div>
+    `;
+
+    // Insert before the summary-total row
+    const totalRow = summaryBlock.querySelector(".summary-total");
+    if(totalRow){
+      // Update grand total
+      const grandTotal = productsTotal + shipCost;
+      const grandEl = totalRow.querySelector(".grand");
+      if(grandEl) grandEl.textContent = `${fmt(grandTotal)} DA`;
+
+      summaryBlock.querySelector(".summary-block").insertBefore(deliveryLine, totalRow);
+    }
+  }
+
+  const baladiaSel = document.getElementById("f-baladia");
+
+  // ── Commune lookup (static, no external API) ──
+  // We previously called an external Ecotrack endpoint here with an API token.
+  // The token was visible to anyone viewing source, so we removed it entirely.
+  // The static `communesData` dictionary above covers all 58 wilayas.
+  function fetchWilayaDetails(wilayaCode){
+    const staticCommunes = communesData[wilayaCode] || [];
+    return Promise.resolve({
+      communes: staticCommunes
+        .map(c => ({nom: c, hasStopDesk: false}))
+        .sort((a,b) => a.nom.localeCompare(b.nom, "fr")),
+      hasStopDesk: false
+    });
+  }
+
+  // ── Compute and display delivery price based on wilaya + cart ──
+  function updateDeliveryDisplay(){
+    const wilayaCode = wilayaSel.value || "";
+    const cart = currentCart;
+    const wData = wilayas.find(w => w.code === wilayaCode);
+    const cartHasMultiple = cart.length > 1;
+    const isAlger = wilayaCode === "16";
+
+    if(!wData || cart.length === 0){
+      document.getElementById("price-door").textContent = "— DA";
+      document.getElementById("price-stop").textContent = "— DA";
+      const stopContainer = document.getElementById("lab-stop");
+      if(stopContainer) stopContainer.style.display = "";
+      return;
+    }
+
+    // Compute door & stop prices based on rules
+    let doorPrice, stopPrice;
+
+    if(isAlger){
+      // Alger: always free
+      doorPrice = 0;
+      stopPrice = 0;
+    } else if(cartHasMultiple){
+      // Multiple items: free delivery
+      doorPrice = 0;
+      stopPrice = 0;
+    } else {
+      // Single item
+      const item = cart[0];
+      if(item && item.product){
+        const w = item.product.weight || "";
+        const is15 = /^1[,.]5\s*kg/i.test(w);
+        if(is15){
+          // 1.5 kg single → pay delivery
+          doorPrice = wData.door;
+          stopPrice = wData.stop;
+        } else {
+          // Non-1.5kg single → free delivery
+          doorPrice = 0;
+          stopPrice = 0;
+        }
+      } else {
+        doorPrice = 0;
+        stopPrice = 0;
+      }
+    }
+
+    document.getElementById("price-door").textContent = doorPrice === 0 ? "Gratuit" : `${fmt(doorPrice)} DA`;
+    document.getElementById("price-stop").textContent = stopPrice === 0 ? "Gratuit" : `${fmt(stopPrice)} DA`;
+
+    // Store on options for form submission
+    if(wilayaSel.selectedOptions[0]){
+      wilayaSel.selectedOptions[0].dataset.door = doorPrice;
+      wilayaSel.selectedOptions[0].dataset.stop = stopPrice;
+    }
+
+    // Toggle label styling
+    const doorLabel = document.getElementById("lab-door");
+    const stopLabel = document.getElementById("lab-stop");
+    const delNote = document.getElementById("delivery-note");
+    if(doorPrice === 0 && stopPrice === 0){
+      doorLabel.style.borderColor = "var(--green)";
+      doorLabel.style.background = "rgba(126,155,92,.06)";
+      stopLabel.style.borderColor = "var(--green)";
+      stopLabel.style.background = "rgba(126,155,92,.06)";
+      if(isAlger){
+        delNote.textContent = "✅ Livraison gratuite — Alger";
+        delNote.style.color = "var(--green)";
+      } else if(cartHasMultiple){
+        delNote.textContent = "✅ Livraison gratuite — commande multiple";
+        delNote.style.color = "var(--green)";
+      } else {
+        delNote.textContent = "✅ Livraison gratuite — produit non concerné";
+        delNote.style.color = "var(--green)";
+      }
+    } else {
+      // Reset to default selection styling
+      const sel = document.querySelector('input[name="delivery"]:checked').value;
+      doorLabel.style.borderColor = sel === "door" ? "var(--red)" : "";
+      doorLabel.style.background = sel === "door" ? "rgba(182,52,43,.04)" : "";
+      stopLabel.style.borderColor = sel === "stop" ? "var(--red)" : "";
+      stopLabel.style.background = sel === "stop" ? "rgba(182,52,43,.04)" : "";
+      delNote.textContent = "Livraison payante — produit 1.5 kg (gratuit si plusieurs articles)";
+      delNote.style.color = "var(--ink-soft)";
+    }
+  }
+
+  function populateCommunes(wilayaCode){
+    baladiaSel.innerHTML = "";
+    const loading = document.createElement("option");
+    loading.value = ""; loading.disabled = true; loading.selected = true;
+    loading.textContent = "جاري التحميل…";
+    baladiaSel.appendChild(loading);
+    baladiaSel.disabled = true;
+
+    // Always show both delivery options — never hide Stop desk
+    const stopContainer = document.getElementById("lab-stop");
+    if(stopContainer){
+      stopContainer.style.display = "";
+      stopContainer.style.opacity = "1";
+      stopContainer.style.pointerEvents = "";
+    }
+
+    fetchWilayaDetails(wilayaCode)
+      .then(({communes}) => {
+        // Update delivery display using cart-based rules
+        updateDeliveryDisplay();
+
+        baladiaSel.innerHTML = "";
+        const ph = document.createElement("option");
+        ph.value = ""; ph.disabled = true; ph.selected = true;
+        ph.textContent = "اختر البلدية";
+        baladiaSel.appendChild(ph);
+        communes.forEach(c => {
+          const o = document.createElement("option");
+          o.value = c.nom; o.textContent = c.nom;
+          baladiaSel.appendChild(o);
+        });
+        baladiaSel.disabled = false;
+      });
+  }
+
+  wilayaSel.addEventListener("change", () => {
+    const opt = wilayaSel.selectedOptions[0];
+    const code = opt.value;
+    populateCommunes(code);
+    // Also update delivery line in modal if open
+    updateModalDeliveryLine();
+  });
+
+  // ── Form validation helper ──
+  function showFieldError(input, msg){
+    // Remove any existing error for this field
+    const existing = input.parentNode.querySelector(".field-error");
+    if(existing) existing.remove();
+    input.style.borderColor = "var(--red)";
+    const err = document.createElement("div");
+    err.className = "field-error";
+    err.style.cssText = "font-size:12px;color:var(--red);margin-top:4px;font-weight:600;";
+    err.textContent = msg;
+    input.parentNode.appendChild(err);
+    input.addEventListener("input", function clearErr(){
+      input.style.borderColor = "";
+      const e = input.parentNode.querySelector(".field-error");
+      if(e) e.remove();
+      input.removeEventListener("input", clearErr);
+    }, {once:false});
+  }
+  function clearAllErrors(){
+    document.querySelectorAll(".field-error").forEach(e => e.remove());
+    document.querySelectorAll(".field input, .field select, .field textarea").forEach(i => i.style.borderColor = "");
+  }
+
+  // ── Track when the form was first shown (used to detect instant bot submits) ──
+  let formOpenedAt = 0;
+
+  document.getElementById("order-form").addEventListener("submit", e => {
+    e.preventDefault();
+    clearAllErrors();
+
+    const cart = getCart();
+    if(!cart.length) return;
+    const fd = new FormData(e.target);
+
+    // ── Anti-bot: honeypot must be empty, and form must have been open >2s ──
+    // Real humans take seconds to fill a form; bots POST instantly.
+    // We silently "succeed" so bots don't learn what tripped them.
+    const honeypot = (fd.get("website") || "").trim();
+    const elapsed  = Date.now() - formOpenedAt;
+    if(honeypot || (formOpenedAt > 0 && elapsed < 2000)){
+      console.warn("Submission blocked (bot heuristic)");
+      formView.style.display = "none";
+      successView.style.display = "";
+      return;
+    }
+
+    // ── Validate required fields ──
+    const name    = (fd.get("name")    || "").trim();
+    const phone   = (fd.get("phone")   || "").trim();
+    const wilaya  = fd.get("wilaya")   || "";
+    const baladia = (fd.get("baladia")  || "").trim();
+    let valid = true;
+
+    if(!name){ showFieldError(document.getElementById("f-name"),"Le nom est requis"); valid = false; }
+    if(!phone){ showFieldError(document.getElementById("f-phone"),"Le téléphone est requis"); valid = false; }
+    else if(!/^0[567]\d{8}$/.test(phone.replace(/\s/g,""))){ showFieldError(document.getElementById("f-phone"),"Numéro invalide (ex: 0555123456)"); valid = false; }
+    if(!wilaya){ showFieldError(wilayaSel,"La wilaya est requise"); valid = false; }
+    if(!baladia){ showFieldError(baladiaSel,"La commune est requise"); valid = false; }
+
+    if(!valid){ document.querySelector(".field-error")?.scrollIntoView({behavior:"smooth",block:"center"}); return; }
+
+    const wOpt = wilayaSel.selectedOptions[0];
+    const ship = fd.get("delivery") === "door" ? +wOpt.dataset.door : +wOpt.dataset.stop;
+    const productsTotal = cart.reduce((s,x) => s + x.subtotal, 0);
+    const grand = productsTotal + ship;
+
+    // ── Build payload for Apps Script ──
+    const payload = {
+      source: "nutsa-website",
+      name,
+      phone,
+      wilaya,
+      wilayaName: wOpt.textContent,
+      baladia,
+      address: (fd.get("address") || "").trim(),
+      delivery: fd.get("delivery"),
+      shipping: ship,
+      note:    (fd.get("note")    || "").trim(),
+      cart: cart.map(x => ({
+        id:        x.product.id,
+        name:      x.product.name,
+        weight:    x.product.weight,
+        sheetName: x.product.sheetName,
+        price:     x.product.price,
+        qty:       x.qty
+      })),
+      productsTotal,
+      grandTotal:    grand,
+      submittedAt:   new Date().toISOString(),
+      secret:        INTAKE_SECRET
+    };
+
+    // ── Disable submit while sending ──
+    const submitBtn = e.target.querySelector(".submit-btn");
+    const cancelBtn = document.getElementById("cancel-btn");
+    if(submitBtn){
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = ".7";
+      submitBtn.textContent = "جاري الإرسال…";
+    }
+    if(cancelBtn) cancelBtn.disabled = true;
+
+    // ── Build success recap safely (textContent prevents self-XSS from user input) ──
+    const recapEl = document.getElementById("success-recap");
+    recapEl.innerHTML = ""; // clear
+    const addRecapRow = (labelText, valueText, valueBold) => {
+      const row = document.createElement("div");
+      const l = document.createElement("span");
+      const v = document.createElement("span");
+      l.textContent = labelText;
+      if(valueBold){
+        const b = document.createElement("strong");
+        b.textContent = valueText;
+        v.appendChild(b);
+      } else {
+        v.textContent = valueText;
+      }
+      row.appendChild(l); row.appendChild(v);
+      recapEl.appendChild(row);
+    };
+    cart.forEach(x => {
+      addRecapRow(
+        `Nutsa ${x.product.name} · ${x.product.weight}`,
+        `${x.qty} × ${fmt(x.product.price)} DA = ${fmt(x.subtotal)} DA`
+      );
+    });
+    addRecapRow("Sous-total produits", `${fmt(productsTotal)} DA`);
+    addRecapRow(
+      `Livraison · ${fd.get("delivery")==="door"?"À domicile":"Stop desk"}`,
+      ship===0 ? "Gratuit" : `${fmt(ship)} DA`
+    );
+    addRecapRow("Total à payer", `${fmt(grand)} DA`, true);
+    addRecapRow("Nom",       name);
+    addRecapRow("Téléphone", phone);
+    addRecapRow("Wilaya",    wOpt.textContent);
+    addRecapRow("Commune",   baladia);
+
+    const showSuccess = () => {
+      formView.style.display = "none";
+      successView.style.display = "";
+      if(submitBtn){
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = "";
+        submitBtn.textContent = "تأكيد الطلب";
+      }
+      if(cancelBtn) cancelBtn.disabled = false;
+      list.querySelectorAll('input[type="number"]').forEach(inp => {
+        inp.value = 0;
+        updateRow(inp.closest(".row"));
+      });
+      e.target.reset();
+      baladiaSel.innerHTML = '<option value="" disabled selected>Sélectionnez d\'abord une wilaya</option>';
+    };
+
+    // ── Save to localStorage as backup ──
+    const saveLocalBackup = () => {
+      try {
+        const pending = JSON.parse(localStorage.getItem("nutsa_pending_orders") || "[]");
+        pending.push(payload);
+        localStorage.setItem("nutsa_pending_orders", JSON.stringify(pending));
+      } catch(err){ console.warn("localStorage backup failed:", err); }
+    };
+
+    // ── Send to Google Apps Script (fire-and-forget — instant UI feedback) ──
+    if(APPS_SCRIPT_URL && APPS_SCRIPT_URL.indexOf("PASTE_YOUR") === -1){
+      saveLocalBackup();
+
+      // Fire the request — don't wait for the response.
+      // keepalive ensures the browser finishes sending even if the user
+      // closes the page or switches apps right after tapping submit.
+      fetch(APPS_SCRIPT_URL, {
+        method:    "POST",
+        headers:   {"Content-Type": "text/plain"},
+        body:      JSON.stringify(payload),
+        keepalive: true
+      }).then(r => {
+        console.log("Order sent:", r.status);
+      }).catch(err => {
+        console.warn("Order POST failed (saved in localStorage):", err);
+      });
+
+      // Show success immediately — order is on its way to the sheet
+      showSuccess();
+    } else {
+      console.warn("⚠️ APPS_SCRIPT_URL not configured. Order was NOT saved to Google Sheet.");
+      console.log("Payload that would have been sent:", payload);
+      saveLocalBackup();
+      showSuccess();
+    }
+  });
+
+  document.getElementById("ok-btn").onclick = closeModal;
+
+
+  // ── Product detail modal ───────────────────
+  const detailModal   = document.getElementById("detail-modal");
+  const closeDetail   = document.getElementById("close-detail");
+
+  function openDetail(id){
+    const p = products.find(x => x.id === id);
+    if(!p) return;
+    document.getElementById("detail-img").src        = p.img;
+    document.getElementById("detail-img").alt        = "Nutsa " + p.name + " " + p.weight;
+    document.getElementById("detail-num").textContent  = "No " + p.num;
+    document.getElementById("detail-title").textContent = "Nutsa " + p.name;
+    document.getElementById("detail-weight").textContent = p.weight;
+    document.getElementById("detail-desc").textContent  = p.desc || "";
+    const pts = document.getElementById("detail-points");
+    pts.innerHTML = "";
+    (p.details || []).forEach(d => {
+      const li = document.createElement("li");
+      li.textContent = d;
+      pts.appendChild(li);
+    });
+    document.getElementById("detail-price-now").textContent = fmt(p.price) + " DA";
+    const wasEl = document.getElementById("detail-price-was");
+    wasEl.textContent = p.was ? fmt(p.was) + " DA" : "";
+    detailModal.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+
+  closeDetail.addEventListener("click", () => {
+    detailModal.classList.remove("open");
+    document.body.style.overflow = "";
+  });
+  detailModal.addEventListener("click", e => {
+    if(e.target === detailModal){
+      detailModal.classList.remove("open");
+      document.body.style.overflow = "";
+    }
+  });
+
+  list.addEventListener("click", e => {
+    const btn = e.target.closest("[data-info]");
+    if(btn) openDetail(+btn.dataset.info);
+  });
+
+</script>
+  <script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+  <script>
 (function() {
+  var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxc8Bxw0eFXX595oSEB02OhPaLRSZAHQ7DUC398bfZKwWm82Tlx5dFqGTi2G-33_zt_/exec";
+
   var sid;
   try {
     sid = sessionStorage.getItem("nutsa_sid");
@@ -341,20 +1607,18 @@ window.va = window.va || function () { (window.vaq = window.vaq || []).push(argu
       sid = "s_" + Math.random().toString(36).slice(2,10) + Date.now().toString(36);
       sessionStorage.setItem("nutsa_sid", sid);
     }
-  } catch(e) { 
-    sid = "s_" + Math.random().toString(36).slice(2,8); 
-  }
+  } catch(e) { sid = "s_" + Math.random().toString(36).slice(2,8); }
 
   var payload = JSON.stringify({
     action: "visit",
-    page: location.pathname || "/",
-    ref: document.referrer || "",
-    sid: sid,
-    ua: (navigator.userAgent || "").slice(0,200),
-    sw: screen.width || 0,
-    sh: screen.height || 0,
-    lang: (navigator.language || "").slice(0,10),
-    src: "vercel"
+    page:  location.pathname || "/",
+    ref:   document.referrer || "",
+    sid:   sid,
+    ua:    (navigator.userAgent || "").slice(0,200),
+    sw:    screen.width  || 0,
+    sh:    screen.height || 0,
+    lang:  (navigator.language || "").slice(0,10),
+    src:   "vercel"
   });
 
   function ping() {
@@ -366,21 +1630,14 @@ window.va = window.va || function () { (window.vaq = window.vaq || []).push(argu
     }
     try {
       fetch(APPS_SCRIPT_URL, {
-        method: "POST", 
-        mode: "no-cors", 
-        keepalive: true,
-        headers: { "Content-Type": "text/plain" }, 
-        body: payload
+        method: "POST", mode: "no-cors", keepalive: true,
+        headers: { "Content-Type": "text/plain" }, body: payload
       }).catch(function(){});
     } catch(e) {}
   }
-  
   if (document.readyState === "complete") ping();
   else window.addEventListener("load", ping, { once: true });
 })();
 </script>
-
-<script defer src="/_vercel/insights/script.js"></script>
-
 </body>
 </html>
