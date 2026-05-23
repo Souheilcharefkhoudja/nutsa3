@@ -1598,54 +1598,47 @@
 <script defer src="/_vercel/insights/script.js"></script>
 
   <script>
+<script>
 (function() {
-  // ── CONFIG ─────────────────────────────────────────────────
   var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxc8Bxw0eFXX595oSEB02OhPaLRSZAHQ7DUC398bfZKwWm82Tlx5dFqGTi2G-33_zt_/exec";
-  var SOURCE_TAG = "vercel"; // change to "shopify-theme" if pasted in Shopify
- 
-  // ── SESSION ID (per-tab, random, no PII) ──────────────────
+
   var sid;
   try {
     sid = sessionStorage.getItem("nutsa_sid");
     if (!sid) {
-      sid = "s_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+      sid = "s_" + Math.random().toString(36).slice(2,10) + Date.now().toString(36);
       sessionStorage.setItem("nutsa_sid", sid);
     }
-  } catch (e) { sid = "s_anon_" + Math.random().toString(36).slice(2, 8); }
- 
-  // ── BUILD PIXEL URL ───────────────────────────────────────
-  // We use a GET request via Image() so there's no CORS issue and
-  // no impact on page load. Apps Script logs the row, returns "ok".
-  var params = [
-    "action=visit",
-    "page=" + encodeURIComponent(location.pathname || "/"),
-    "ref=" + encodeURIComponent(document.referrer || ""),
-    "sid=" + encodeURIComponent(sid),
-    "ua=" + encodeURIComponent((navigator.userAgent || "").slice(0, 200)),
-    "sw=" + (screen.width || 0),
-    "sh=" + (screen.height || 0),
-    "lang=" + encodeURIComponent((navigator.language || "").slice(0, 10)),
-    "src=" + encodeURIComponent(SOURCE_TAG),
-    "t=" + Date.now() // cache buster
-  ].join("&");
- 
-  // ── FIRE THE BEACON ───────────────────────────────────────
-  // Run after page load so we never delay the user's experience.
+  } catch(e) { sid = "s_" + Math.random().toString(36).slice(2,8); }
+
+  var payload = JSON.stringify({
+    action: "visit",
+    page:  location.pathname || "/",
+    ref:   document.referrer || "",
+    sid:   sid,
+    ua:    (navigator.userAgent || "").slice(0,200),
+    sw:    screen.width  || 0,
+    sh:    screen.height || 0,
+    lang:  (navigator.language || "").slice(0,10),
+    src:   "vercel"
+  });
+
   function ping() {
+    if (navigator.sendBeacon) {
+      try {
+        var blob = new Blob([payload], { type: "text/plain;charset=UTF-8" });
+        if (navigator.sendBeacon(APPS_SCRIPT_URL, blob)) return;
+      } catch(e) {}
+    }
     try {
-      var img = new Image(1, 1);
-      img.src = APPS_SCRIPT_URL + "?" + params;
-      img.style.position = "absolute";
-      img.style.left = "-9999px";
-      img.style.width = "1px";
-      img.style.height = "1px";
-    } catch (e) {}
+      fetch(APPS_SCRIPT_URL, {
+        method: "POST", mode: "no-cors", keepalive: true,
+        headers: { "Content-Type": "text/plain" }, body: payload
+      }).catch(function(){});
+    } catch(e) {}
   }
-  if (document.readyState === "complete") {
-    ping();
-  } else {
-    window.addEventListener("load", ping, { once: true });
-  }
+  if (document.readyState === "complete") ping();
+  else window.addEventListener("load", ping, { once: true });
 })();
 </script>
 </body>
