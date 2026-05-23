@@ -1,1600 +1,1532 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Nutsa — Catalogue & Commande</title>
+<title>Nutsa — Tableau de Bord</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://nutsa-dz.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Fraunces:ital,wght@0,300;0,400;0,500;0,700;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Fraunces:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   :root{
-    --paper:#FBFAF7;
-    --ink:#1A1A1A;
-    --ink-soft:#5A5A5A;
-    --rule:#E8E4DC;
-    --rule-soft:#F0EDE6;
-    --red:#B6342B;
-    --red-deep:#8E2620;
-    --red-light:#D44A40;
-    --green:#7E9B5C;
-    --green-deep:#4F6B3A;
-    --accent:#C97B4F;
+    --paper:#FBFAF7; --paper-warm:#F5F1E8;
+    --ink:#1A1A1A; --ink-soft:#5A5A5A; --ink-muted:#8A8A8A;
+    --rule:#E8E4DC; --rule-soft:#F0EDE6;
+    --red:#B6342B; --red-deep:#8E2620; --red-tint:rgba(182,52,43,.08);
+    --green:#7E9B5C; --green-deep:#4F6B3A; --green-tint:rgba(126,155,92,.14);
+    --accent:#C97B4F; --accent-deep:#A0623E; --accent-tint:rgba(201,123,79,.14);
+    --gold:#C4A04A; --gold-deep:#8A6D1F; --gold-tint:rgba(196,160,74,.16);
+    --purple:#8E6FA8; --purple-deep:#6A5286; --purple-tint:rgba(142,111,168,.14);
+    --blue:#3E6FA5; --blue-deep:#2B5180; --blue-tint:rgba(62,111,165,.12);
     --shadow:0 1px 0 rgba(26,26,26,.04), 0 30px 60px -30px rgba(26,26,26,.18);
-    --radius:18px;
-    --display:"Fraunces", ui-serif, Georgia, serif;
-    --body:"Manrope", ui-sans-serif, system-ui, sans-serif;
-    --arabic:"Cairo", "Segoe UI", Tahoma, sans-serif;
+    --shadow-lift:0 1px 0 rgba(26,26,26,.04), 0 20px 50px -20px rgba(26,26,26,.25);
+    --radius:18px; --radius-sm:12px;
+    --display:"Fraunces",ui-serif,Georgia,serif;
+    --body:"Manrope",ui-sans-serif,system-ui,sans-serif;
+    --arabic:"Cairo","Segoe UI",Tahoma,sans-serif;
   }
-
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
-  body{
-    font-family:var(--body);
-    color:var(--ink);
-    background:var(--paper);
-    min-height:100vh;
-    -webkit-font-smoothing:antialiased;
-    line-height:1.5;
-    padding-bottom:110px;
-  }
+  body{font-family:var(--body);color:var(--ink);background:var(--paper);min-height:100vh;-webkit-font-smoothing:antialiased;line-height:1.5;overflow-x:hidden}
+  ::selection{background:var(--red);color:#fff}
+  body::before{content:"";position:fixed;inset:0;background-image:radial-gradient(circle at 1px 1px,rgba(26,26,26,.025) 1px,transparent 0);background-size:24px 24px;pointer-events:none;z-index:0;opacity:.6}
 
-  a{color:inherit}
-  button{font-family:inherit}
+  /* ── Topbar ─────────────────────────── */
+  .topbar{position:relative;z-index:5;border-bottom:1px solid var(--rule);background:#fff}
+  .topbar-inner{max-width:1400px;margin:0 auto;padding:12px 32px;display:flex;align-items:center;justify-content:space-between;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);font-weight:600}
+  .ticker{display:flex;gap:28px;align-items:center;flex-wrap:wrap}
+  .live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:8px;box-shadow:0 0 0 0 rgba(126,155,92,.7);animation:pulse 2s infinite}
+  .live-dot.demo{background:var(--gold);box-shadow:0 0 0 0 rgba(196,160,74,.7)}
+  .live-dot.error{background:var(--red);box-shadow:0 0 0 0 rgba(182,52,43,.7)}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 currentColor}70%{box-shadow:0 0 0 10px transparent}100%{box-shadow:0 0 0 0 transparent}}
+  .clock{font-variant-numeric:tabular-nums;letter-spacing:.1em}
+  .refresh-btn{border:1px solid var(--rule);background:#fff;cursor:pointer;padding:6px 12px;border-radius:999px;font-family:var(--body);font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);transition:all .2s ease}
+  .refresh-btn:hover{color:var(--ink);border-color:var(--ink)}
+  .refresh-btn.spinning::before{content:"↻ ";display:inline-block;animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
 
-  /* ── Top ticker ─────────────────────────── */
-  .topbar{
-    position:relative;z-index:5;
-    border-bottom:1px solid var(--rule);
-    background:#fff;
-  }
-  .topbar-inner{
-    max-width:1240px;margin:0 auto;
-    padding:12px 28px;
-    display:flex;align-items:center;justify-content:space-between;
-    font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);
-  }
-  .ticker{display:flex;gap:28px}
-  .ticker span::before{content:"●";color:var(--green);margin-right:8px;font-size:8px;vertical-align:middle}
-  .lang{display:flex;gap:14px}
-  .lang a{text-decoration:none;opacity:.5;transition:opacity .15s ease}
-  .lang a.on{opacity:1;color:var(--red);font-weight:700}
-  .lang a:hover{opacity:1}
-
-  /* ── Brand ──────────────────────────────── */
-  header.brand{
-    background:#fff;
-    border-bottom:1px solid var(--rule);
-  }
-  .brand-inner{
-    max-width:1240px;margin:0 auto;
-    padding:24px 28px;
-    display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:24px;
-  }
-  .brand-left,.brand-right{font-size:12px;color:var(--ink-soft);letter-spacing:.06em;text-transform:uppercase}
+  /* ── Brand ─────────────────────────── */
+  header.brand{background:#fff;border-bottom:1px solid var(--rule);position:relative;z-index:4}
+  .brand-inner{max-width:1400px;margin:0 auto;padding:28px 32px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:24px}
+  .brand-left,.brand-right{font-size:11px;color:var(--ink-soft);letter-spacing:.14em;text-transform:uppercase;font-weight:600}
   .brand-right{text-align:right}
-  .brand-right strong{color:var(--red);font-weight:700}
-  .logo{
-    text-align:center;
-    font-family:var(--display);
-    font-weight:700;
-    font-size:42px;
-    letter-spacing:-.02em;
-    line-height:1;
-  }
+  .brand-right .ar{font-family:var(--arabic);font-weight:800;letter-spacing:0;font-size:13px;color:var(--ink);display:block;margin-top:4px}
+  .logo{text-align:center;font-family:var(--display);font-weight:700;font-size:44px;letter-spacing:-.02em;line-height:1}
   .logo em{font-style:italic;color:var(--red);font-weight:500}
-  .logo small{
-    display:block;font-family:var(--body);font-weight:600;
-    font-size:10px;letter-spacing:.4em;text-transform:uppercase;
-    color:var(--ink-soft);margin-top:8px;
-  }
+  .logo small{display:block;font-family:var(--body);font-weight:600;font-size:9px;letter-spacing:.5em;text-transform:uppercase;color:var(--ink-soft);margin-top:10px;padding-left:.5em}
 
-  /* ── Hero ───────────────────────────────── */
-  .hero{
-    max-width:1240px;margin:0 auto;
-    padding:64px 28px 40px;
-    display:grid;grid-template-columns:1.4fr 1fr;gap:48px;align-items:end;
-    border-bottom:1px solid var(--rule);
-  }
-  .hero .kicker{
-    font-size:12px;letter-spacing:.32em;text-transform:uppercase;
-    color:var(--accent);font-weight:600;margin-bottom:16px;
-  }
-  .hero h1{
-    font-family:var(--display);
-    font-weight:300;
-    font-size:clamp(48px, 8vw, 104px);
-    line-height:.9;
-    letter-spacing:-.03em;
-    margin:0;
-    font-variation-settings:"opsz" 144;
-  }
+  /* ── Source notice ─────────────────── */
+  .source-notice{max-width:1400px;margin:0 auto;padding:14px 32px;border-bottom:1px solid var(--rule);background:var(--gold-tint);display:none;align-items:center;gap:14px;font-size:12px;color:var(--gold-deep);font-weight:600;letter-spacing:.04em}
+  .source-notice.show{display:flex}
+  .source-notice .badge{padding:3px 10px;background:var(--gold);color:#fff;border-radius:999px;font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+
+  /* ── Hero ──────────────────────────── */
+  .hero{max-width:1400px;margin:0 auto;padding:56px 32px 40px;position:relative;z-index:2}
+  .kicker{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--accent);font-weight:700;display:flex;align-items:center;gap:14px;margin-bottom:28px}
+  .kicker::before{content:"";width:32px;height:1px;background:var(--accent)}
+  .hero-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:64px;align-items:end;padding-bottom:32px;border-bottom:1px solid var(--rule)}
+  .hero h1{font-family:var(--display);font-weight:300;font-size:clamp(48px,6.5vw,88px);line-height:.9;letter-spacing:-.035em;margin:0;font-variation-settings:"opsz" 144}
   .hero h1 .ital{font-style:italic;font-weight:400;color:var(--red)}
-  .hero h1 .ar{
-    display:block;font-family:var(--arabic);font-weight:800;
-    font-size:.42em;color:var(--ink);margin-top:18px;letter-spacing:0;
-    line-height:1.1;
-  }
-  .hero p.lede{
-    font-size:16px;color:var(--ink-soft);max-width:38ch;
-    margin:0 0 6px;
-  }
-  .meta-row{
-    display:flex;gap:18px;flex-wrap:wrap;
-    margin-top:20px;padding-top:20px;border-top:1px solid var(--rule);
-    font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);
-  }
-  .meta-row span{display:inline-flex;align-items:center;gap:8px;font-weight:600}
-  .meta-row span::before{content:"";width:6px;height:6px;background:var(--red);border-radius:50%}
+  .hero h1 .ar{display:block;font-family:var(--arabic);font-weight:800;font-size:.36em;color:var(--ink);margin-top:18px;letter-spacing:0;line-height:1.1}
+  .hero-stats{display:flex;flex-direction:column;gap:28px;text-align:right}
+  .hero-stat .label{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px;justify-content:flex-end}
+  .hero-stat .label .dot{width:6px;height:6px;border-radius:50%}
+  .hero-stat .label .dot.green{background:var(--green)}
+  .hero-stat .label .dot.ink{background:var(--ink-muted)}
+  .hero-stat.primary .value{font-family:var(--display);font-weight:400;font-size:clamp(36px,5vw,68px);line-height:1;letter-spacing:-.03em;color:var(--ink)}
+  .hero-stat.primary .value .currency{font-style:italic;color:var(--red);font-weight:300;font-size:.45em;margin-right:.1em;vertical-align:.2em}
+  .hero-stat.secondary .value{font-family:var(--display);font-weight:400;font-style:italic;font-size:clamp(22px,2.8vw,32px);line-height:1;letter-spacing:-.02em;color:var(--ink-soft)}
+  .hero-stat.secondary .value .currency{font-size:.7em;margin-right:.1em}
+  .hero-stat .sub{margin-top:8px;font-size:12px;color:var(--ink-muted);font-weight:500;letter-spacing:.04em}
 
-  /* ── Filter chips ───────────────────────── */
-  .filters{
-    max-width:1240px;margin:0 auto;
-    padding:32px 28px 8px;
-    display:flex;gap:10px;flex-wrap:wrap;align-items:center;
-  }
-  .filters .label{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft);margin-right:6px;font-weight:600}
-  .chip{
-    border:1px solid var(--rule);
-    background:#fff;
-    padding:9px 18px;border-radius:999px;
-    font-size:13px;letter-spacing:.03em;
-    cursor:pointer;color:var(--ink);
-    transition:all .2s ease;
-  }
-  .chip:hover{border-color:var(--ink)}
-  .chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  /* ── Main ──────────────────────────── */
+  main{max-width:1400px;margin:0 auto;padding:48px 32px 80px;position:relative;z-index:2}
 
-  /* ── Product list ───────────────────────── */
-  main{
-    max-width:1240px;margin:0 auto;
-    padding:24px 28px 40px;
-  }
-  .table-wrap{
-    background:#fff;border-radius:var(--radius);border:1px solid var(--rule);
-    box-shadow:var(--shadow);
-    overflow:hidden;
-  }
-  .thead{
-    display:grid;grid-template-columns:140px 1.4fr 200px 160px;gap:24px;
-    padding:18px 28px;border-bottom:2px solid var(--red);
-    font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;
-  }
-  .row{
-    display:grid;grid-template-columns:140px 1.4fr 200px 160px;gap:24px;align-items:center;
-    padding:22px 28px;border-top:1px solid var(--rule-soft);
-    transition:background .2s ease;
-  }
-  .row:hover{background:var(--rule-soft)}
-  .row:first-child{border-top:0}
-  .row.selected{background:rgba(182,52,43,.04);border-left:3px solid var(--red)}
-  .row.selected:first-child{border-top:0}
+  /* ── Multi-source overview strip ───── */
+  .source-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:64px}
+  .source-mini{background:#fff;border:1px solid var(--rule);border-radius:var(--radius);padding:22px 24px;position:relative;overflow:hidden;transition:all .3s ease;cursor:pointer;text-decoration:none;color:inherit}
+  .source-mini:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift)}
+  .source-mini::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px}
+  .source-mini[data-src="shopify"]::before{background:#96BF47}
+  .source-mini[data-src="vercel"]::before{background:var(--ink)}
+  .source-mini[data-src="anderson"]::before{background:var(--blue)}
+  .source-mini[data-src="callcenter"]::before{background:var(--accent)}
+  .source-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .source-tag{font-size:10px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:var(--ink-soft)}
+  .source-badge{font-size:9px;padding:2px 8px;border-radius:999px;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+  .source-badge.live{background:var(--green-tint);color:var(--green-deep)}
+  .source-badge.warn{background:var(--gold-tint);color:var(--gold-deep)}
+  .source-badge.err{background:var(--red-tint);color:var(--red-deep)}
+  .source-name{font-family:var(--display);font-weight:500;font-size:22px;letter-spacing:-.01em;line-height:1.1;margin-bottom:18px}
+  .source-name .ital{font-style:italic;color:var(--red)}
+  .source-row{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-top:1px solid var(--rule-soft);font-size:13px}
+  .source-row:first-of-type{border-top:0}
+  .source-row .k{color:var(--ink-soft);letter-spacing:.04em}
+  .source-row .v{font-family:var(--display);font-weight:500;color:var(--ink);font-size:15px;letter-spacing:-.01em}
+  .source-row .v .ital{font-style:italic;color:var(--ink-soft);font-weight:400;font-size:.85em}
 
-  .thumb{
-    width:120px;height:120px;border-radius:14px;overflow:hidden;
-    background:var(--rule-soft);
-    box-shadow:inset 0 0 0 1px rgba(26,26,26,.06);
-    display:grid;place-items:center;
-  }
-  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  /* ── Section headers ───────────────── */
+  .section{margin-bottom:56px}
+  .section-banner{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:24px 0 16px;border-top:2px solid var(--ink);margin-bottom:32px;flex-wrap:wrap}
+  .section-banner .left{display:flex;align-items:center;gap:18px}
+  .section-banner .num{font-family:var(--display);font-style:italic;font-weight:400;font-size:14px;color:var(--accent);letter-spacing:.04em;min-width:40px}
+  .section-banner h2{font-family:var(--display);font-weight:400;font-size:38px;letter-spacing:-.02em;line-height:1;margin:0}
+  .section-banner h2 .ital{font-style:italic;color:var(--red)}
+  .section-banner .ar{font-family:var(--arabic);font-weight:800;font-size:18px;color:var(--ink-soft)}
+  .section-banner .meta{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;text-align:right}
+  .section-banner .meta .domain{display:block;font-family:var(--display);font-style:italic;font-weight:400;font-size:14px;color:var(--ink);text-transform:none;letter-spacing:0;margin-top:4px}
 
-  .info .num{
-    font-family:var(--display);font-style:italic;font-weight:400;
-    font-size:13px;color:var(--accent);letter-spacing:.02em;
-  }
-  .info h3{
-    font-family:var(--display);font-weight:500;
-    font-size:22px;line-height:1.1;letter-spacing:-.01em;
-    margin:2px 0 8px;
-  }
-  .tags{display:flex;gap:6px;flex-wrap:wrap}
-  .tag{
-    font-size:10px;letter-spacing:.16em;text-transform:uppercase;
-    padding:3px 9px;border-radius:999px;border:1px solid var(--rule);color:var(--ink-soft);background:#fff;
-  }
-  .tag.sale{background:var(--red);color:#fff;border-color:var(--red)}
-  .tag.green{background:rgba(126,155,92,.15);border-color:rgba(126,155,92,.35);color:var(--green-deep)}
+  /* ── KPI grid ──────────────────────── */
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:32px}
+  .kpi-card{background:#fff;border:1px solid var(--rule);border-radius:var(--radius);padding:24px 26px;position:relative;overflow:hidden;transition:all .35s cubic-bezier(.2,.7,.3,1)}
+  .kpi-card:hover{box-shadow:var(--shadow-lift);transform:translateY(-3px);border-color:rgba(26,26,26,.15)}
+  .kpi-num{font-family:var(--display);font-style:italic;font-weight:400;font-size:13px;color:var(--accent);letter-spacing:.04em;margin-bottom:14px}
+  .kpi-label{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;margin-bottom:8px}
+  .kpi-value{font-family:var(--display);font-weight:500;font-size:40px;line-height:1;letter-spacing:-.02em;margin-bottom:14px;color:var(--ink)}
+  .kpi-value .unit{font-size:.45em;color:var(--ink-soft);font-weight:400;margin-left:4px;font-style:italic}
+  .kpi-foot{font-size:12px;color:var(--ink-muted);letter-spacing:.04em}
 
-  .qty{
-    display:flex;align-items:center;
-    border:1.5px solid var(--ink);border-radius:999px;
-    width:max-content;background:#fff;overflow:hidden;
-  }
-  .qty button{
-    width:38px;height:42px;border:0;background:transparent;cursor:pointer;
-    font-size:20px;color:var(--ink);font-weight:600;
-    transition:background .15s ease;
-  }
-  .qty button:hover{background:var(--ink);color:#fff}
-  .qty input{
-    width:54px;height:42px;text-align:center;border:0;background:transparent;
-    font-family:var(--display);font-size:20px;font-weight:600;
-    -moz-appearance:textfield;color:var(--ink);
-    border-left:1px solid var(--rule);border-right:1px solid var(--rule);
-  }
-  .qty input::-webkit-outer-spin-button,
-  .qty input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  /* ── Chart panel ───────────────────── */
+  .chart-panel{background:#fff;border:1px solid var(--rule);border-radius:var(--radius);padding:32px 36px;margin-bottom:32px;box-shadow:var(--shadow)}
+  .chart-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:24px;margin-bottom:24px}
+  .chart-head h3{font-family:var(--display);font-weight:400;font-size:24px;letter-spacing:-.015em;margin:0}
+  .chart-head h3 .ital{font-style:italic;color:var(--red)}
+  .chart-legend{display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+  .legend-item{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--ink-soft);font-weight:500;letter-spacing:.04em}
+  .legend-item .swatch{width:10px;height:10px;border-radius:2px}
+  .chart-wrap{position:relative;height:300px;width:100%}
 
-  .price-stack .now{
-    font-family:var(--display);font-weight:500;font-size:24px;line-height:1.1;
-    font-variant-numeric:tabular-nums;color:var(--ink);transition:color .25s ease;
-  }
-  .price-stack .now.bump{color:var(--red)}
-  .price-stack .was{text-decoration:line-through;color:var(--ink-soft);font-size:13px;font-variant-numeric:tabular-nums}
-  .price-stack .meta{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-top:4px;font-weight:600}
+  /* ── Split panels ──────────────────── */
+  .split{display:grid;grid-template-columns:1.45fr 1fr;gap:32px;margin-bottom:32px}
+  .panel{background:#fff;border:1px solid var(--rule);border-radius:var(--radius);padding:30px 32px;box-shadow:var(--shadow)}
+  .panel h3{font-family:var(--display);font-weight:400;font-size:22px;letter-spacing:-.015em;margin:0 0 22px}
+  .panel h3 .ital{font-style:italic;color:var(--red)}
 
-  /* ── STICKY BOTTOM ORDER BAR ─────────── */
-  .order-bar{
-    position:fixed;bottom:0;left:0;right:0;
-    background:#fff;
-    border-top:1px solid var(--rule);
-    box-shadow:0 -8px 40px -8px rgba(26,26,26,.18);
-    z-index:40;
-    padding:14px 28px;
-    transition:transform .3s cubic-bezier(.22,1,.36,1), opacity .3s ease;
-  }
-  .order-bar.hidden{
-    transform:translateY(110%);
-    opacity:0;
-    pointer-events:none;
-  }
-  .order-bar-inner{
-    max-width:1240px;margin:0 auto;
-    display:flex;align-items:center;justify-content:space-between;gap:24px;
-  }
-  .bar-summary{display:flex;flex-direction:column;gap:3px}
-  .bar-summary .bar-count{
-    font-size:12px;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--ink-soft);font-weight:600;
-  }
-  .bar-summary .bar-total{
-    font-family:var(--display);font-size:26px;font-weight:500;
-    font-variant-numeric:tabular-nums;color:var(--ink);
-    line-height:1;
-  }
-  .bar-items-list{
-    flex:1;
-    display:flex;gap:8px;flex-wrap:wrap;align-items:center;
-    padding:0 8px;
-    max-height:60px;overflow:hidden;
-  }
-  .bar-pill{
-    background:var(--rule-soft);border:1px solid var(--rule);
-    border-radius:999px;padding:5px 12px;
-    font-size:12px;color:var(--ink);white-space:nowrap;
-  }
-  .bar-pill strong{font-weight:700;color:var(--red)}
+  /* ── Product / commune lists ───────── */
+  .item-row{display:grid;grid-template-columns:36px 1fr auto;gap:18px;align-items:center;padding:16px 0;border-top:1px solid var(--rule-soft);transition:padding .2s ease}
+  .item-row:first-of-type{border-top:2px solid var(--ink)}
+  .item-row:hover{padding-left:6px}
+  .item-row:hover .item-name{color:var(--red)}
+  .item-rank{font-family:var(--display);font-style:italic;font-weight:400;font-size:16px;color:var(--accent)}
+  .item-info{min-width:0}
+  .item-name{font-family:var(--display);font-weight:500;font-size:16px;letter-spacing:-.005em;line-height:1.25;color:var(--ink);transition:color .2s ease;margin-bottom:6px}
+  .item-bar-wrap{height:5px;background:var(--rule-soft);border-radius:999px;overflow:hidden}
+  .item-bar{height:100%;border-radius:999px;width:0%;transition:width 1.2s cubic-bezier(.2,.7,.3,1)}
+  .item-bar.red{background:linear-gradient(90deg,var(--red),var(--accent))}
+  .item-bar.green{background:linear-gradient(90deg,var(--green-deep),var(--green))}
+  .item-bar.blue{background:linear-gradient(90deg,var(--blue-deep),var(--blue))}
+  .item-stats{text-align:right;white-space:nowrap}
+  .item-revenue{font-family:var(--display);font-weight:500;font-size:16px;color:var(--ink);letter-spacing:-.01em}
+  .item-revenue .da{font-size:.65em;color:var(--ink-soft);font-style:italic;margin-left:2px}
+  .item-meta{font-size:11px;color:var(--ink-soft);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-top:3px}
 
-  /* ── BIG RED ARABIC BUTTON ──────────────── */
-  /* Uses transform/opacity (GPU-accelerated) instead of box-shadow for better mobile perf + battery */
-  @keyframes pulse-glow {
-    0%, 100% { transform: scale(1); }
-    50%      { transform: scale(1.025); }
-  }
-  .order-btn{
-    appearance:none;border:0;cursor:pointer;
-    background:linear-gradient(180deg, var(--red-light) 0%, var(--red) 60%, var(--red-deep) 100%);
-    color:#fff;
-    padding:18px 36px;
-    white-space:nowrap;
-    border-radius:14px;
-    font-family:var(--arabic);
-    font-size:22px;font-weight:900;letter-spacing:.02em;
-    direction:rtl;
-    text-shadow:0 1px 0 rgba(0,0,0,.25);
-    box-shadow:0 6px 0 var(--red-deep), 0 12px 24px -8px rgba(182,52,43,.5);
-    animation: pulse-glow 4s ease-in-out infinite;
-    will-change: transform;
-    transform-origin:center;
-    transition:transform .12s ease;
-    position:relative;overflow:hidden;
-    flex-shrink:0;
-  }
-  .order-btn::before{
-    content:"";position:absolute;inset:0;
-    background:linear-gradient(120deg, transparent 30%, rgba(255,255,255,.35) 50%, transparent 70%);
-    transform:translateX(-100%);transition:transform .6s ease;
-  }
-  .order-btn:hover::before{transform:translateX(100%)}
-  .order-btn:hover{
-    animation-play-state:paused;
-    transform:translateY(-2px);
-    box-shadow:0 8px 0 var(--red-deep), 0 18px 32px -8px rgba(182,52,43,.7);
-  }
-  .order-btn:active{
-    transform:translateY(3px);
-    box-shadow:0 3px 0 var(--red-deep), 0 6px 12px -4px rgba(182,52,43,.5);
-  }
-  .order-btn .icon{display:inline-block;margin-left:10px;font-size:18px;vertical-align:middle}
+  /* ── Funnel ────────────────────────── */
+  .funnel{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:0;align-items:stretch;margin-top:8px}
+  .funnel-stage{padding:8px 0;min-width:0}
+  .funnel-stage .stage-label{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft);font-weight:700;margin-bottom:14px}
+  .funnel-stage .stage-num{font-family:var(--display);font-weight:400;font-size:clamp(36px,4.5vw,60px);line-height:1;letter-spacing:-.025em;color:var(--ink)}
+  .funnel-stage .stage-bar{margin-top:18px;height:8px;background:var(--rule-soft);border-radius:999px;overflow:hidden}
+  .funnel-stage .stage-fill{height:100%;border-radius:999px;width:0%;transition:width 1.4s cubic-bezier(.2,.7,.3,1)}
+  .funnel-stage.total .stage-fill{background:var(--ink)}
+  .funnel-stage.confirmed .stage-fill{background:var(--green)}
+  .funnel-stage.delivered .stage-fill{background:var(--green-deep)}
+  .funnel-stage .stage-meta{margin-top:10px;font-size:12px;color:var(--ink-soft);letter-spacing:.04em}
+  .funnel-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 28px;color:var(--ink-muted)}
+  .funnel-arrow .pct{font-family:var(--display);font-style:italic;font-weight:400;font-size:20px;color:var(--green-deep);margin-bottom:6px;letter-spacing:-.01em}
+  .funnel-arrow .line{width:60px;height:1px;background:var(--rule);position:relative}
+  .funnel-arrow .line::after{content:"";position:absolute;right:-2px;top:-3px;border-left:7px solid var(--ink-muted);border-top:3.5px solid transparent;border-bottom:3.5px solid transparent}
+  .funnel-arrow .lbl{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-muted);font-weight:600;margin-top:8px}
 
-  /* ── Field validation errors ─────────────── */
-  .field-error{
-    font-size:12px;color:var(--red);margin-top:4px;font-weight:600;
-    animation: fade .2s ease;
-  }
+  /* ── Status breakdown ──────────────── */
+  .status-strip{display:flex;height:14px;border-radius:999px;overflow:hidden;margin-bottom:28px;background:var(--rule-soft);box-shadow:inset 0 0 0 1px var(--rule)}
+  .status-strip .seg{height:100%;transition:width 1.2s cubic-bezier(.2,.7,.3,1);width:0%}
+  .status-strip .seg[data-status="Livré"]{background:var(--green-deep)}
+  .status-strip .seg[data-status="Confirmed"]{background:var(--green)}
+  .status-strip .seg[data-status="Pending"]{background:var(--gold)}
+  .status-strip .seg[data-status="Callback"]{background:var(--purple)}
+  .status-strip .seg[data-status="No Answer"]{background:var(--accent)}
+  .status-strip .seg[data-status="Cancelled"]{background:var(--red)}
+  .status-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px}
+  .status-card{background:#fff;border:1px solid var(--rule);border-radius:var(--radius);padding:22px 24px;position:relative;overflow:hidden;transition:all .3s ease}
+  .status-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px}
+  .status-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift)}
+  .status-card[data-status="Livré"]::before{background:var(--green-deep)}
+  .status-card[data-status="Confirmed"]::before{background:var(--green)}
+  .status-card[data-status="Pending"]::before{background:var(--gold)}
+  .status-card[data-status="Callback"]::before{background:var(--purple)}
+  .status-card[data-status="No Answer"]::before{background:var(--accent)}
+  .status-card[data-status="Cancelled"]::before{background:var(--red)}
+  .status-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;gap:12px}
+  .status-name{font-weight:700;font-size:13px;letter-spacing:.05em;color:var(--ink)}
+  .status-name .ar{font-family:var(--arabic);font-weight:700;font-size:12px;color:var(--ink-soft);margin-left:8px}
+  .status-pct{font-family:var(--display);font-style:italic;font-weight:400;font-size:14px;color:var(--ink-soft)}
+  .status-count{font-family:var(--display);font-weight:500;font-size:36px;line-height:1;letter-spacing:-.02em;color:var(--ink);margin-bottom:6px}
+  .status-rev{font-size:12px;color:var(--ink-soft);letter-spacing:.04em}
+  .status-rev strong{color:var(--ink);font-weight:600}
 
-  /* ── Modal ──────────────────────────────── */
-  .modal-backdrop{
-    position:fixed;inset:0;
-    background:rgba(26,26,26,.6);
-    backdrop-filter:blur(4px);
-    z-index:50;
-    display:none;align-items:center;justify-content:center;
-    padding:20px;
-  }
-  .modal-backdrop.open{display:flex;animation:fade .2s ease}
-  @keyframes fade{from{opacity:0}to{opacity:1}}
-  .modal{
-    background:#fff;
-    border-radius:var(--radius);
-    width:min(580px,100%);
-    max-height:92vh;overflow:auto;
-    box-shadow:0 30px 80px -20px rgba(0,0,0,.4);
-    position:relative;
-    animation:rise .3s cubic-bezier(.22,1,.36,1);
-  }
-  @keyframes rise{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
-  .modal header{
-    padding:28px 32px 18px;border-bottom:1px solid var(--rule);
-  }
-  .eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);font-weight:700}
-  .modal h2{font-family:var(--display);font-weight:400;font-size:30px;letter-spacing:-.02em;margin:6px 0 0;line-height:1.1}
-  .modal h2 em{font-style:italic;color:var(--red)}
+  /* ── Communes ──────────────────────── */
+  .communes-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 56px}
 
-  /* Multi-item summary */
-  .summary-block{
-    margin:18px 32px 0;
-    border:1px solid var(--rule);border-radius:12px;overflow:hidden;
-  }
-  .summary-item{
-    display:flex;justify-content:space-between;align-items:center;gap:16px;
-    padding:12px 16px;background:var(--rule-soft);
-    border-bottom:1px solid var(--rule);
-  }
-  .summary-item:last-child{border-bottom:0}
-  .summary-item .si-left strong{font-family:var(--display);font-weight:500;font-size:15px;display:block}
-  .summary-item .si-left span{font-size:11px;color:var(--ink-soft);letter-spacing:.04em}
-  .summary-item .si-right{font-family:var(--display);font-size:18px;color:var(--red);white-space:nowrap}
-  .summary-total{
-    display:flex;justify-content:space-between;align-items:center;
-    padding:14px 16px;background:#fff;
-    border-top:2px solid var(--red);
-  }
-  .summary-total span:first-child{font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--ink-soft)}
-  .summary-total .grand{font-family:var(--display);font-size:26px;font-weight:500;color:var(--ink)}
+  /* ── Orders table ──────────────────── */
+  .orders-section{background:#fff;border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);margin-bottom:32px}
+  .orders-head{padding:24px 32px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+  .orders-head h3{font-family:var(--display);font-weight:400;font-size:22px;letter-spacing:-.015em;margin:0}
+  .orders-head h3 .ital{font-style:italic;color:var(--red)}
+  .live-tag{display:inline-flex;align-items:center;gap:8px;padding:5px 12px;background:var(--green-tint);color:var(--green-deep);border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.1em}
+  .live-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+  .orders-table{width:100%;border-collapse:collapse}
+  .orders-table th{text-align:left;padding:12px 32px;border-top:2px solid var(--red);border-bottom:1px solid var(--rule);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);font-weight:700;background:var(--paper-warm)}
+  .orders-table th:last-child,.orders-table td:last-child{text-align:right}
+  .orders-table td{padding:16px 32px;border-top:1px solid var(--rule-soft);font-size:13px}
+  .orders-table tbody tr:hover{background:var(--paper-warm)}
+  .order-id{font-family:var(--display);font-style:italic;color:var(--accent);font-weight:500}
+  .order-customer{font-weight:600;color:var(--ink)}
+  .order-customer small{display:block;font-weight:400;color:var(--ink-soft);font-size:11px;margin-top:2px}
+  .order-total{font-family:var(--display);font-weight:500;font-size:15px;color:var(--ink);letter-spacing:-.01em}
+  .order-total .da{font-size:.7em;color:var(--ink-soft);font-style:italic}
+  .status-pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+  .status-pill[data-st="Livré"]{background:var(--green-deep);color:#fff}
+  .status-pill[data-st="Confirmed"]{background:var(--green-tint);color:var(--green-deep)}
+  .status-pill[data-st="Pending"]{background:var(--gold-tint);color:var(--gold-deep)}
+  .status-pill[data-st="Cancelled"]{background:var(--red-tint);color:var(--red-deep)}
+  .status-pill[data-st="No Answer"]{background:var(--accent-tint);color:var(--accent-deep)}
+  .status-pill[data-st="Callback"]{background:var(--purple-tint);color:var(--purple-deep)}
+  .status-pill[data-st="FULFILLED"]{background:var(--green-deep);color:#fff}
+  .status-pill[data-st="UNFULFILLED"]{background:var(--gold-tint);color:var(--gold-deep)}
+  .status-pill[data-st="PAID"]{background:var(--green-tint);color:var(--green-deep)}
+  .status-pill[data-st="PENDING"]{background:var(--gold-tint);color:var(--gold-deep)}
+  .status-pill[data-st="REFUNDED"]{background:var(--red-tint);color:var(--red-deep)}
+  .order-time{color:var(--ink-soft);font-size:12px;letter-spacing:.04em}
 
-  form{padding:18px 32px 28px;display:grid;gap:14px}
-  .field{display:flex;flex-direction:column;gap:6px}
-  .field label{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);font-weight:700}
-  .field input,.field select,.field textarea{
-    font-family:var(--body);font-size:15px;
-    padding:13px 14px;border-radius:10px;
-    border:1px solid var(--rule);
-    background:#fff;color:var(--ink);
-    outline:none;transition:border-color .15s ease, box-shadow .15s ease;
-  }
-  .field input:focus,.field select:focus,.field textarea:focus{
-    border-color:var(--ink);box-shadow:0 0 0 3px rgba(26,26,26,.08);
-  }
-  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  /* ── Not configured panel ──────────── */
+  .not-configured{background:#fff;border:1px dashed var(--rule);border-radius:var(--radius);padding:48px 32px;text-align:center;color:var(--ink-soft)}
+  .not-configured h4{font-family:var(--display);font-weight:400;font-style:italic;font-size:22px;color:var(--ink);margin:0 0 12px}
+  .not-configured p{margin:8px 0;font-size:13px;line-height:1.6}
+  .not-configured code{background:var(--paper-warm);padding:3px 8px;border-radius:6px;font-size:12px;color:var(--ink)}
 
-  .delivery{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
-  .delivery label{
-    border:1px solid var(--rule);border-radius:12px;
-    padding:12px 14px;cursor:pointer;
-    display:flex;flex-direction:column;gap:2px;
-    transition:all .15s ease;position:relative;
-  }
-  .delivery label:hover{border-color:var(--ink-soft)}
-  .delivery input{position:absolute;opacity:0;pointer-events:none}
-  .delivery label.sel{border-color:var(--red);background:rgba(182,52,43,.04)}
-  .delivery .name{font-weight:700;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
-  .delivery .price{font-family:var(--display);font-size:18px;color:var(--red)}
+  /* ── Footer ────────────────────────── */
+  footer{max-width:1400px;margin:0 auto;padding:48px 32px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;position:relative;z-index:2}
+  footer .ar{font-family:var(--arabic);font-weight:800;letter-spacing:0;font-size:12px;color:var(--ink)}
 
-  .submit-row{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:6px}
-  .submit-btn{
-    flex:1;
-    appearance:none;border:0;cursor:pointer;
-    background:var(--red);color:#fff;
-    padding:16px 24px;border-radius:999px;
-    font-family:var(--arabic);font-size:16px;font-weight:800;letter-spacing:.04em;
-    transition:background .2s ease, transform .2s ease;
+  /* ── Responsive ────────────────────── */
+  @media (max-width:1100px){
+    .funnel{grid-template-columns:1fr;gap:24px}
+    .funnel-arrow{flex-direction:row;padding:0;gap:14px}
+    .funnel-arrow .line{width:1px;height:32px}
+    .funnel-arrow .line::after{right:-3px;top:auto;bottom:-2px;border-left:3.5px solid transparent;border-right:3.5px solid transparent;border-top:7px solid var(--ink-muted);border-bottom:0}
   }
-  .submit-btn:hover{background:var(--red-deep);transform:translateY(-1px)}
-  .cancel{background:transparent;border:0;cursor:pointer;padding:14px;color:var(--ink-soft);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
-  .cancel:hover{color:var(--ink)}
-
-  .close{
-    position:absolute;top:16px;right:16px;
-    width:36px;height:36px;border-radius:50%;
-    background:var(--rule-soft);border:0;cursor:pointer;
-    font-size:18px;color:var(--ink);
-    display:grid;place-items:center;
-  }
-  .close:hover{background:var(--ink);color:#fff}
-
-  /* ── Success state ──────────────────────── */
-  .success{padding:48px 32px 32px;text-align:center}
-  .success .badge{
-    width:68px;height:68px;border-radius:50%;
-    background:var(--green);color:#fff;
-    display:grid;place-items:center;margin:0 auto 18px;
-    font-size:32px;font-weight:700;
-  }
-  .success h2{font-family:var(--display);font-size:32px;margin:0 0 10px;font-weight:400}
-  .success h2 em{font-style:italic;color:var(--red)}
-  .success p{color:var(--ink-soft);max-width:38ch;margin:0 auto 24px}
-  .success .recap{
-    text-align:left;background:var(--rule-soft);border-radius:12px;
-    padding:18px 20px;margin:0 auto 22px;border:1px solid var(--rule);font-size:14px;
-  }
-  .success .recap div{display:flex;justify-content:space-between;padding:5px 0;gap:14px}
-  .success .recap div + div{border-top:1px dashed var(--rule)}
-  .success .recap span:first-child{color:var(--ink-soft);letter-spacing:.04em}
-
-  /* ── Footer ─────────────────────────────── */
-  footer{
-    border-top:1px solid var(--rule);
-    background:var(--ink);color:var(--paper);
-    padding:48px 28px 28px;margin-top:48px;
-  }
-  .foot-inner{
-    max-width:1240px;margin:0 auto;
-    display:grid;grid-template-columns:2fr 1fr 1fr;gap:48px;align-items:start;
-  }
-  .foot-inner h4{font-family:var(--display);font-weight:400;font-size:32px;margin:0 0 8px;letter-spacing:-.01em}
-  .foot-inner h4 em{font-style:italic;color:var(--red-light)}
-  .foot-inner p{color:rgba(251,250,247,.65);max-width:42ch;font-size:14px}
-  .foot-inner ul{list-style:none;padding:0;margin:0;display:grid;gap:8px;font-size:14px;color:rgba(251,250,247,.85)}
-  .foot-inner h5{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--red-light);margin:0 0 14px;font-weight:700}
-  .foot-bottom{
-    max-width:1240px;margin:32px auto 0;padding-top:20px;
-    border-top:1px solid rgba(251,250,247,.15);
-    display:flex;justify-content:space-between;font-size:12px;color:rgba(251,250,247,.5);
-    letter-spacing:.06em;
-  }
-
-  /* ── Responsive ─────────────────────────── */
   @media (max-width:980px){
-    .hero{grid-template-columns:1fr;gap:24px;padding:40px 20px 32px}
-    .thead{display:none}
-    .row{
-      grid-template-columns:90px 1fr;
-      grid-template-rows:auto auto auto;
-      gap:14px 16px;padding:18px;
-    }
-    .thumb{width:90px;height:90px}
-    .info{grid-column:2}
-    .qty-cell, .price-cell{
-      grid-column:1 / -1;
-      display:flex;justify-content:space-between;align-items:center;
-      border-top:1px dashed var(--rule);padding-top:12px;
-    }
-    .topbar-inner{flex-direction:column;gap:8px;padding:10px}
-    .ticker{font-size:11px;gap:14px}
+    .hero-grid{grid-template-columns:1fr;gap:32px}
+    .hero-stats{text-align:left}
+    .hero-stat .label{justify-content:flex-start}
+    .kpi-grid{grid-template-columns:repeat(2,1fr)}
+    .status-grid{grid-template-columns:repeat(2,1fr)}
+    .source-strip{grid-template-columns:repeat(2,1fr)}
+    .split{grid-template-columns:1fr}
+    .communes-grid{grid-template-columns:1fr}
     .brand-inner{grid-template-columns:1fr;text-align:center}
-    .brand-left,.brand-right{display:none}
-    .foot-inner{grid-template-columns:1fr;gap:28px}
-    .field-row,.delivery{grid-template-columns:1fr}
-    .order-bar-inner{flex-wrap:wrap;gap:12px}
-    .bar-items-list{display:none}
-    .order-btn{font-size:20px;padding:16px 24px;width:100%}
-    .bar-summary{flex-direction:row;gap:16px;align-items:baseline}
+    .brand-left,.brand-right{text-align:center}
+    .topbar-inner{flex-direction:column;gap:8px}
+    .orders-table th,.orders-table td{padding-left:18px;padding-right:18px}
+    .hide-mobile{display:none}
+    .section-banner h2{font-size:28px}
   }
-
-  /* ── En savoir plus button ──────────────── */
-  .btn-info{
-    display:inline-flex;align-items:center;gap:7px;
-    margin-top:12px;
-    padding:9px 18px;border-radius:999px;
-    border:1.5px solid var(--red);
-    background:rgba(182,52,43,.06);color:var(--red);
-    font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;
-    cursor:pointer;transition:all .2s ease;
-    font-family:var(--body);
-    box-shadow:0 2px 8px -2px rgba(182,52,43,.18);
+  @media (max-width:580px){
+    .kpi-grid,.status-grid{grid-template-columns:1fr}
+    main{padding:32px 20px 60px}
+    .hero{padding:40px 20px 32px}
+    .panel,.chart-panel{padding:24px 20px}
+    .orders-head{padding:20px 18px 14px}
+    .orders-table th,.orders-table td{padding:13px 18px;font-size:12px}
   }
-  .btn-info:hover{
-    background:var(--red);color:#fff;
-    box-shadow:0 4px 16px -4px rgba(182,52,43,.45);
-    transform:translateY(-1px);
-  }
-  .btn-info:active{transform:translateY(0)}
-  .btn-info svg{width:12px;height:12px;flex-shrink:0}
-
-  /* ── Product detail modal ───────────────── */
-  #detail-modal .modal{width:min(540px,100%)}
-  .detail-img{
-    width:100%;height:220px;object-fit:cover;
-    border-radius:var(--radius) var(--radius) 0 0;
-    display:block;
-  }
-  .detail-body{padding:28px 32px 32px}
-  .detail-num{font-family:var(--display);font-style:italic;font-size:13px;color:var(--accent);margin-bottom:4px}
-  .detail-title{font-family:var(--display);font-weight:500;font-size:28px;letter-spacing:-.02em;line-height:1.1;margin:0 0 6px}
-  .detail-weight{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;margin-bottom:16px}
-  .detail-desc{font-size:15px;color:var(--ink-soft);line-height:1.65;margin-bottom:20px}
-  .detail-points{list-style:none;padding:0;margin:0 0 24px;display:flex;flex-direction:column;gap:8px}
-  .detail-points li{
-    display:flex;align-items:center;gap:10px;
-    font-size:13px;font-weight:600;letter-spacing:.03em;color:var(--ink);
-  }
-  .detail-points li::before{
-    content:"";width:6px;height:6px;border-radius:50%;
-    background:var(--red);flex-shrink:0;
-  }
-  .detail-price{
-    display:flex;align-items:baseline;gap:10px;
-    padding-top:20px;border-top:1px solid var(--rule);
-  }
-  .detail-price .dp-now{font-family:var(--display);font-size:28px;font-weight:500;color:var(--ink)}
-  .detail-price .dp-was{font-size:14px;text-decoration:line-through;color:var(--ink-soft)}
-  .detail-price .dp-unit{font-size:12px;color:var(--ink-soft);letter-spacing:.1em;text-transform:uppercase;margin-left:auto;font-weight:600}
-
 </style>
 </head>
 <body>
 
-<!-- ─── Top ticker ──────────────────────── -->
 <div class="topbar">
   <div class="topbar-inner">
     <div class="ticker">
-      <span>Livraison 24 wilayas</span>
-      <span>Paiement à la livraison</span>
-      <span>Gros &amp; détail</span>
+      <span><span class="live-dot" id="status-dot"></span><span id="status-text">Chargement…</span></span>
+      <span class="hide-mobile" id="last-updated"></span>
     </div>
-    <div class="lang">
-      <a href="#" class="on">FR</a>
-      <a href="#">AR</a>
-      <a href="#">EN</a>
+    <div class="ticker">
+      <button class="refresh-btn" id="refresh-btn">↻ Actualiser</button>
+      <span class="clock" id="clock">--:--:--</span>
     </div>
   </div>
 </div>
 
-<!-- ─── Brand ──────────────────────────── -->
 <header class="brand">
   <div class="brand-inner">
-    <div class="brand-left">Nutsa Distribution · Algérie ©</div>
-    <div class="logo">
-      <img src="Logo_Nutsa.svg" alt="Nutsa" width="216" height="72" style="height:72px;width:auto;display:block;margin:0 auto;">
-      <small>Pâtes à tartiner premium</small>
-    </div>
-    <div class="brand-right"><strong>05 5543 33 22</strong></strong> · contact@nutsa-dz.com</div>
+    <div class="brand-left">Tableau de Bord<br>Multi-Source</div>
+    <div class="logo">Nu<em>t</em>sa<small>Direction Générale</small></div>
+    <div class="brand-right">Shopify · Vercel · Anderson · Sheet<span class="ar">لوحة القيادة</span></div>
   </div>
 </header>
 
-<!-- ─── Hero ───────────────────────────── -->
+<div class="source-notice" id="source-notice">
+  <span class="badge">Démo</span>
+  <span id="source-notice-text"></span>
+</div>
+
+<!-- HERO -->
 <section class="hero">
-  <div>
-    <div class="kicker">Catalogue · Gros &amp; détail</div>
-    <h1>
-      Catalogue<br>
-      <span class="ital">de gros</span> &amp; détail.
-      <span class="ar">اطلب الآن — توصيل لكامل الولايات</span>
+  <div class="kicker">Vue d'ensemble · toutes sources confondues</div>
+  <div class="hero-grid">
+    <h1>Tout en un <span class="ital">coup d'œil.</span>
+      <span class="ar">كل شيء في لمحة واحدة</span>
     </h1>
-  </div>
-  <div>
-    <p class="lede">Choisissez vos références, ajustez les quantités, commandez en quelques secondes. Une seule commande pour tout le panier — paiement à la livraison.</p>
-    <div class="meta-row">
-      <span>8 références</span>
-      <span>Stock disponible</span>
-      <span>Expédition 48h</span>
+    <div class="hero-stats">
+      <div class="hero-stat primary">
+        <div class="label"><span class="dot green"></span>Revenu combiné (30j)</div>
+        <div class="value"><span class="currency">DA</span><span id="hero-combined">0</span></div>
+        <div class="sub" id="hero-combined-sub">Shopify + Centre d'appels</div>
+      </div>
+      <div class="hero-stat secondary">
+        <div class="label"><span class="dot ink"></span>Total des commandes</div>
+        <div class="value"><span id="hero-orders">0</span></div>
+        <div class="sub" id="hero-orders-sub">Toutes sources</div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ─── Filters ────────────────────────── -->
-<div class="filters">
-  <div class="label">Filtrer</div>
-  <button class="chip on" data-filter="all">Tout voir</button>
-  <button class="chip" data-filter="choco">Chocolat noisettes</button>
-  <button class="chip" data-filter="pistache">Pistache</button>
-  <button class="chip" data-filter="rocher">Rocher</button>
-</div>
-
-<!-- ─── Product list ───────────────────── -->
 <main>
-  <div class="table-wrap">
-    <div class="thead">
-      <div>Image</div>
-      <div>Product</div>
-      <div>Quantity</div>
-      <div>Price</div>
-    </div>
-    <div id="product-list"><!-- rows render here --></div>
+
+  <!-- Source overview strip -->
+  <div class="source-strip">
+    <a class="source-mini" data-src="shopify" href="#shopify-section">
+      <div class="source-head">
+        <div class="source-tag">Shopify</div>
+        <div class="source-badge" id="badge-shopify">…</div>
+      </div>
+      <div class="source-name">Boutique <span class="ital">en ligne</span></div>
+      <div class="source-row"><span class="k">Visiteurs (30j)</span><span class="v" id="mini-shopify-visitors">—</span></div>
+      <div class="source-row"><span class="k">Commandes (30j)</span><span class="v" id="mini-shopify-orders">—</span></div>
+      <div class="source-row"><span class="k">Revenu (30j)</span><span class="v" id="mini-shopify-revenue">—</span></div>
+    </a>
+
+    <a class="source-mini" data-src="vercel" href="#vercel-section">
+      <div class="source-head">
+        <div class="source-tag">Vercel</div>
+        <div class="source-badge" id="badge-vercel">…</div>
+      </div>
+      <div class="source-name">Site <span class="ital">Vercel</span></div>
+      <div class="source-row"><span class="k">Visites (30j)</span><span class="v" id="mini-vercel-visits">—</span></div>
+      <div class="source-row"><span class="k">Sessions uniques</span><span class="v" id="mini-vercel-sessions">—</span></div>
+      <div class="source-row"><span class="k">Aujourd'hui</span><span class="v" id="mini-vercel-today">—</span></div>
+    </a>
+
+    <a class="source-mini" data-src="anderson" href="#anderson-section">
+      <div class="source-head">
+        <div class="source-tag">Anderson</div>
+        <div class="source-badge live">Live</div>
+      </div>
+      <div class="source-name">Logistique <span class="ital">livraison</span></div>
+      <div class="source-row"><span class="k">Envoyées</span><span class="v" id="mini-anderson-sent">—</span></div>
+      <div class="source-row"><span class="k">En transit</span><span class="v" id="mini-anderson-transit">—</span></div>
+      <div class="source-row"><span class="k">Taux de livraison</span><span class="v" id="mini-anderson-rate">—</span></div>
+    </a>
+
+    <a class="source-mini" data-src="callcenter" href="#sheet-section">
+      <div class="source-head">
+        <div class="source-tag">Google Sheet</div>
+        <div class="source-badge live">Live</div>
+      </div>
+      <div class="source-name">Centre <span class="ital">d'appels</span></div>
+      <div class="source-row"><span class="k">Total commandes</span><span class="v" id="mini-sheet-orders">—</span></div>
+      <div class="source-row"><span class="k">Confirmées</span><span class="v" id="mini-sheet-confirmed">—</span></div>
+      <div class="source-row"><span class="k">Taux confirmation</span><span class="v" id="mini-sheet-rate">—</span></div>
+    </a>
   </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SHOPIFY SECTION -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <section class="section" id="shopify-section">
+    <div class="section-banner">
+      <div class="left">
+        <span class="num">No 01</span>
+        <h2>Shopify <span class="ital">boutique.</span></h2>
+        <span class="ar">المتجر الإلكتروني</span>
+      </div>
+      <div class="meta">
+        Boutique en ligne — 30 derniers jours
+        <span class="domain" id="shopify-domain">nutsa-dz.com</span>
+      </div>
+    </div>
+
+    <div id="shopify-content">
+      <!-- Filled by renderShopify() -->
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- VERCEL SECTION -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <section class="section" id="vercel-section">
+    <div class="section-banner">
+      <div class="left">
+        <span class="num">No 02</span>
+        <h2>Vercel <span class="ital">trafic.</span></h2>
+        <span class="ar">حركة الموقع</span>
+      </div>
+      <div class="meta">
+        Suivi du site Vercel
+        <span class="domain" id="vercel-domain">via beacon</span>
+      </div>
+    </div>
+
+    <div id="vercel-content">
+      <!-- Filled by renderVercel() -->
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- ANDERSON SECTION -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <section class="section" id="anderson-section">
+    <div class="section-banner">
+      <div class="left">
+        <span class="num">No 03</span>
+        <h2>Anderson <span class="ital">logistique.</span></h2>
+        <span class="ar">الخدمات اللوجستية</span>
+      </div>
+      <div class="meta">
+        Pipeline de livraison
+        <span class="domain">ecotrack.dz</span>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-num">No 01</div>
+        <div class="kpi-label">Envoyées à Anderson</div>
+        <div class="kpi-value" id="anderson-sent">0</div>
+        <div class="kpi-foot">Total cumulé</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-num">No 02</div>
+        <div class="kpi-label">En cours de livraison</div>
+        <div class="kpi-value" id="anderson-transit">0</div>
+        <div class="kpi-foot">Pas encore livrées</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-num">No 03</div>
+        <div class="kpi-label">Livrées</div>
+        <div class="kpi-value" id="anderson-delivered">0</div>
+        <div class="kpi-foot" id="anderson-delivered-rate">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-num">No 04</div>
+        <div class="kpi-label">Échecs / Refus</div>
+        <div class="kpi-value" id="anderson-failed">0</div>
+        <div class="kpi-foot" id="anderson-failed-rate">—</div>
+      </div>
+    </div>
+
+    <div class="chart-panel">
+      <div class="chart-head">
+        <h3>Performance de <span class="ital">livraison</span></h3>
+        <div class="chart-legend">
+          <div class="legend-item"><span class="swatch" style="background:var(--green-deep)"></span>Livrées</div>
+          <div class="legend-item"><span class="swatch" style="background:var(--gold)"></span>En transit</div>
+          <div class="legend-item"><span class="swatch" style="background:var(--red)"></span>Échecs</div>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:200px"><canvas id="andersonChart"></canvas></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- GOOGLE SHEET (CALL CENTER) SECTION -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <section class="section" id="sheet-section">
+    <div class="section-banner">
+      <div class="left">
+        <span class="num">No 04</span>
+        <h2>Google <span class="ital">Sheet.</span></h2>
+        <span class="ar">مركز الاتصال</span>
+      </div>
+      <div class="meta">
+        Centre d'appels · Pipeline de confirmation
+        <span class="domain">Sheet1</span>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-num">No 01</div>
+        <div class="kpi-label">Total commandes</div>
+        <div class="kpi-value" id="sheet-total">0</div>
+        <div class="kpi-foot">Toutes statuts</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-num">No 02</div>
+        <div class="kpi-label">Panier moyen</div>
+        <div class="kpi-value" id="sheet-aov">0<span class="unit">DA</span></div>
+        <div class="kpi-foot">Revenu / commandes</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-num">No 03</div>
+        <div class="kpi-label">Taux confirmation</div>
+        <div class="kpi-value" id="sheet-confirm">0<span class="unit">%</span></div>
+        <div class="kpi-foot">Confirmées / décidées</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-num">No 04</div>
+        <div class="kpi-label">Revenu confirmé</div>
+        <div class="kpi-value" id="sheet-revenue">0<span class="unit">DA</span></div>
+        <div class="kpi-foot">Confirmé + Livré</div>
+      </div>
+    </div>
+
+    <div class="chart-panel">
+      <div class="chart-head" style="margin-bottom:8px">
+        <h3>Entonnoir de <span class="ital">conversion</span></h3>
+        <div class="chart-legend"><div class="legend-item">Du panier à la livraison</div></div>
+      </div>
+      <div class="funnel">
+        <div class="funnel-stage total">
+          <div class="stage-label">Total</div>
+          <div class="stage-num" id="funnel-total">0</div>
+          <div class="stage-bar"><div class="stage-fill" data-pct="100"></div></div>
+          <div class="stage-meta">Commandes reçues</div>
+        </div>
+        <div class="funnel-arrow">
+          <div class="pct" id="arrow-1-pct">—</div>
+          <div class="line"></div>
+          <div class="lbl">Confirmation</div>
+        </div>
+        <div class="funnel-stage confirmed">
+          <div class="stage-label">Confirmées</div>
+          <div class="stage-num" id="funnel-confirmed">0</div>
+          <div class="stage-bar"><div class="stage-fill" data-pct="0"></div></div>
+          <div class="stage-meta">Validées par téléphone</div>
+        </div>
+        <div class="funnel-arrow">
+          <div class="pct" id="arrow-2-pct">—</div>
+          <div class="line"></div>
+          <div class="lbl">Livraison</div>
+        </div>
+        <div class="funnel-stage delivered">
+          <div class="stage-label">Livrées</div>
+          <div class="stage-num" id="funnel-delivered">0</div>
+          <div class="stage-bar"><div class="stage-fill" data-pct="0"></div></div>
+          <div class="stage-meta">Reçues par le client</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-panel">
+      <div class="chart-head" style="margin-bottom:18px">
+        <h3>Répartition par <span class="ital">statut</span></h3>
+        <div class="chart-legend"><div class="legend-item">6 statuts de votre Sheet</div></div>
+      </div>
+      <div class="status-strip" id="status-strip"></div>
+      <div class="status-grid" id="status-grid"></div>
+    </div>
+
+    <div class="split">
+      <div class="panel">
+        <h3>Top <span class="ital">communes</span></h3>
+        <div class="communes-grid" id="communes-grid"></div>
+      </div>
+      <div class="panel">
+        <h3>Source des <span class="ital">commandes</span></h3>
+        <div id="source-breakdown"></div>
+      </div>
+    </div>
+
+    <div class="orders-section">
+      <div class="orders-head">
+        <h3>Commandes <span class="ital">récentes</span> · Sheet</h3>
+        <div class="live-tag"><span class="dot"></span>En direct</div>
+      </div>
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th>Commande</th>
+            <th>Client</th>
+            <th class="hide-mobile">Commune</th>
+            <th>Total</th>
+            <th class="hide-mobile">Statut</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="sheet-orders-body"></tbody>
+      </table>
+    </div>
+  </section>
+
 </main>
 
-<!-- ─── STICKY ORDER BAR ─────────────── -->
-<div class="order-bar hidden" id="order-bar">
-  <div class="order-bar-inner">
-    <div class="bar-summary">
-      <div class="bar-count" id="bar-count">0 article</div>
-      <div class="bar-total" id="bar-total">0 DA</div>
-    </div>
-    <div class="bar-items-list" id="bar-items-list"></div>
-    <button class="order-btn" id="main-order-btn">
-      اطلب الآن <span class="icon">←</span>
-    </button>
-  </div>
-</div>
-
-<!-- ─── Modal ──────────────────────────── -->
-<div class="modal-backdrop" id="modal">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <button class="close" id="close-modal" aria-label="Fermer">×</button>
-    <div id="form-view">
-      <header>
-        <div class="eyebrow">Paiement à la livraison · COD</div>
-        <h2 id="modal-title">Finalisez votre <em>commande</em></h2>
-      </header>
-
-      <div id="modal-summary-block"></div>
-
-      <form id="order-form" autocomplete="on" novalidate>
-        <!-- Honeypot: real users never see or fill this. Bots usually do. -->
-        <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none">
-          <label>Ne pas remplir<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label for="f-name">Nom complet</label>
-            <input id="f-name" name="name" type="text" required autocomplete="name" placeholder="الاسم الكامل">
-          </div>
-          <div class="field">
-            <label for="f-phone">Téléphone</label>
-            <input id="f-phone" name="phone" type="tel" required autocomplete="tel" placeholder="0555 12 34 56">
-          </div>
-        </div>
-
-        <div class="field-row">
-          <div class="field">
-            <label for="f-wilaya">Wilaya</label>
-            <select id="f-wilaya" name="wilaya" required>
-              <option value="" disabled selected>اختر الولاية</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="f-baladia">Commune</label>
-            <select id="f-baladia" name="baladia" required>
-              <option value="" disabled selected>Sélectionnez d'abord une wilaya</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="f-address">Adresse complète <span style="text-transform:none;color:var(--ink-soft);font-weight:400">(optionnel)</span></label>
-          <input id="f-address" name="address" type="text" placeholder="Rue, numéro, repère…">
-        </div>
-
-        <div class="field">
-          <label>Mode de livraison</label>
-          <div class="delivery">
-            <label class="sel" id="lab-door">
-              <input type="radio" name="delivery" value="door" checked>
-              <span class="name">À domicile</span>
-              <span class="price" id="price-door">— DA</span>
-            </label>
-            <label id="lab-stop">
-              <input type="radio" name="delivery" value="stop">
-              <span class="name">Stop desk</span>
-              <span class="price" id="price-stop">— DA</span>
-            </label>
-          </div>
-          <div id="delivery-note" style="font-size:12px;color:var(--ink-soft);margin-top:4px;font-weight:500"></div>
-        </div>
-
-        <div class="field">
-          <label for="f-note">Note <span style="text-transform:none;color:var(--ink-soft);font-weight:400">(optionnel)</span></label>
-          <textarea id="f-note" name="note" rows="2" placeholder="ملاحظات…"></textarea>
-        </div>
-
-        <div class="submit-row">
-          <button type="button" class="cancel" id="cancel-btn">Annuler</button>
-          <button type="submit" class="submit-btn">تأكيد الطلب</button>
-        </div>
-      </form>
-    </div>
-
-    <div id="success-view" style="display:none">
-      <div class="success">
-        <div class="badge">✓</div>
-        <h2>تم تأكيد <em>طلبك</em></h2>
-        <p>سنتصل بك قريباً لتأكيد التوصيل. شكراً لك!</p>
-        <div class="recap" id="success-recap"></div>
-        <button class="submit-btn" id="ok-btn" style="max-width:240px">شكراً</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-<!-- ─── Product Detail Modal ──────────────── -->
-<div class="modal-backdrop" id="detail-modal">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="detail-title">
-    <button class="close" id="close-detail" aria-label="Fermer">×</button>
-    <img class="detail-img" id="detail-img" src="" alt="">
-    <div class="detail-body">
-      <div class="detail-num" id="detail-num"></div>
-      <h2 class="detail-title" id="detail-title"></h2>
-      <div class="detail-weight" id="detail-weight"></div>
-      <p class="detail-desc" id="detail-desc"></p>
-      <ul class="detail-points" id="detail-points"></ul>
-      <div class="detail-price">
-        <span class="dp-now" id="detail-price-now"></span>
-        <span class="dp-was" id="detail-price-was"></span>
-        <span class="dp-unit">/ unité</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ─── Footer ─────────────────────────── -->
 <footer>
-  <div class="foot-inner">
-    <div>
-      <h4>Nutsa, <em>la pâte à tartiner</em><br>des professionnels.</h4>
-      <p>Pâtes à tartiner premium pour pâtissiers, hôtels, cafés et particuliers exigeants. Textures maîtrisées, saveurs intenses.</p>
-    </div>
-    <div>
-      <h5>Catalogue</h5>
-      <ul>
-        <li>Chocolat noisettes</li>
-        <li>Pistache</li>
-        <li>Rocher</li>
-        <li>Chococo</li>
-      </ul>
-    </div>
-    <div>
-      <h5>Contact</h5>
-      <ul>
-        <li>contact@nutsa-dz.com</li>
-        <li>+213 555 00 00 00</li>
-        <li>Alger, Algérie</li>
-      </ul>
-    </div>
-  </div>
-  <div class="foot-bottom">
-    <span>© Nutsa Distribution Algérie · 2026</span>
-    <span>Catalogue Gros &amp; Détail</span>
-  </div>
+  <div>© 2026 Nutsa · Tableau de bord multi-source</div>
+  <div class="ar">جميع الحقوق محفوظة</div>
+  <div>v3.1 · Shopify + Vercel + Anderson + Sheet</div>
 </footer>
 
 <script>
-  // ── Apps Script endpoint (paste your Web App URL here after deploying) ──
-  // Should look like: https://script.google.com/macros/s/AKfycby...../exec
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxc8Bxw0eFXX595oSEB02OhPaLRSZAHQ7DUC398bfZKwWm82Tlx5dFqGTi2G-33_zt_/exec";
-
-  // ── Shared secret — must match Script Property `INTAKE_SECRET` ──
-  // This isn't real security (anyone can View Source), but stops drive-by spam
-  // from anyone POSTing directly to the Apps Script endpoint.
-  const INTAKE_SECRET = "nutsa_a8K2p9X4mZqL7vR3bN6fT1yH5wQ8jE";
-
-  // ── Data ───────────────────────────────────
-  const CDN = "https://nutsa-dz.com/cdn/shop/files/";
-  const products = [
-    { id:1,  num:"01", name:"Chococo (raf-aelo)", weight:"1.5 kg", cat:"choco", price:2400, was:2850, sheetName:"Nutsa Chococo (raf-aelo) 1,5 kg", img:CDN+"Code_Generated_Image.png?width=400",
-      desc:"Une pâte à tartiner au chocolat douce et onctueuse, élaborée à partir d'ingrédients soigneusement sélectionnés. Sa texture légère et sa saveur équilibrée en font le choix idéal pour le petit-déjeuner ou une collation gourmande.",
-      details:["Texture légère et fondante","Saveur chocolat équilibrée","Idéal pour particuliers","Format 1,5 kg"] },
-    { id:2,  num:"02", name:"Chococo", weight:"2.5 kg", cat:"choco", price:4000, was:null, sheetName:"Nutsa Chococo 2,5 kg", img:CDN+"B4503433-82FC-4B9C-BEC6-9FBF6DC16E61_1e1d7091-98c6-4370-b200-474ee768e66e.png?width=400",
-      desc:"La même recette Chococo dans un format plus grand pour ne jamais manquer de gourmandise. Idéale pour les familles nombreuses ou les petits commerces, cette pâte offre une texture soyeuse et une saveur généreuse à chaque tartine.",
-      details:["Texture soyeuse et généreuse","Grand format économique","Idéal familles & petits commerces","Format 2,5 kg"] },
-
-    { id:6,  num:"06", name:"Pistachio Crock", weight:"1.5 kg", cat:"pistache", price:3700, was:null, sheetName:"Nutsa Pistachio Crock 1,5 kg", img:CDN+"Gemini_Generated_Image_fefs1dfefs1dfefs.png?width=400",
-      desc:"Une expérience unique : la douceur de la pistache rencontre le croquant des éclats de fruits secs. La Pistachio Crock est une pâte premium à la texture inégalée, idéale pour sublimer vos desserts ou se déguster à la cuillère.",
-      details:["Éclats croquants de pistache","Recette premium haut de gamme","Idéal pour pâtissiers","Format 1,5 kg"] },
-    { id:7,  num:"07", name:"Pistache", weight:"1.5 kg", cat:"pistache", price:2400, was:2830, sheetName:"Nutsa Pistachio – 1,5 KG", img:CDN+"NUTSA-Pistaches-1_5KG.jpg?width=400",
-      desc:"Une pâte à la pistache pure, à l'arôme intense et à la couleur naturelle. Élaborée à partir de pistaches de qualité, elle se distingue par sa texture crémeuse. Parfaite pour garnir vos gâteaux, crêpes ou simplement tartiner.",
-      details:["Arôme pistache intense","Couleur naturelle","Polyvalente en pâtisserie","Format 1,5 kg"] },
-    { id:8,  num:"08", name:"Pistache", weight:"2.5 kg", cat:"pistache", price:4000, was:4700, sheetName:"Nutsa Pistachio – 2,5 KG", img:CDN+"NUTSA-Pistaches-2_5KG.jpg?width=400",
-      desc:"Le format intermédiaire de notre pâte à la pistache, pensé pour les professionnels de la pâtisserie et les grandes familles. Même qualité premium, même saveur authentique — en plus grande quantité pour un meilleur rapport qualité-prix.",
-      details:["Qualité professionnelle","Rapport qualité-prix optimal","Pour pâtissiers & cafés","Format 2,5 kg"] },
-    { id:9,  num:"09", name:"Pistache", weight:"12 kg", cat:"pistache", price:19200, was:22600, sheetName:"Nutsa Pistachio – 12 KG", img:CDN+"NUTSA_-_Pistaches_-_12_KG.jpg?width=400",
-      desc:"Le format professionnel par excellence. Conçu pour les hôtels, boulangeries, pâtisseries et restaurants, ce conditionnement de 12 kg garantit un approvisionnement sans interruption. Qualité constante, livraison sur toute l'Algérie.",
-      details:["Format industriel 12 kg","Pour hôtels, boulangeries, restaurants","Qualité constante & certifiée","Livraison 48h sur toute l'Algérie"] },
-    { id:10, num:"10", name:"Rocher", weight:"1.5 kg", cat:"rocher", price:2700, was:3000, sheetName:"Nutsa Rocher 1,5kg", img:CDN+"rocher_2048_1_1_page-0001.jpg?width=400",
-      desc:"Inspirée du célèbre bonbon au chocolat, la pâte Rocher de Nutsa offre une expérience gustative riche et gourmande. Mélange de chocolat onctueux et d'éclats de noisettes grillées, elle transforme chaque tartine en moment d'exception.",
-      details:["Éclats de noisettes grillées","Saveur chocolat intense","Texture riche et gourmande","Format 1,5 kg"] },
-    { id:11, num:"11", name:"Rocher", weight:"2.5 kg", cat:"rocher", price:4500, was:null, sheetName:"Nutsa Rocher 2,5kg", img:CDN+"Gemini_Generated_Image_gru9n1gru9n1gru9.png?width=400",
-      desc:"La même recette Rocher dans un format plus grand pour les amateurs et les professionnels. Chocolat fondant, noisettes croquantes : une alliance parfaite pour vos préparations sucrées ou pour régaler toute la famille au quotidien.",
-      details:["Même recette Rocher premium","Noisettes croquantes & chocolat fondant","Idéal professionnels & familles","Format 2,5 kg"] },
-  ];
-
-  const wilayas = [
-    {code:"01",name:"Adrar",                door:800, stop:600},
-    {code:"02",name:"Chlef",                door:600, stop:450},
-    {code:"03",name:"Laghouat",             door:800, stop:600},
-    {code:"04",name:"Oum El Bouaghi",       door:600, stop:450},
-    {code:"05",name:"Batna",                door:600, stop:450},
-    {code:"06",name:"Béjaia",               door:600, stop:450},
-    {code:"07",name:"Biskra",               door:700, stop:500},
-    {code:"08",name:"Béchar",               door:900, stop:700},
-    {code:"09",name:"Blida",                door:600, stop:450},
-    {code:"10",name:"Bouira",               door:600, stop:450},
-    {code:"11",name:"Tamanrasset",          door:1200,stop:900},
-    {code:"12",name:"Tébessa",              door:600, stop:450},
-    {code:"13",name:"Tlemcen",              door:600, stop:450},
-    {code:"14",name:"Tiaret",               door:600, stop:450},
-    {code:"15",name:"Tizi Ouzou",           door:600, stop:450},
-    {code:"16",name:"Alger",                door:0,   stop:0  },
-    {code:"17",name:"Djelfa",               door:700, stop:500},
-    {code:"18",name:"Jijel",                door:600, stop:450},
-    {code:"19",name:"Sétif",                door:600, stop:450},
-    {code:"20",name:"Saïda",                door:600, stop:450},
-    {code:"21",name:"Skikda",               door:600, stop:450},
-    {code:"22",name:"Sidi Bel Abbès",       door:600, stop:450},
-    {code:"23",name:"Annaba",               door:600, stop:450},
-    {code:"24",name:"Guelma",               door:600, stop:450},
-    {code:"25",name:"Constantine",          door:600, stop:450},
-    {code:"26",name:"Médéa",                door:600, stop:450},
-    {code:"27",name:"Mostaganem",           door:600, stop:450},
-    {code:"28",name:"M'Sila",               door:700, stop:500},
-    {code:"29",name:"Mascara",              door:600, stop:450},
-    {code:"30",name:"Ouargla",              door:800, stop:600},
-    {code:"31",name:"Oran",                 door:600, stop:450},
-    {code:"32",name:"El Bayadh",            door:800, stop:600},
-    {code:"33",name:"Illizi",               door:1200,stop:900},
-    {code:"34",name:"Bordj Bou Arréridj",   door:600, stop:450},
-    {code:"35",name:"Boumerdes",            door:600, stop:450},
-    {code:"36",name:"El Tarf",              door:600, stop:450},
-    {code:"37",name:"Tindouf",              door:1200,stop:900},
-    {code:"38",name:"Tissemsilt",           door:600, stop:450},
-    {code:"39",name:"El Oued",              door:800, stop:600},
-    {code:"40",name:"Khenchela",            door:600, stop:450},
-    {code:"41",name:"Souk Ahras",           door:600, stop:450},
-    {code:"42",name:"Tipaza",               door:600, stop:450},
-    {code:"43",name:"Mila",                 door:600, stop:450},
-    {code:"44",name:"Aïn Defla",            door:600, stop:450},
-    {code:"45",name:"Naama",                door:800, stop:600},
-    {code:"46",name:"Aïn Témouchent",       door:600, stop:450},
-    {code:"47",name:"Ghardaïa",             door:800, stop:600},
-    {code:"48",name:"Relizane",             door:600, stop:450},
-    {code:"49",name:"Timimoun",             door:900, stop:700},
-    {code:"50",name:"Bordj Badji Mokhtar",  door:1200,stop:900},
-    {code:"51",name:"Ouled Djellal",        door:700, stop:500},
-    {code:"52",name:"Béni Abbès",           door:1000,stop:800},
-    {code:"53",name:"In Salah",             door:1200,stop:900},
-    {code:"54",name:"In Guezzam",           door:1200,stop:900},
-    {code:"55",name:"Touggourt",            door:800, stop:600},
-    {code:"56",name:"Djanet",               door:1200,stop:900},
-    {code:"57",name:"El Menia",             door:1000,stop:800},
-    {code:"58",name:"El M'Ghair",           door:800, stop:600},
-  ];
-
-  // ── Delivery pricing rules ─────────────────
-  // Only single 1.5 kg items pay delivery.
-  // Multiple items (any) → free delivery.
-  // Alger (wilaya 16) → always free.
-  function getDeliveryCost(wilayaCode, cart){
-    // Alger is always free
-    if(wilayaCode === "16") return 0;
-    // Multiple distinct products → free
-    if(cart.length > 1) return 0;
-    // Single item that is NOT 1.5 kg → free
-    const item = cart[0];
-    if(!item) return 0;
-    const w = item.product.weight || "";
-    const is15 = /^1[,.]5\s*kg/i.test(w);
-    if(!is15) return 0;
-    // Single 1.5 kg → pay delivery
-    const wData = wilayas.find(x => x.code === wilayaCode);
-    if(!wData) return 0;
-    // Default to door price; caller can adjust for stop desk
-    return wData.door;
-  }
-
-  const communesData = {
-    "01":["Adrar","Tamest","Charouine","Reggane","In Zghmir","Tit","Ksar Kaddour","Sali","Bouda","Timokten","Aougrout","Fenoughil","Tamentit","Tamantit","Zaouiet Kounta","Akabli","Ouled Ahmed Timmi","Sba","Bordj Ould Moussa","Tsabit"],
-    "02":["Chlef","Tenes","Benairia","El Karimia","Taougrit","Beni Haoua","Sobha","Harchoun","Ouled Fares","Sidi Akkacha","Boukadir","Beni Rached","Talassa","Herenfa","Oued Goussine","Abou El Hassan","Ain Merane","Beni Bouattab","El Hadjadj","El Marsa","Labiod Medjadja","Moussadek","Oued Sly","Ouled Abbes","Ouled Benabdelkader","Sendjas","Sidi Abderrahmane","Tadjna","Zeboudja","Breira","Chettia","Dahra","Ain Bouchekif","Beni Haoua"],
-    "03":["Laghouat","Ksar El Hirane","El Kihia","Sidi Makhlouf","Hassi R'Mel","Aflou","El Ghicha","Oued Morra","Hassi Delaa","Tadjemout","Tadjrouna","Brida","El Assafia","Kheneg","Gueltat Sidi Saad","Ain Sidi Ali","Bennasser Ben Chohra","El Haouaita","Oued Abiod","Sebgag","Sidi Bouzid","Taouiala","Beidha","Ouessel"],
-    "04":["Oum El Bouaghi","Ain Beida","Ain M'lila","F'Kirina","Ain Babouche","Ksar Sbahi","Dhalaa","Sigus","Ain Diss","Ain Kercha","Meskiana","Souk Naamane","Telerghma","Gosbat","Oued Nini","Ain Zitoun","Behir Chergui","El Amiria","El Belala","Hanchir Toumghani","Oued Garou","Rahia","Souk El Had","Ain El Bordj","Bir Chouhada","Zorg"],
-    "05":["Batna","Ghassira","Maafa","Merouana","Tazoult","N'Gaous","Seggana","Arris","Timgad","Ichmoul","Fesdis","Ain Yagout","Bouzina","Chemora","Djerma","Ain Djasser","Ain El Hassi","Ain Touta","Barika","Boulhilet","Boumia","Djezzar","El Madher","Foum Toub","Guigba","Hidoussa","Kimmel","Larbaa","Lazrou","Lemsane","Menaa","Msela","Ouled Aouf","Ouled Selam","Ras El Aioun","Sefriane","Seriana","Tilatou","Tkout","Tighanimine","Zanat El Beida","Tazolt","Ouled Sidi Slimane","Aïn Yagout","El Hassi","Chir","Talkhamt","Kimel","Draa Toubkal","Abdelkader Azzouza","Tigharghar","Rahbat","Ouyoun El Assafir"],
-    "06":["Bejaia","Amizour","Ferraoun","Taourirt Ighil","Chemini","Taskriout","Tamokra","Draa El Caid","Kherraga","Sidi Aich","El Kseur","Melbou","Akfadou","Toudja","Tifra","Souk El Tenine","Tazmalt","Aokas","Barbacha","Beni Ksila","Beni Maouche","Beni Mellikeche","Boukhelifa","Darguina","El Flaye","Fenaia Ilmaten","Ighil Ali","Ighram","Kendira","Kherrata","M'Cisna","Ouzellaguen","Sedouk","Tichy","Timezrit","Tizi Embarek","Oued Ghir","Soumaa","Tibane","Beni Djellil","Draath","Sidi Ayad","Beni Maouche","Taourirt Amokrane","Souk Oufella","Amalou","Leflaye","Tifrit N'Ait El Hadi","Boukhlifa","Oued Sebt","Oued Fali","Akbou"],
-    "07":["Biskra","Sidi Okba","M'Chouneche","El Kantara","Ain Zaatout","Tolga","Zeribet El Oued","El Outaya","Branis","Djemorah","Tanthelik","Ain Naga","Lioua","Lichana","Ain Ben Naoui","Bouchagroun","Chetma","Djemorah","El Feidh","El Ghrous","Foughala","Khenguet Sidi Nadji","M'Lili","Meziraa","Oumache","Ourlal","Ras El Miad","Sidi Khaled","Bordj Ben Azzouz","El Hadjeb","Liwa","Sidi Ghzel"],
-    "08":["Bechar","Meridja","Lahmar","Boukais","Mogheul","Abadla","Taghit","Erg Ferradj","Beni Ounif","Kenadsa","Ksabi","El Ouata","Ouled Khoudir","Kerzaz","Beni Abbes","Timoudi","Igli","Tamtert","Merijet","Rechaiga"],
-    "09":["Blida","Boufarik","Bougara","El Affroun","Oued El Alleug","Mouzaia","Meftah","Larbaa","Bouinan","Guerrouaou","Ain Romana","Soumaa","Bouarfa","Chiffa","Ouled Yaich","Chrea","Ain Laloui","Ben Khellil","Oued Djer","Djebabra","Beni Tamou","Hammam Melouane","El Esnam","Chiffa","Bougara","Soumaa","Meftah"],
-    "10":["Bouira","Aïn Bessem","Bir Ghbalou","Lakhdaria","El Hachimia","Souk El Khemis","Kadiria","Haizer","Taghzout","M'Chedellah","Ridane","Maala","Aomar","Djebahia","Bouderbala","Ait Laaziz","Bechloul","Bordj Okhriss","Boukram","Chorfa","Dechmia","El Adjiba","El Asnam","El Esnam","El Hakimia","Guerrouma","Hadjera Zerga","Khabouzia","Maamora","Raouraoua","Saharidj","Sour El Ghouzlane","Zbarbar"],
-    "11":["Tamanrasset","Abalessa","Idles","Tazrouk","Arak","Tin Zaouatine","Ain Amguel","Foggaret Ezzaouia","In Ghar","Aguemoun"],
-    "12":["Tebessa","Bir El Ater","Cheria","Stah Guentis","El Aouinet","El Ogla","Safsaf El Ouesra","Hammamet","Ain Zerga","Negrine","Bir El Mokadem","El Kouif","Morsott","El Ogla Malha","Oum Ali","Ouenza","Ferkane","Ain Zerga","El Ma Labiodh","Boukhadra","Thlidjene","Bir Dheheb","El Meridj","Bir Mokadem","Ain El Mabrouk","El Hammamet"],
-    "13":["Tlemcen","Sebdou","Ghazaouet","Remchi","Beni Snous","Maghnia","Hennaya","Bensekrane","Ouled Mimoun","Ain Youcef","Bab El Assa","Chetouane","Fellaoucene","Ain Fezza","Aïn Nehala","Marhoum","Amieur","Marsa Ben M'Hidi","Ain Tallout","Aïn Ghoraba","Aïn Kebira","Azail","Beni Bahdel","Beni Boussaid","Beni Mester","Beni Ouarsous","Beni Semiel","Bouhlou","Dar Yaghmouracene","El Gor","El Fehoul","Hammam Boughrara","Hennaya","Mansourah","Nedroma","Ouled Riyah","Plaine des Matmors","Sidi Abdelli","Sidi Djillali","Souk Thlatha","Terni Beni Hdiel","Tienet","Tlat Larbaa","Zouia"],
-    "14":["Tiaret","Medroussa","Ain Bouchekif","Sidi Ali Mellal","Ain Zair","Dahmouni","Rahouia","Sougueur","Mellakou","Ksar Chellala","Frenda","Takhemaret","Hamadia","Serghine","Nadorah","Ain Dheb","Ain El Hadid","Ain Kermes","Beni Chaïb","Chehaima","Djillali Ben Amar","El Ghomri","Faidja","Guertoufa","Mechraa Safa","Meghila","Oued Lilli","Rechaiga","Sebt","Sidi Abdelghani","Sidi Bakhti","Sidi Hosni","Tagdemt","Zmalet El Emir Abdelkader"],
-    "15":["Tizi Ouzou","Ain El Hammam","Larba Nath Irathen","Mekla","Beni Douala","Boghni","Draa El Mizan","Ouacif","Azeffoun","Tizi Ghenif","Iferhounene","Bouzguen","Yakouren","Freha","Tadmait","Aghribs","Ifigha","Zekri","Assi Youcef","Ain Zaouia","Ait Aggouacha","Ait Boumahdi","Ait Chafaa","Ait Khelili","Ait Mahmoud","Ait Oumalou","Ait Toudert","Ait Yahia","Ait Yahia Moussa","Akerrou","Amdoun","Azazga","Azaghar","Beni Aissi","Beni Yenni","Beni Zikki","Beni Zmenzer","Boghni","Boudjima","Bouzeguene","Draa Ben Khedda","Frikat","Iboudraren","Iflissen","Illilten","Imsouhal","Irdjen","Larbaa Nath Irathen","Maatkas","Makouda","Mechtras","Mizrana","Mourad Rais","Ouadhias","Ouaguenoun","Sahel","Sidi Naamane","Souk El Tenine","Taddert","Tala Athmane","Tigzirt","Timizart","Tirmitine","Yatafen"],
-    "16":["Alger Centre","Sidi M'Hamed","El Madania","Bab El Oued","Bologhine","Casbah","Oued Koriche","Bir Mourad Rais","El Biar","Bouzareah","Birkhadem","El Harrach","Baraki","Oued Smar","Bachdjerrah","Hussein Dey","Kouba","Bourouba","Dar El Beida","Bab Ezzouar","Ben Aknoun","Dely Ibrahim","Hammamet","Rais Hamidou","Djasr Kasentina","El Mouradia","Hydra","Mohammadia","Bordj El Kiffan","El Magharia","Beni Messous","Les Eucalyptus","Birtouta","Tessala El Merdja","Ouled Chebel","Sidi Moussa","Ain Taya","Bordj El Bahri","El Marsa","H'Raoua","Rouiba","Reghaia","Ain Benian","Staoueli","Zeralda","Mahelma","Rahmania","Souidania","Cheraga","Ouled Fayet","El Achour","Draria","Douera","Baba Hassen","Khraicia","Saoula"],
-    "17":["Djelfa","Messaad","Hassi Bahbah","Ain Maabed","Dar Chioukh","Sidi Ladjel","Charef","El Idrissia","Guettara","Birine","Ain El Ibel","Hassi El Euch","M'Liliha","Ain Feka","Ain Oussera","Ain Chouhada","Bouiha Lehbib","Brouiha Lehbib","Deldoul","El Azizia","El Guedid","Faidh El Botma","Hassi Fedoul","Leba","Moudjebara","Oum Laadham","Sed Rahal","Selmana","Sidi Baizid","Zaafrane","Zaccar"],
-    "18":["Jijel","Taher","El Aouana","Chekfa","Settara","El Milia","Sidi Maarouf","Erraguene","Ziama Mansouriah","El Kennar","Ghebala","Ouled Yahia Khedrouce","Texenna","Djemaa Beni Habibi","Bordj T'har","Ain Makhlouf","Boucif Ouled Askeur","El Ancer","El Djendel","Emir Abdelkader","Kaous","Kheïri Oued Adjoul","Sidi Abdelaziz","Selma Benziada","Chahna","Oued Adjoul","Bouraoui Belhadef","Ouled Rabah"],
-    "19":["Setif","El Eulma","Ain Arnat","Guidjel","Beni Aziz","Amoucha","Babor","Ain Oulmene","Bouandas","Hammam Guergour","Salah Bey","Bir El Arch","Boutaleb","Ain Legradj","Ain Roua","Ain Sebt","Aïn Abessa","Aïn El Kebira","Aïn Lahdjar","Aïn Oulmane","Aouras","Beidha Bordj","Belaa","Bir Haddada","Bougaa","Boutaleb","Dehamcha","Draa Kebila","El Eulma","El Ouldja","Guellal","Hammam Soukhna","Harbil","Ksar El Abtal","Maoklane","Mezloug","Oued El Barad","Ouled Addouane","Ouled Si Ahmed","Ouled Tebben","Rasfa","Serdj El Ghoul","Ain El Hamam","Talaifacene","Taya","Tizi N'Bechar","Zit El Kebir"],
-    "20":["Saida","Sidi Boubekeur","Ouled Brahim","Tircount","Ain Soltane","Ouled Khaled","Youb","Moulay Larbi","Maamora","Ain Hadjar","Hounet","Sidi Khaled","Sidi Amar","Ain Sekhouna","El Hassasna","Doui Thabet"],
-    "21":["Skikda","El Hadaik","Azzaba","Ben Azzouz","Collo","Tamalous","Filfila","Sidi Mezghiche","Ain Bouziane","Zerdezas","Ouled Habbaba","Ramdane Djamel","Oued Zitoun","Ouldja Boulballout","Kanoua","Aïn Charchar","Beni Bechir","Beni Oulbane","Beni Zid","Bouchtata","Cheraia","Djendel Saadi Mohamed","El Harrouch","Essebt","Hamadi Krouma","Kerkera","Khenacha","Larbaatache","Oum Toub","Salah Bouchaour","Sidi Mezghiche","Tamalous","Zitouna"],
-    "22":["Sidi Bel Abbes","Tessala","Sidi Brahim","Mostefa Ben Brahim","Telagh","Sidi Ali Boussidi","Maroufia","Sidi Lahcene","Tenira","Moulay Slissen","Mezaourou","Redjem Demouche","Ain Tindamine","Tilmouni","Badredine El Mokrani","Aïn Adden","Aïn El Berd","Aïn Kada","Aïn Tindamine","Amarnas","Benachiba Chelia","Bir El Hammam","Bou Nif","Boudriaa Ben Yaich","Chetouane Belaila","Dhaya","El Hacaiba","El Haçaïba","Hassi Dahou","Hassi Zahana","Lamtar","M'Cid","Merine","Mezaourou","Oued Sebaa","Oued Taourira","Ras El Ma","Sfissef","Sidi Chaib","Sidi Khaled","Sidi Yacoub","Sidi Zerrouk","Tabia","Teghalimet","Tlelat","Zerouala"],
-    "23":["Annaba","Seraidi","Berrahel","El Hadjar","El Bouni","Ain Berda","Chetaibi","Sidi Amar","Treat","Oued El Aneb","Cheurfa","El Eulma"],
-    "24":["Guelma","Hammam Debagh","Bouchegouf","Djeballah Khemissi","Ain Makhlouf","Oued Zenati","Ain Ben Beida","Bouati Mahmoud","Medjez Sfa","Hammam N'Bail","Boumahra Ahmed","Guelaat Bou Sbaa","Nechmaya","Ain Lahdjar","Khezara","Ain Hessainia","Ain Larbi","Aïn Sandel","Beni Mezline","Bordj Maamoun","El Fedjoudj","Heliopolis","Houari Boumediene","Khaloua","Ras El Agba","Sellaoua Announa","Tamlouka"],
-    "25":["Constantine","El Khroub","Hamma Bouziane","Ibn Ziad","Zighoud Youcef","Ain Abid","Messaoud Boudjriou","Beni Hamiden","Didouche Mourad","Ain Smara","Ouled Rahmoune","El Khroub"],
-    "26":["Medea","Berrouaghia","Ouzera","El Omaria","Souagui","Ksar El Boukhari","Aziz","Chabounia","Tablat","Mezerana","Tamesguida","Benchicao","Seghouane","Boghar","Sidi Naamane","Ain Boucif","Ain Ouksir","Ain El Hajel","Aissaouia","Beni Slimane","Bir Ben Laabed","Bouaichoune","Boughezoul","Bouskene","Chahbounia","Cheniguel","Derrag","Djouab","El Azizia","El Guelb El Kebir","El Hamdania","El Ouinet","Hannacha","Kef Lakhdar","Khams Djouamaa","Lam Tamine","Mihoub","Meftah","Ouamri","Ouled Antar","Ouled Brahim","Ouled Deide","Ouled Maaref","Oum El Djalil","Oued El Djemal","Oued Harbil","Rebaia","Saneg","Sedraia","Si Mahdjoub","Sidi Damed","Sidi Errabia","Sidi Naamane","Souagui","Tafraout","Tala Athmane","Tamesguida","Tbessa","Tlalet El Oued","Zoubiria"],
-    "27":["Mostaganem","Ain Nouicy","Hassi Mamach","Stidia","Ain Tedles","Sour El Ghozlane","Mesra","Ain Sidi Cherif","Bouguirat","Kheir Eddine","Sidi Lakhdar","Mansourah","Ouled Boughalem","Djidiouia","Sidi Ali","Achaacha","Ain Boudinar","Aïn Nouissi","Aïn Sidi Cherif","Bouguirat","Chelif","El Haciane","El Karma","Fornaka","Hadjadj","Khadra","Mazagran","Ouled Boughalem","Ouled Maallah","Safsaf","Souaflia","Tazgaïet","Tigditt"],
-    "28":["M'Sila","Medjedel","Hammam Dhalaa","Ouled Derradj","Ain El Hadjel","Khoubana","Ouled Addi Guebala","Tarmount","Sidi Ameur","Maadid","Ain El Melh","Beni Ilmane","Oultene","Djebel Messaad","Sidi M'Hamed","Ain El Hadjel","Ain El Rich","Ain Farsia","Ben Srour","Berhoum","Bir Foda","Bou Saada","Bouti Sayah","Dehahna","El Hamel","El Houamed","Gamra","Grarem Gouga","Guicha","Hammam Dalaa","Khoubri","M'Tarfa","Magra","Maarif","Mcif","Msaad","Ouanougha","Ould Addi Gueballa","Sidi Aissa","Sidi M'Hamed","Slim","Souama","Tarmount","Zarzour"],
-    "29":["Mascara","Sig","Bou Henni","El Bordj","Mohammadia","Tighenif","Oued Taria","Ain Fekan","Hachem","Ghriss","Zahana","Hanacha","Maoussa","Oued El Abtal","Ferraguig","Ain Fares","Ain Ferkah","Ain Frass","Ain Oulbene","Benian","Bou Hanifia","Bouhenni","El Ghomri","El Keurt","Froha","Gharrous","Guerdjoum","Khalouia","Makdha","Matemore","Nesmot","Oggaz","Ras El Aïn Amirouche","Sedjerara","Sehailia","Sidi Abdelmoumen","Sidi Boussaid","Tizi","Tliouanet","Zarouria"],
-    "30":["Ouargla","Hassi Messaoud","N'Goussa","Rouissat","Ain Beida","El Borma","Tebesbest","Nezla","Sidi Slimane","Balidat Ameur","Taibet","Temacine","El Harihira","Megarine","Ain El Beida","Adjadja","Ben Naceur","El Allia","El Hadjira","El Macta","Gassi Touil","Guellala","Hassi Lefhel","Mekhadma","Sidi Khouiled","Tamacine","Zaouia El Abidia"],
-    "31":["Oran","Es Senia","Bir El Djir","Sidi Chami","Gdyel","Marsa","Boufatis","Ain El Turk","Arzew","Bethioua","Ain El Kerma","Hassi Ben Okba","Misserghin","Mers El Kebir","Oued Tlelat","Tafraoui","Bousfer","El Ancor","Ain El Bia","Ain Biya","Ain El Turk","Ben Freha","Boutlelis","El Hassi","El Kerma","Hassi Mefsoukh","Oued Tlelat","Sidi Ben Yebka","Sidi Chahmi","Tafraoui"],
-    "32":["El Bayadh","Brezina","Rogassa","El Abiodh Sidi Cheikh","Ghassoul","Boualem","Sidi Ameur","Chellala","Arbaouat","Sidi Slimane","Sidi Tifour","Kef El Ahmar","El Bnoud","Ain El Orak","Cheguig","Bou Saada","Boualem","El Aouedj","El Mehara","Gueassem","Krakda","Mehara","Oulad Sidi Slimane","Sidi Yakoub","Stitene"],
-    "33":["Illizi","Debdeb","Bordj Omar Driss","Tin Fouye Tabankort","In Amenas","Bordj El Haouass","In Guezzam"],
-    "34":["Bordj Bou Arreridj","Ras El Oued","Bordj Zemoura","Mansoura","El M'hir","Ben Daoud","El Achir","Ain Taghrout","Sidi Embarek","Belimour","Medjana","Teniet En Nasr","Djaafra","Tixter","Bir Kasdali","Aïn Tesra","Aïn Touila","Bordj Ghedir","Colla","El Ach","El Anseur","El Hamadia","Ghilassa","Hasnaoua","Khelil","Rabta","Ridane","Sidi M'Hamed","Tassameurt"],
-    "35":["Boumerdes","Boudouaou","Bordj Menaiel","Issers","Naciria","Thenia","Dellys","Baghlia","Sidi Daoud","Khemis El Khechna","Chabet El Ameur","Taourga","Ouled Hedadj","Zemmouri","Laghata","Ain Taya","Beni Amrane","Boudouaou El Bahri","Boumerdes","Cap Djenet","Djinet","El Kharrouba","Hammedi","Khemis El Khechna","Larbaa Nath Irathen","Ledjmet","Ouled Aissa","Si Mustapha","Taourga","Tidjelabine"],
-    "36":["El Tarf","El Kala","Bouhadjar","Ben M'Hidi","El Aioun","Souarekh","Zerizer","Boutheldja","Ain El Assel","Berrihane","Lac des Oiseaux","Hammam Beni Salah","Asfour","Ain Kerma","Ben Mehdi","Besbes","Bouteldja","Chbaita Mokhtar","Chefia","Dréan","El Aioun","El Tarf","Oued Zitoun","Raml Souk","Souk El Had","Zitouna"],
-    "37":["Tindouf","Oum El Assel"],
-    "38":["Tissemsilt","Theniet El Had","Bordj Emir Abdelkader","Lardjem","Beni Chaib","Ammari","Ouled Bessam","Maacem","Bordj Bounaama","Sidi Slimane","Melaab","Sidi Lantri","Khemisti","Layoune","Youssoufia","Ain Bouchekif","Ain Dzarit","Ain El Azem","Ain Oulmane","Boucaïd","El Brouj","Lazharia","Sidi Slimane","Tissemsilt"],
-    "39":["El Oued","Robbah","Oued El Alenda","Beni Guecha","Nakhla","Guemar","Hamraia","Reguiba","Debila","Magrane","Mih Ouansa","Hassi Khalifa","Trifaoui","Taleb Larbi","Bayadha","Ain El Beida","Bayadha","Belair","Choucha","Djamaa","El Ogla","El Oued","Guemar","Hamraia","Kouinine","Mih Ouansa","Nakhla","Oued El Alenda","Our Erradjiche","Oum Touyour","Reguiba","Robbah","Still","Taghzout","Tendla","Trifaoui","Douar El Ma"],
-    "40":["Khenchela","Kais","El Hamma","Ain Touila","Taouzianat","Baghai","Chelia","Babar","Fais","Djellal","Ouled Rechache","M'Toussa","Bouhmama","El Oueldja","Remila","Ain Touila","Chechar","El Mahmel","Ensigha","Khenchela","Khirane","Lessouda","Ouled Rechache","Tamsa"],
-    "41":["Souk Ahras","Sedrata","Haddada","Mechroha","Ain Soltane","Ouled Drareb","Tiffech","Taoura","Zaarouria","Bir Bouhouche","Madjer","Sidi Fredj","Oum El Adhaim","Kheiter","M'Daourouch","Ain Zana","Bir Bouhouche","Drea","El Haouche","Hannachi","Joubes Agreb","Khedara","Khemissa","Lahdada","Merahna","Oued Keberit","Ouldja","Ouled Driss","Ragouba","Sidi Fredj","Taoura","Terraguelt","Zaarouria"],
-    "42":["Tipaza","Hadjout","Sidi Amar","Gouraya","Cherchell","Damous","Menaceur","Fouka","Bou Ismail","Kolea","Attatba","Ahmar El Ain","Sidi Ghiles","Bou Haroun","Nador","Aghbal","Aghlal","Ain Tagourait","Ain Benian","Beni Milleuk","Bourkika","Chaiba","Damous","Douaouda","El Afroun","Gouraya","Hadjeret Ennous","Hamr","Khemisti","Kolea","Larhat","Marengo","Meurad","Messelmoune","Nador","Sidi Amar","Sidi Rached","Tipasa","Bou Ismail","Cherchell"],
-    "43":["Mila","Ferdjioua","Chelghoum Laid","Tassadane Haddada","Teleghma","Oued Athmania","Tadjenanet","Grarem Gouga","Ahmed Rached","Rouached","Aïn Mellouk","Mihoub","Sidi Merouane","Ain Beida Harriche","Ain Tine","Benyahia Abderrahmane","Bouhatem","El Mechira","Hamala","Mila","Oued Seguen","Oued Endja","Ouled Khlouf","Sidi Khelifa","Terrai Bainen","Tessala Lemtai","Tiberguent","Zeghaia"],
-    "44":["Ain Defla","Mekhatria","Bathia","Aïn Bouyahia","Tiberkanine","Khemis Miliana","Hoceinia","Rouina","Boumedfaa","Aïn Lechiakh","Djemaa Ouled Cheikh","Arib","El Abadia","El Amra","El Attaf","El Maine","Hammam Righa","Jdioua","Miliana","Oued Chorfa","Oued El Djemaa","Oued Fodda","Oued Rouina","Oued Sebt","Oued Sila","Rouina","Sidi Lakhdar","Tarik Ibn Ziad","Tiberkanine","Zeddine"],
-    "45":["Naama","Mecheria","Aïn Séfra","Tiout","Sfissifa","Moghrar","Djéniane Bourzeg","Kasdir","El Biodh","Ain Ben Khelil","Makman Ben Amer","Djeniene Bourzeg"],
-    "46":["Ain Temouchent","Hammam Bouhadjar","Aghlal","Ain El Arbaa","Ain Kihel","Beni Saf","Ouled Boudjemaa","Chentouf","Sidi Safi","Terga","Aoubellil","Ain Tolba","Sidi Ben Adda","Hassi El Ghella","Bou Zedjar","Ain Larbaa","Ain Temouchent","Aoulef","Bouzedjar","El Amria","El Emir Abdelkader","El Malah","Hassasna","Mesra","Oued Berkeche","Oued Sebbah","Ouled Kihal","Sidi Boumediene","Tamzoura"],
-    "47":["Ghardaia","Berriane","Metlili","El Atteuf","Zelfana","Sebseb","Bounoura","Mansoura","Dhayet Bendhahoua","Igrarene","Taghrdait","Guerrara","Hassi El Gara"],
-    "48":["Relizane","Bendaoud","Sidi M'Hamed Ben Ali","El H'Madna","Ain Tarik","Oued Rhiou","Mediouna","Oued El Djemaa","Mazouna","Ramka","Matmar","Zemmoura","Sidi Khettab","Beni Dergoun","Sidi Lazreg","Ain Tarik","Ammi Moussa","Beni Dergoun","Beni Zentis","Djidioua","El Matmar","El Ouldja","Hamri","Kalaa","Lahlef","Ouarizane","Oued El Djemaa","Oued Rhiou","Ouled Sidi Mihoub","Sidi Lazreg","Sidi M'Hamed","Yellel","Zemoura"],
-    "49":["Timimoun","Ouled Said","Tinerkouk","Ksar Kaddour","Metarfa","Talmine","Charouine","Aougrout","Deldoul","Ksabi"],
-    "50":["Bordj Badji Mokhtar","Timiaouine","In Zghmir"],
-    "51":["Ouled Djellal","Sidi Khaled","Ras El Miad","Besbes","Chaiba","Doucen","Beni Ikhlef","M'Liliha"],
-    "52":["Beni Abbes","Tabelbala","Igli","Kerzaz","Ouled Khoudir","Tamtert","Timoudi","Ksar El Maadjed","El Ouata"],
-    "53":["In Salah","In Ghar","Foggaret Ezzaouia","Tin Amzi","Arak"],
-    "54":["In Guezzam","Tin Zaouatine","Ain Amguel"],
-    "55":["Touggourt","Taibet","Temacine","Megarine","El Harihira","Balidat Ameur","M'Naguer","Benaceur","Sidi Slimane","Blidet Amor"],
-    "56":["Djanet","El Mihan","Bordj El Haouass"],
-    "57":["El Menia","Hassi Gara","Hassi Fehal","Tin El Koum","El Menia"],
-    "58":["El M'Ghair","Oum Touyour","Sidi Khelil","Still","Djamaa","M'Rara","Tendla","Sidi Amrane","Mih Ouensa"]
+  // ════════════════════════════════════════════════════════════
+  //  CONFIG — PASTE YOUR APPS SCRIPT WEB APP URL HERE
+  // ════════════════════════════════════════════════════════════
+  const CONFIG = {
+    APPS_SCRIPT_URL: "",   // e.g. "https://script.google.com/macros/s/AKfycbxxx.../exec"
+    TOKEN:           ""    // matches DASHBOARD_TOKEN script property
   };
 
-  // ── Render ─────────────────────────────────
-  const fmt = n => new Intl.NumberFormat("fr-DZ").format(n);
-  const list = document.getElementById("product-list");
+  // ── Color palette
+  const C = {
+    red:'#B6342B', redDeep:'#8E2620',
+    green:'#7E9B5C', greenDeep:'#4F6B3A',
+    accent:'#C97B4F', accentDeep:'#A0623E',
+    gold:'#C4A04A', goldDeep:'#8A6D1F',
+    purple:'#8E6FA8', purpleDeep:'#6A5286',
+    blue:'#3E6FA5', blueDeep:'#2B5180',
+    ink:'#1A1A1A', inkSoft:'#5A5A5A', inkMuted:'#8A8A8A',
+    rule:'#E8E4DC', ruleSoft:'#F0EDE6'
+  };
 
-  function rowHtml(p){
-    const sale = p.was ? `<span class="tag sale">Promo</span>` : "";
-    const cat  = p.cat === "pistache" ? `<span class="tag green">Pistache</span>` :
-                 p.cat === "choco"    ? `<span class="tag">Chocolat</span>` :
-                                        `<span class="tag">${p.cat[0].toUpperCase()+p.cat.slice(1)}</span>`;
-    const was  = p.was ? `<span class="was">${fmt(p.was)} DA</span>` : "";
-    return `
-      <article class="row" data-cat="${p.cat}" data-id="${p.id}" role="listitem" aria-label="Nutsa ${p.name} ${p.weight}">
-        <div class="thumb"><img src="${p.img}" alt="Nutsa ${p.name} ${p.weight}" width="120" height="120" loading="lazy" decoding="async"></div>
-        <div class="info">
-          <div class="num">No ${p.num}</div>
-          <h3>Nutsa ${p.name}</h3>
-          <div class="tags">
-            <span class="tag">${p.weight}</span>
-            ${cat}
-            ${sale}
-          </div>
-          <button class="btn-info" data-info="${p.id}">
-            <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 5.5V9M6 3.5V4.5" stroke="currentColor" stroke-linecap="round"/></svg>
-            En savoir plus
-          </button>
-        </div>
-        <div class="qty-cell">
-          <div class="qty">
-            <button type="button" data-act="dec" aria-label="Diminuer quantité Nutsa ${p.name}">−</button>
-            <input type="number" min="0" value="0" data-id="${p.id}" inputmode="numeric" aria-label="Quantité Nutsa ${p.name}" id="qty-${p.id}">
-            <button type="button" data-act="inc" aria-label="Augmenter quantité Nutsa ${p.name}">+</button>
-          </div>
-        </div>
-        <div class="price-cell">
-          <div class="price-stack">
-            <div class="now" data-total="${p.id}" data-unit="${p.price}">0 DA</div>
-            ${was}
-            <div class="meta" data-meta="${p.id}">${fmt(p.price)} DA / unité</div>
-          </div>
-        </div>
-      </article>`;
+  const STATUS_META = {
+    "Livré":     { ar:"تم التسليم", color:C.greenDeep },
+    "Confirmed": { ar:"مؤكد",       color:C.green },
+    "Pending":   { ar:"معلق",       color:C.gold },
+    "Callback":  { ar:"معاودة",     color:C.purple },
+    "No Answer": { ar:"لا يرد",     color:C.accent },
+    "Cancelled": { ar:"ملغاة",      color:C.red }
+  };
+  const STATUS_ORDER = ["Livré","Confirmed","Pending","Callback","No Answer","Cancelled"];
+
+  // ── Clock
+  function tickClock(){
+    const d = new Date();
+    const p = n => String(n).padStart(2,'0');
+    document.getElementById('clock').textContent = p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());
   }
-  list.innerHTML = products.map(rowHtml).join("");
+  tickClock(); setInterval(tickClock, 1000);
 
-  // ── Quantity interactions ──────────────────
-  list.addEventListener("click", e => {
-    const btn = e.target.closest("[data-act]");
-    if(!btn) return;
-    const row = btn.closest(".row");
-    const input = row.querySelector("input[type=number]");
-    let v = parseInt(input.value || 0, 10);
-    v = btn.dataset.act === "inc" ? v+1 : Math.max(0, v-1);
-    input.value = v;
-    updateRow(row);
-  });
-  list.addEventListener("input", e => {
-    if(e.target.matches("input[type=number]")){
-      const row = e.target.closest(".row");
-      const v = Math.max(0, parseInt(e.target.value || 0, 10) || 0);
-      e.target.value = v;
-      updateRow(row);
+  // ── Helpers
+  const fmt = n => Math.round(n || 0).toLocaleString('fr-FR').replace(/,/g,' ');
+  const fmtCompact = n => {
+    n = n || 0;
+    if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+    if (n >= 1000) return Math.round(n/1000) + 'k';
+    return fmt(n);
+  };
+  const fmtPct = (n, d=1) => (n || 0).toFixed(d);
+
+  function animateNumber(el, target, opts = {}){
+    const {duration = 1200, formatter = null} = opts;
+    if(!el) return;
+    if(!el.firstChild || el.firstChild.nodeType !== 3) el.innerHTML = '0';
+    const start = performance.now();
+    function frame(t){
+      const p = Math.min((t-start)/duration, 1);
+      const eased = 1 - Math.pow(1-p, 3);
+      const v = target * eased;
+      el.firstChild.nodeValue = formatter ? formatter(v) : fmt(v);
+      if(p < 1) requestAnimationFrame(frame);
     }
-  });
+    requestAnimationFrame(frame);
+  }
 
-  function updateRow(row){
-    const id = +row.dataset.id;
-    const p  = products.find(x => x.id === id);
-    const q  = +row.querySelector("input").value || 0;
-    const tot = row.querySelector("[data-total]");
-    const meta = row.querySelector("[data-meta]");
-    tot.textContent = q === 0 ? `0 DA` : `${fmt(p.price * q)} DA`;
-    meta.textContent = q > 1 ? `${q} × ${fmt(p.price)} DA` : `${fmt(p.price)} DA / unité`;
-    if(q > 0){
-      tot.classList.add("bump");
-      setTimeout(()=>tot.classList.remove("bump"), 300);
+  function timeAgo(iso){
+    if(!iso) return '—';
+    const d = new Date(iso);
+    if(isNaN(d.getTime())) return iso;
+    const diffMin = Math.floor((Date.now() - d.getTime()) / 60000);
+    if(diffMin < 1) return "à l'instant";
+    if(diffMin < 60) return `il y a ${diffMin} min`;
+    if(diffMin < 1440) return `il y a ${Math.floor(diffMin/60)} h`;
+    const days = Math.floor(diffMin/1440);
+    if(days < 30) return `il y a ${days} j`;
+    return d.toLocaleDateString('fr-FR');
+  }
+
+  function setStatus(kind, message, updatedAt){
+    const dot = document.getElementById('status-dot');
+    const text = document.getElementById('status-text');
+    const upd = document.getElementById('last-updated');
+    dot.className = 'live-dot' + (kind === 'demo' ? ' demo' : kind === 'error' ? ' error' : '');
+    text.textContent = message;
+    if(updatedAt) upd.textContent = 'Mis à jour: ' + timeAgo(updatedAt);
+  }
+
+  function showSourceNotice(kind, message){
+    const el = document.getElementById('source-notice');
+    if(kind === 'live'){ el.classList.remove('show'); return; }
+    document.getElementById('source-notice-text').textContent = message;
+    el.classList.add('show');
+  }
+
+  // ════════════════════════════════════════════════════════════
+  //  DEMO DATA
+  // ════════════════════════════════════════════════════════════
+  const DEMO_DATA = {
+    generated_at: new Date().toISOString(),
+    sheet: {
+      summary: {
+        total_orders: 342, gross_revenue: 1485000, confirmed_revenue: 1156000,
+        delivered_revenue: 845000, lost_revenue: 81000,
+        confirmation_rate: 84.2, delivery_rate: 76.5, aov: 4342
+      },
+      funnel: { total:342, confirmed:268, delivered:205, cancelled:32, pending:42 },
+      status_breakdown: {
+        "Pending":   { count: 28,  revenue: 124000 },
+        "Confirmed": { count: 63,  revenue: 311000 },
+        "Livré":     { count: 205, revenue: 845000 },
+        "Cancelled": { count: 32,  revenue: 81000 },
+        "No Answer": { count: 10,  revenue: 78000 },
+        "Callback":  { count: 4,   revenue: 46000 }
+      },
+      communes: [
+        { name:"Alger Centre", count:48 }, { name:"Hydra", count:34 },
+        { name:"Bab Ezzouar", count:28 }, { name:"Bordj El Kiffan", count:24 },
+        { name:"Kouba", count:22 }, { name:"El Harrach", count:19 },
+        { name:"Dely Ibrahim", count:17 }, { name:"Cheraga", count:15 },
+        { name:"Birkhadem", count:13 }, { name:"Bir Mourad Rais", count:11 }
+      ],
+      sources: { website:{count:215,revenue:928000}, manual:{count:127,revenue:557000} },
+      recent_orders: [
+        {order:'#10247', name:'Amine B.', commune:'Hydra', total:5850, status:'Livré', date:new Date(Date.now()-4*60000).toISOString()},
+        {order:'#10246', name:'Yasmine K.', commune:'Bab Ezzouar', total:3200, status:'Confirmed', date:new Date(Date.now()-12*60000).toISOString()},
+        {order:'#10245', name:'Mohamed S.', commune:'El Harrach', total:7400, status:'Confirmed', date:new Date(Date.now()-18*60000).toISOString()},
+        {order:'#10244', name:'Lina M.', commune:'Kouba', total:2950, status:'Pending', date:new Date(Date.now()-24*60000).toISOString()},
+        {order:'#10243', name:'Karim A.', commune:'Cheraga', total:4100, status:'Livré', date:new Date(Date.now()-31*60000).toISOString()}
+      ]
+    },
+    anderson: {
+      sent: 268, in_transit: 38, delivered: 205, failed: 25,
+      awaiting_send: 12, delivery_rate: 76.5, failure_rate: 9.3, in_transit_rate: 14.2
+    },
+    shopify: {
+      configured: true, error: null,
+      shop_name: "Nutsa", domain: "https://nutsa-dz.com",
+      summary: {
+        gross_sales: 11344100, net_sales: 11344100, orders: 707, avg_order_value: 16043,
+        sessions: 61751, visitors: 50710, conversion_rate: 1.39
+      },
+      daily_trend: (() => {
+        const arr = []; const today = new Date();
+        for(let i=29;i>=0;i--){
+          const d=new Date(today); d.setDate(d.getDate()-i);
+          arr.push({ date:d.toISOString().slice(0,10), revenue:Math.round(200000+Math.random()*800000), orders:Math.round(15+Math.random()*35) });
+        }
+        return arr;
+      })(),
+      top_products: [
+        { name:"Nutsa Pistachio – 12 KG", revenue:31891800, orders:88 },
+        { name:"Nutsa Pistachio – 1,5 KG", revenue:15441600, orders:388 },
+        { name:"Nutsa Rocher 2,5kg", revenue:6084000, orders:25 },
+        { name:"Nutsa Pistachio – 2,5 KG", revenue:1716000, orders:265 },
+        { name:"Nutsa Chococo 2,5kg", revenue:968000, orders:46 }
+      ],
+      recent_orders: [
+        {order:'#2016', customer:'Arezki Mohamed', city:'Alger', total:4000, financial_status:'PENDING', fulfillment_status:'UNFULFILLED', date:new Date(Date.now()-5*60000).toISOString()},
+        {order:'#2015', customer:'Houa حواء', city:'Oran', total:4150, financial_status:'PENDING', fulfillment_status:'UNFULFILLED', date:new Date(Date.now()-90*60000).toISOString()},
+        {order:'#2014', customer:'بن طلحة', city:'Constantine', total:4000, financial_status:'PENDING', fulfillment_status:'UNFULFILLED', date:new Date(Date.now()-140*60000).toISOString()},
+        {order:'#2013', customer:'الياس عوالي', city:'Tlemcen', total:4000, financial_status:'PENDING', fulfillment_status:'UNFULFILLED', date:new Date(Date.now()-150*60000).toISOString()},
+        {order:'#2012', customer:'Allou yassima', city:'Sétif', total:2400, financial_status:'PENDING', fulfillment_status:'UNFULFILLED', date:new Date(Date.now()-3*3600000).toISOString()}
+      ],
+      product_count: 8
+    },
+    vercel: {
+      configured: true, error: null,
+      total_visits: 8420, today_visits: 287, unique_sessions: 5732, visits_per_session: 1.47,
+      daily_trend: (() => {
+        const arr = []; const today = new Date();
+        for(let i=29;i>=0;i--){
+          const d=new Date(today); d.setDate(d.getDate()-i);
+          arr.push({ date:d.toISOString().slice(0,10), visits:Math.round(150+Math.random()*350), sessions:Math.round(100+Math.random()*220) });
+        }
+        return arr;
+      })(),
+      top_pages: [
+        { page:'/', visits:4280 },
+        { page:'/products/pistachio-1-5kg', visits:1840 },
+        { page:'/products/pistachio-2-5kg', visits:920 },
+        { page:'/products/rocher-2-5kg', visits:580 },
+        { page:'/checkout', visits:430 },
+        { page:'/contact', visits:240 },
+        { page:'/about', visits:130 }
+      ],
+      top_referrers: [
+        { referrer:'(direct)', visits:3120 },
+        { referrer:'facebook.com', visits:2640 },
+        { referrer:'instagram.com', visits:1890 },
+        { referrer:'google.com', visits:520 },
+        { referrer:'tiktok.com', visits:250 }
+      ]
     }
-    row.classList.toggle("selected", q > 0);
-    refreshBar();
+  };
+
+  // ════════════════════════════════════════════════════════════
+  //  FETCH
+  // ════════════════════════════════════════════════════════════
+  async function fetchDashboardData(){
+    if(!CONFIG.APPS_SCRIPT_URL){
+      showSourceNotice('demo', "Données fictives. Collez l'URL Apps Script dans CONFIG en haut du <script>.");
+      setStatus('demo', 'Mode démo · données fictives');
+      return DEMO_DATA;
+    }
+    try {
+      const url = new URL(CONFIG.APPS_SCRIPT_URL);
+      url.searchParams.set('action', 'dashboard');
+      if(CONFIG.TOKEN) url.searchParams.set('token', CONFIG.TOKEN);
+      const res = await fetch(url.toString(), { redirect:'follow' });
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      if(data.error) throw new Error(data.error);
+      setStatus('live', 'Live · 4 sources connectées', data.generated_at);
+      showSourceNotice('live');
+      return data;
+    } catch(err) {
+      console.error('Fetch failed:', err);
+      showSourceNotice('demo', "Impossible de joindre Google Sheets. Données fictives. (" + err.message + ")");
+      setStatus('error', 'Connexion échouée');
+      return DEMO_DATA;
+    }
   }
 
-  // ── Sticky bar ─────────────────────────────
-  const orderBar    = document.getElementById("order-bar");
-  const barCount    = document.getElementById("bar-count");
-  const barTotal    = document.getElementById("bar-total");
-  const barItemsList= document.getElementById("bar-items-list");
+  // ════════════════════════════════════════════════════════════
+  //  RENDER
+  // ════════════════════════════════════════════════════════════
+  let charts = {};
 
-  function getCart(){
-    return products.map(p => {
-      const input = list.querySelector(`input[data-id="${p.id}"]`);
-      const q = input ? (+input.value || 0) : 0;
-      return { product:p, qty:q, subtotal: p.price * q };
-    }).filter(x => x.qty > 0);
+  function render(data){
+    renderHero(data);
+    renderSourceStrip(data);
+    renderShopify(data.shopify);
+    renderVercel(data.vercel);
+    renderAnderson(data.anderson);
+    renderSheet(data.sheet);
   }
 
-  function refreshBar(){
-    const cart = getCart();
-    const totalItems = cart.reduce((s,x) => s + x.qty, 0);
-    const totalPrice = cart.reduce((s,x) => s + x.subtotal, 0);
+  function renderHero(data){
+    const shopifyRev = (data.shopify && data.shopify.configured && data.shopify.summary) ? (data.shopify.summary.gross_sales || 0) : 0;
+    const sheetRev = (data.sheet && data.sheet.summary) ? (data.sheet.summary.confirmed_revenue || 0) : 0;
+    const combined = shopifyRev + sheetRev;
+    const shopifyOrders = (data.shopify && data.shopify.summary) ? (data.shopify.summary.orders || 0) : 0;
+    const sheetOrders = (data.sheet && data.sheet.summary) ? (data.sheet.summary.total_orders || 0) : 0;
+    const totalOrders = shopifyOrders + sheetOrders;
 
-    if(totalItems === 0){
-      orderBar.classList.add("hidden");
+    animateNumber(document.getElementById('hero-combined'), combined);
+    animateNumber(document.getElementById('hero-orders'), totalOrders);
+    document.getElementById('hero-combined-sub').textContent =
+      `Shopify: ${fmt(shopifyRev)} DA · Sheet: ${fmt(sheetRev)} DA`;
+    document.getElementById('hero-orders-sub').textContent =
+      `Shopify: ${fmt(shopifyOrders)} · Sheet: ${fmt(sheetOrders)}`;
+  }
+
+  function renderSourceStrip(data){
+    // Shopify mini
+    const s = data.shopify;
+    const badge = document.getElementById('badge-shopify');
+    if(s.configured) {
+      badge.textContent = 'Live'; badge.className = 'source-badge live';
+      document.getElementById('mini-shopify-visitors').textContent = fmtCompact(s.summary.visitors);
+      document.getElementById('mini-shopify-orders').textContent = fmt(s.summary.orders);
+      document.getElementById('mini-shopify-revenue').innerHTML = fmtCompact(s.summary.gross_sales) + ' <span class="ital">DA</span>';
+    } else {
+      badge.textContent = 'Off'; badge.className = 'source-badge warn';
+      document.getElementById('mini-shopify-visitors').textContent = '—';
+      document.getElementById('mini-shopify-orders').textContent = '—';
+      document.getElementById('mini-shopify-revenue').textContent = '—';
+    }
+
+    // Anderson mini
+    const a = data.anderson;
+    document.getElementById('mini-anderson-sent').textContent = fmt(a.sent);
+    document.getElementById('mini-anderson-transit').textContent = fmt(a.in_transit);
+    document.getElementById('mini-anderson-rate').innerHTML = fmtPct(a.delivery_rate) + '<span class="ital">%</span>';
+
+    // Vercel mini
+    const v = data.vercel || { configured:false };
+    const vbadge = document.getElementById('badge-vercel');
+    if(v.configured) {
+      vbadge.textContent = v.total_visits > 0 ? 'Live' : 'En attente';
+      vbadge.className = 'source-badge ' + (v.total_visits > 0 ? 'live' : 'warn');
+      document.getElementById('mini-vercel-visits').textContent = fmtCompact(v.total_visits);
+      document.getElementById('mini-vercel-sessions').textContent = fmtCompact(v.unique_sessions);
+      document.getElementById('mini-vercel-today').textContent = fmt(v.today_visits);
+    } else {
+      vbadge.textContent = 'Off'; vbadge.className = 'source-badge warn';
+      document.getElementById('mini-vercel-visits').textContent = '—';
+      document.getElementById('mini-vercel-sessions').textContent = '—';
+      document.getElementById('mini-vercel-today').textContent = '—';
+    }
+
+    // Sheet mini
+    const sh = data.sheet.summary;
+    document.getElementById('mini-sheet-orders').textContent = fmt(sh.total_orders);
+    document.getElementById('mini-sheet-confirmed').textContent = fmt(data.sheet.funnel.confirmed);
+    document.getElementById('mini-sheet-rate').innerHTML = fmtPct(sh.confirmation_rate) + '<span class="ital">%</span>';
+  }
+
+  // ── SHOPIFY ─────────────────────────────────────────────────
+  function renderShopify(s){
+    const container = document.getElementById('shopify-content');
+
+    if(!s || !s.configured) {
+      container.innerHTML = `
+        <div class="not-configured">
+          <h4>Shopify n'est pas encore connecté</h4>
+          <p>Pour voir vos données Shopify ici, ajoutez ces propriétés dans Apps Script:</p>
+          <p><code>SHOPIFY_TOKEN</code> · jeton Admin API (commence par shpat_)</p>
+          <p><code>SHOPIFY_STORE_HANDLE</code> · ex. "nutsa-1282"</p>
+          <p style="margin-top:20px;font-size:11px;color:var(--ink-muted)">Consultez SETUP_GUIDE.md pour les étapes détaillées.</p>
+          ${s && s.error ? `<p style="margin-top:14px;color:var(--red-deep)"><strong>Erreur:</strong> ${s.error}</p>` : ''}
+        </div>`;
       return;
     }
-    orderBar.classList.remove("hidden");
-    barCount.textContent = `${totalItems} article${totalItems > 1 ? "s" : ""}`;
-    barTotal.textContent = `${fmt(totalPrice)} DA`;
-    barItemsList.innerHTML = cart.map(x =>
-      `<span class="bar-pill">${x.product.name} <strong>×${x.qty}</strong></span>`
-    ).join("");
-  }
 
-  // ── Filters ────────────────────────────────
-  document.querySelectorAll(".chip").forEach(c => {
-    c.addEventListener("click", () => {
-      document.querySelectorAll(".chip").forEach(x => x.classList.remove("on"));
-      c.classList.add("on");
-      const f = c.dataset.filter;
-      document.querySelectorAll(".row").forEach(r => {
-        r.style.display = (f === "all" || r.dataset.cat === f) ? "" : "none";
-      });
-    });
-  });
-
-  // ── Modal / order ──────────────────────────
-  const modal       = document.getElementById("modal");
-  const formView    = document.getElementById("form-view");
-  const successView = document.getElementById("success-view");
-  const wilayaSel   = document.getElementById("f-wilaya");
-  const summaryBlock= document.getElementById("modal-summary-block");
-
-  wilayas.forEach(w => {
-    const o = document.createElement("option");
-    o.value = w.code;
-    o.textContent = `${w.code} — ${w.name}`;
-    o.dataset.door = w.door;
-    o.dataset.stop = w.stop;
-    wilayaSel.appendChild(o);
-  });
-
-  // Track current cart for live delivery recalculation
-  let currentCart = [];
-
-  document.getElementById("main-order-btn").addEventListener("click", () => {
-    const cart = getCart();
-    if(!cart.length) return;
-    currentCart = cart;
-    const productsTotal = cart.reduce((s,x) => s + x.subtotal, 0);
-
-    let itemsHtml = cart.map(x => `
-      <div class="summary-item">
-        <div class="si-left">
-          <strong>Nutsa ${x.product.name} · ${x.product.weight}</strong>
-          <span>${x.qty} ${x.qty > 1 ? "unités" : "unité"} × ${fmt(x.product.price)} DA</span>
-        </div>
-        <div class="si-right">${fmt(x.subtotal)} DA</div>
-      </div>`).join("");
-
-    summaryBlock.innerHTML = `
-      <div class="summary-block">
-        ${itemsHtml}
-        <div class="summary-total">
-          <span>Sous-total</span>
-          <span class="grand">${fmt(productsTotal)} DA</span>
-        </div>
-      </div>`;
-
-    lastActiveElement = document.activeElement;
-    formView.style.display = "";
-    successView.style.display = "none";
-    modal.classList.add("open");
-    document.body.style.overflow = "hidden";
-    modal.addEventListener("keydown", trapFocus);
-    formOpenedAt = Date.now(); // anti-bot timing baseline
-    // Show delivery line in summary (will compute once wilaya is selected)
-    setTimeout(()=>{ updateModalDeliveryLine(); document.getElementById("f-name").focus(); }, 250);
-  });
-
-  // ── Focus trap for modal ──
-  const focusableSel = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-  let lastActiveElement = null;
-
-  function getFocusable(){
-    return Array.from(modal.querySelectorAll(focusableSel)).filter(el => el.offsetParent !== null);
-  }
-
-  function trapFocus(e){
-    if(e.key !== "Tab") return;
-    const focusable = getFocusable();
-    if(!focusable.length) return;
-    const first = focusable[0], last = focusable[focusable.length - 1];
-    if(e.shiftKey){
-      if(document.activeElement === first){ e.preventDefault(); last.focus(); }
-    } else {
-      if(document.activeElement === last){ e.preventDefault(); first.focus(); }
+    if(s.error && !s.summary.orders) {
+      container.innerHTML = `
+        <div class="not-configured">
+          <h4>Erreur de connexion Shopify</h4>
+          <p style="color:var(--red-deep)"><strong>${s.error}</strong></p>
+          <p>Vérifiez que votre <code>SHOPIFY_TOKEN</code> est valide et que les scopes incluent read_orders, read_products, read_reports.</p>
+        </div>`;
+      return;
     }
-  }
 
-  function closeModal(){
-    modal.classList.remove("open");
-    document.body.style.overflow = "";
-    modal.removeEventListener("keydown", trapFocus);
-    // Restore focus to the element that opened the modal
-    if(lastActiveElement) lastActiveElement.focus();
-  }
-  document.getElementById("close-modal").onclick = closeModal;
-  document.getElementById("cancel-btn").onclick = closeModal;
-  modal.addEventListener("click", e => { if(e.target === modal) closeModal(); });
-  document.addEventListener("keydown", e => { if(e.key === "Escape") closeModal(); });
+    if(s.domain) document.getElementById('shopify-domain').textContent = s.domain.replace(/^https?:\/\//, '');
 
-  const labDoor = document.getElementById("lab-door");
-  const labStop = document.getElementById("lab-stop");
-  document.querySelectorAll('input[name="delivery"]').forEach(r => {
-    r.addEventListener("change", () => {
-      const sel = document.querySelector('input[name="delivery"]:checked').value;
-      labDoor.classList.toggle("sel", sel === "door");
-      labStop.classList.toggle("sel", sel === "stop");
-      labDoor.style.borderColor = sel === "door" ? "var(--red)" : "";
-      labDoor.style.background = sel === "door" ? "rgba(182,52,43,.04)" : "";
-      labStop.style.borderColor = sel === "stop" ? "var(--red)" : "";
-      labStop.style.background = sel === "stop" ? "rgba(182,52,43,.04)" : "";
-      // Update the displayed delivery cost in the summary
-      updateModalDeliveryLine();
-    });
-  });
-
-  // ── Update delivery line in modal summary ──
-  function updateModalDeliveryLine(){
-    const summaryBlock = document.getElementById("modal-summary-block");
-    const existing = summaryBlock.querySelector(".summary-delivery");
-    if(existing) existing.remove();
-
-    const wilayaCode = wilayaSel.value;
-    if(!wilayaCode) return;
-
-    const wOpt = wilayaSel.selectedOptions[0];
-    const deliveryType = document.querySelector('input[name="delivery"]:checked')?.value || "door";
-    const shipCost = deliveryType === "door" ? (+wOpt.dataset.door || 0) : (+wOpt.dataset.stop || 0);
-    const productsTotal = currentCart.reduce((s,x) => s + x.subtotal, 0);
-
-    const deliveryLine = document.createElement("div");
-    deliveryLine.className = "summary-delivery summary-item";
-    deliveryLine.style.background = shipCost === 0 ? "rgba(126,155,92,.06)" : "";
-    deliveryLine.innerHTML = `
-      <div class="si-left">
-        <strong>Livraison · ${deliveryType === "door" ? "À domicile" : "Stop desk"}</strong>
-        <span>${wilayaSel.options[wilayaSel.selectedIndex].textContent}</span>
+    container.innerHTML = `
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-num">No 01</div>
+          <div class="kpi-label">Visiteurs uniques</div>
+          <div class="kpi-value" id="shop-visitors">0</div>
+          <div class="kpi-foot">30 derniers jours</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-num">No 02</div>
+          <div class="kpi-label">Sessions</div>
+          <div class="kpi-value" id="shop-sessions">0</div>
+          <div class="kpi-foot">30 derniers jours</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-num">No 03</div>
+          <div class="kpi-label">Commandes</div>
+          <div class="kpi-value" id="shop-orders">0</div>
+          <div class="kpi-foot">30 derniers jours</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-num">No 04</div>
+          <div class="kpi-label">Taux de conversion</div>
+          <div class="kpi-value" id="shop-conv">0<span class="unit">%</span></div>
+          <div class="kpi-foot">Commandes / visiteurs</div>
+        </div>
       </div>
-      <div class="si-right" style="color:${shipCost === 0 ? "var(--green)" : "var(--red)"}">${shipCost === 0 ? "Gratuit ✓" : fmt(shipCost) + " DA"}</div>
+
+      <div class="chart-panel">
+        <div class="chart-head">
+          <h3>Revenu sur <span class="ital">30 jours</span></h3>
+          <div class="chart-legend">
+            <div class="legend-item"><span class="swatch" style="background:${C.red}"></span>Revenu brut</div>
+            <div class="legend-item"><span class="swatch" style="background:${C.green}"></span>Commandes</div>
+          </div>
+        </div>
+        <div class="chart-wrap"><canvas id="shopifyChart"></canvas></div>
+      </div>
+
+      <div class="split">
+        <div class="panel">
+          <h3>Top <span class="ital">produits</span> Shopify</h3>
+          <div id="shop-products"></div>
+        </div>
+        <div class="panel">
+          <h3>Détails <span class="ital">boutique</span></h3>
+          <div class="source-row"><span class="k">Revenu brut (30j)</span><span class="v">${fmt(s.summary.gross_sales)} <span class="ital">DA</span></span></div>
+          <div class="source-row"><span class="k">Revenu net (30j)</span><span class="v">${fmt(s.summary.net_sales)} <span class="ital">DA</span></span></div>
+          <div class="source-row"><span class="k">Panier moyen</span><span class="v">${fmt(s.summary.avg_order_value)} <span class="ital">DA</span></span></div>
+          <div class="source-row"><span class="k">Visiteurs (30j)</span><span class="v">${fmt(s.summary.visitors)}</span></div>
+          <div class="source-row"><span class="k">Sessions (30j)</span><span class="v">${fmt(s.summary.sessions)}</span></div>
+          <div class="source-row"><span class="k">Produits actifs</span><span class="v">${fmt(s.product_count)}</span></div>
+          <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--rule)">
+            <a href="https://admin.shopify.com/store/${(s.domain||'').split('//').pop().split('.')[0] || 'nutsa-1282'}" target="_blank" style="display:inline-block;padding:10px 18px;background:var(--ink);color:#fff;text-decoration:none;border-radius:8px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700">Ouvrir Shopify Admin →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="orders-section">
+        <div class="orders-head">
+          <h3>Commandes <span class="ital">récentes</span> · Shopify</h3>
+          <div class="live-tag"><span class="dot"></span>Direct depuis Shopify</div>
+        </div>
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th>Commande</th>
+              <th>Client</th>
+              <th class="hide-mobile">Ville</th>
+              <th>Total</th>
+              <th class="hide-mobile">Paiement</th>
+              <th class="hide-mobile">Livraison</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="shop-orders-body"></tbody>
+        </table>
+      </div>
     `;
 
-    // Insert before the summary-total row
-    const totalRow = summaryBlock.querySelector(".summary-total");
-    if(totalRow){
-      // Update grand total
-      const grandTotal = productsTotal + shipCost;
-      const grandEl = totalRow.querySelector(".grand");
-      if(grandEl) grandEl.textContent = `${fmt(grandTotal)} DA`;
+    // Fill KPIs
+    animateNumber(document.getElementById('shop-visitors'), s.summary.visitors);
+    animateNumber(document.getElementById('shop-sessions'), s.summary.sessions);
+    animateNumber(document.getElementById('shop-orders'), s.summary.orders);
+    animateNumber(document.getElementById('shop-conv'), s.summary.conversion_rate, { formatter: v => v.toFixed(2) });
 
-      summaryBlock.querySelector(".summary-block").insertBefore(deliveryLine, totalRow);
-    }
-  }
-
-  const baladiaSel = document.getElementById("f-baladia");
-
-  // ── Commune lookup (static, no external API) ──
-  // We previously called an external Ecotrack endpoint here with an API token.
-  // The token was visible to anyone viewing source, so we removed it entirely.
-  // The static `communesData` dictionary above covers all 58 wilayas.
-  function fetchWilayaDetails(wilayaCode){
-    const staticCommunes = communesData[wilayaCode] || [];
-    return Promise.resolve({
-      communes: staticCommunes
-        .map(c => ({nom: c, hasStopDesk: false}))
-        .sort((a,b) => a.nom.localeCompare(b.nom, "fr")),
-      hasStopDesk: false
+    // Chart
+    const trend = s.daily_trend || [];
+    const labels = trend.map(d => {
+      const dt = new Date(d.date);
+      return dt.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
     });
+    const ctx = document.getElementById('shopifyChart').getContext('2d');
+    const grad = ctx.createLinearGradient(0,0,0,300);
+    grad.addColorStop(0, 'rgba(182,52,43,.18)');
+    grad.addColorStop(1, 'rgba(182,52,43,0)');
+
+    if(charts.shopify) charts.shopify.destroy();
+    charts.shopify = new Chart(ctx, {
+      type:'line',
+      data:{
+        labels,
+        datasets:[
+          {
+            label:'Revenu',
+            data: trend.map(d => d.revenue),
+            yAxisID:'y',
+            borderColor:C.red,
+            backgroundColor:grad,
+            borderWidth:2.5,
+            pointRadius:0,
+            pointHoverRadius:6,
+            pointBackgroundColor:'#fff',
+            pointBorderColor:C.red,
+            pointBorderWidth:2,
+            tension:.35,
+            fill:true
+          },
+          {
+            label:'Commandes',
+            data: trend.map(d => d.orders),
+            yAxisID:'y1',
+            borderColor:C.green,
+            backgroundColor:'transparent',
+            borderWidth:1.8,
+            borderDash:[4,4],
+            pointRadius:0,
+            pointHoverRadius:5,
+            tension:.35
+          }
+        ]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        interaction:{mode:'index',intersect:false},
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            backgroundColor:'#1A1A1A', titleFont:{family:'Manrope',size:11,weight:600},
+            bodyFont:{family:'Manrope',size:13,weight:500},
+            padding:14, cornerRadius:8,
+            callbacks:{
+              label: ctx => {
+                if(ctx.dataset.label === 'Revenu') return '  Revenu: ' + fmt(ctx.parsed.y) + ' DA';
+                return '  Commandes: ' + ctx.parsed.y;
+              }
+            }
+          }
+        },
+        scales:{
+          x:{ grid:{display:false}, border:{color:C.rule}, ticks:{color:C.inkSoft,font:{family:'Manrope',size:11,weight:600},padding:10,maxRotation:0,autoSkipPadding:20} },
+          y:{ position:'left', grid:{color:C.ruleSoft,drawTicks:false}, border:{display:false}, ticks:{color:C.inkSoft,font:{family:'Manrope',size:11,weight:500},padding:14, callback:v => (v/1000).toFixed(0)+'k'} },
+          y1:{ position:'right', grid:{display:false}, border:{display:false}, ticks:{color:C.green,font:{family:'Manrope',size:11,weight:500},padding:14} }
+        },
+        animation:{duration:1400,easing:'easeOutCubic'}
+      }
+    });
+
+    // Top products
+    const prods = (s.top_products || []).slice(0,5);
+    const maxRev = prods.length ? prods[0].revenue : 1;
+    document.getElementById('shop-products').innerHTML = prods.map((p,i) => `
+      <div class="item-row">
+        <div class="item-rank">No ${String(i+1).padStart(2,'0')}</div>
+        <div class="item-info">
+          <div class="item-name">${p.name}</div>
+          <div class="item-bar-wrap"><div class="item-bar red" data-pct="${(p.revenue/maxRev)*100}"></div></div>
+        </div>
+        <div class="item-stats">
+          <div class="item-revenue">${fmtCompact(p.revenue)}<span class="da"> DA</span></div>
+          <div class="item-meta">${fmt(p.orders)} cmdes</div>
+        </div>
+      </div>`).join('');
+    setTimeout(() => document.querySelectorAll('#shop-products .item-bar').forEach(b => b.style.width = b.dataset.pct + '%'), 200);
+
+    // Recent Shopify orders
+    const orders = (s.recent_orders || []).slice(0,10);
+    document.getElementById('shop-orders-body').innerHTML = orders.length === 0
+      ? '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--ink-soft)">Aucune commande.</td></tr>'
+      : orders.map(o => `
+        <tr>
+          <td><span class="order-id">${o.order}</span></td>
+          <td><span class="order-customer">${o.customer || '—'}</span></td>
+          <td class="hide-mobile">${o.city || '—'}</td>
+          <td><span class="order-total">${fmt(o.total)}<span class="da"> DA</span></span></td>
+          <td class="hide-mobile"><span class="status-pill" data-st="${o.financial_status}">${o.financial_status||'—'}</span></td>
+          <td class="hide-mobile"><span class="status-pill" data-st="${o.fulfillment_status}">${o.fulfillment_status||'—'}</span></td>
+          <td><span class="order-time">${timeAgo(o.date)}</span></td>
+        </tr>`).join('');
   }
 
-  // ── Compute and display delivery price based on wilaya + cart ──
-  function updateDeliveryDisplay(){
-    const wilayaCode = wilayaSel.value || "";
-    const cart = currentCart;
-    const wData = wilayas.find(w => w.code === wilayaCode);
-    const cartHasMultiple = cart.length > 1;
-    const isAlger = wilayaCode === "16";
+  // ── VERCEL ──────────────────────────────────────────────────
+  function renderVercel(v){
+    const container = document.getElementById('vercel-content');
 
-    if(!wData || cart.length === 0){
-      document.getElementById("price-door").textContent = "— DA";
-      document.getElementById("price-stop").textContent = "— DA";
-      const stopContainer = document.getElementById("lab-stop");
-      if(stopContainer) stopContainer.style.display = "";
+    if(!v || !v.configured) {
+      container.innerHTML = `
+        <div class="not-configured">
+          <h4>Vercel n'est pas encore relié</h4>
+          <p>Pour suivre le trafic de votre site Vercel, installez le beacon de tracking sur vos pages.</p>
+          <p style="margin-top:18px"><strong>3 étapes:</strong></p>
+          <p>1. Ouvrez <code>vercel-beacon.html</code> (fourni avec ce dashboard)</p>
+          <p>2. Remplacez <code>APPS_SCRIPT_URL</code> par votre URL Apps Script</p>
+          <p>3. Collez le snippet <code>&lt;script&gt;</code> dans le <code>&lt;head&gt;</code> de votre site Vercel</p>
+          <p style="margin-top:18px;font-size:11px;color:var(--ink-muted)">À la première visite, l'onglet "Visits" se créera automatiquement dans votre Google Sheet.</p>
+          ${v && v.error ? `<p style="margin-top:14px;color:var(--ink-soft);font-size:11px">${v.error}</p>` : ''}
+        </div>`;
       return;
     }
 
-    // Compute door & stop prices based on rules
-    let doorPrice, stopPrice;
-
-    if(isAlger){
-      // Alger: always free
-      doorPrice = 0;
-      stopPrice = 0;
-    } else if(cartHasMultiple){
-      // Multiple items: free delivery
-      doorPrice = 0;
-      stopPrice = 0;
-    } else {
-      // Single item
-      const item = cart[0];
-      if(item && item.product){
-        const w = item.product.weight || "";
-        const is15 = /^1[,.]5\s*kg/i.test(w);
-        if(is15){
-          // 1.5 kg single → pay delivery
-          doorPrice = wData.door;
-          stopPrice = wData.stop;
-        } else {
-          // Non-1.5kg single → free delivery
-          doorPrice = 0;
-          stopPrice = 0;
-        }
-      } else {
-        doorPrice = 0;
-        stopPrice = 0;
-      }
-    }
-
-    document.getElementById("price-door").textContent = doorPrice === 0 ? "Gratuit" : `${fmt(doorPrice)} DA`;
-    document.getElementById("price-stop").textContent = stopPrice === 0 ? "Gratuit" : `${fmt(stopPrice)} DA`;
-
-    // Store on options for form submission
-    if(wilayaSel.selectedOptions[0]){
-      wilayaSel.selectedOptions[0].dataset.door = doorPrice;
-      wilayaSel.selectedOptions[0].dataset.stop = stopPrice;
-    }
-
-    // Toggle label styling
-    const doorLabel = document.getElementById("lab-door");
-    const stopLabel = document.getElementById("lab-stop");
-    const delNote = document.getElementById("delivery-note");
-    if(doorPrice === 0 && stopPrice === 0){
-      doorLabel.style.borderColor = "var(--green)";
-      doorLabel.style.background = "rgba(126,155,92,.06)";
-      stopLabel.style.borderColor = "var(--green)";
-      stopLabel.style.background = "rgba(126,155,92,.06)";
-      if(isAlger){
-        delNote.textContent = "✅ Livraison gratuite — Alger";
-        delNote.style.color = "var(--green)";
-      } else if(cartHasMultiple){
-        delNote.textContent = "✅ Livraison gratuite — commande multiple";
-        delNote.style.color = "var(--green)";
-      } else {
-        delNote.textContent = "✅ Livraison gratuite — produit non concerné";
-        delNote.style.color = "var(--green)";
-      }
-    } else {
-      // Reset to default selection styling
-      const sel = document.querySelector('input[name="delivery"]:checked').value;
-      doorLabel.style.borderColor = sel === "door" ? "var(--red)" : "";
-      doorLabel.style.background = sel === "door" ? "rgba(182,52,43,.04)" : "";
-      stopLabel.style.borderColor = sel === "stop" ? "var(--red)" : "";
-      stopLabel.style.background = sel === "stop" ? "rgba(182,52,43,.04)" : "";
-      delNote.textContent = "Livraison payante — produit 1.5 kg (gratuit si plusieurs articles)";
-      delNote.style.color = "var(--ink-soft)";
-    }
-  }
-
-  function populateCommunes(wilayaCode){
-    baladiaSel.innerHTML = "";
-    const loading = document.createElement("option");
-    loading.value = ""; loading.disabled = true; loading.selected = true;
-    loading.textContent = "جاري التحميل…";
-    baladiaSel.appendChild(loading);
-    baladiaSel.disabled = true;
-
-    // Always show both delivery options — never hide Stop desk
-    const stopContainer = document.getElementById("lab-stop");
-    if(stopContainer){
-      stopContainer.style.display = "";
-      stopContainer.style.opacity = "1";
-      stopContainer.style.pointerEvents = "";
-    }
-
-    fetchWilayaDetails(wilayaCode)
-      .then(({communes}) => {
-        // Update delivery display using cart-based rules
-        updateDeliveryDisplay();
-
-        baladiaSel.innerHTML = "";
-        const ph = document.createElement("option");
-        ph.value = ""; ph.disabled = true; ph.selected = true;
-        ph.textContent = "اختر البلدية";
-        baladiaSel.appendChild(ph);
-        communes.forEach(c => {
-          const o = document.createElement("option");
-          o.value = c.nom; o.textContent = c.nom;
-          baladiaSel.appendChild(o);
-        });
-        baladiaSel.disabled = false;
-      });
-  }
-
-  wilayaSel.addEventListener("change", () => {
-    const opt = wilayaSel.selectedOptions[0];
-    const code = opt.value;
-    populateCommunes(code);
-    // Also update delivery line in modal if open
-    updateModalDeliveryLine();
-  });
-
-  // ── Form validation helper ──
-  function showFieldError(input, msg){
-    // Remove any existing error for this field
-    const existing = input.parentNode.querySelector(".field-error");
-    if(existing) existing.remove();
-    input.style.borderColor = "var(--red)";
-    const err = document.createElement("div");
-    err.className = "field-error";
-    err.style.cssText = "font-size:12px;color:var(--red);margin-top:4px;font-weight:600;";
-    err.textContent = msg;
-    input.parentNode.appendChild(err);
-    input.addEventListener("input", function clearErr(){
-      input.style.borderColor = "";
-      const e = input.parentNode.querySelector(".field-error");
-      if(e) e.remove();
-      input.removeEventListener("input", clearErr);
-    }, {once:false});
-  }
-  function clearAllErrors(){
-    document.querySelectorAll(".field-error").forEach(e => e.remove());
-    document.querySelectorAll(".field input, .field select, .field textarea").forEach(i => i.style.borderColor = "");
-  }
-
-  // ── Track when the form was first shown (used to detect instant bot submits) ──
-  let formOpenedAt = 0;
-
-  document.getElementById("order-form").addEventListener("submit", e => {
-    e.preventDefault();
-    clearAllErrors();
-
-    const cart = getCart();
-    if(!cart.length) return;
-    const fd = new FormData(e.target);
-
-    // ── Anti-bot: honeypot must be empty, and form must have been open >2s ──
-    // Real humans take seconds to fill a form; bots POST instantly.
-    // We silently "succeed" so bots don't learn what tripped them.
-    const honeypot = (fd.get("website") || "").trim();
-    const elapsed  = Date.now() - formOpenedAt;
-    if(honeypot || (formOpenedAt > 0 && elapsed < 2000)){
-      console.warn("Submission blocked (bot heuristic)");
-      formView.style.display = "none";
-      successView.style.display = "";
+    if(v.total_visits === 0) {
+      container.innerHTML = `
+        <div class="not-configured">
+          <h4>Beacon installé · en attente du premier visiteur</h4>
+          <p>L'onglet <code>Visits</code> a été créé dans votre Sheet, mais aucune visite n'a encore été enregistrée.</p>
+          <p>Visitez votre site Vercel une fois pour confirmer que le beacon fonctionne, puis rechargez ce tableau de bord.</p>
+        </div>`;
       return;
     }
 
-    // ── Validate required fields ──
-    const name    = (fd.get("name")    || "").trim();
-    const phone   = (fd.get("phone")   || "").trim();
-    const wilaya  = fd.get("wilaya")   || "";
-    const baladia = (fd.get("baladia")  || "").trim();
-    let valid = true;
+    container.innerHTML = `
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-num">No 01</div>
+          <div class="kpi-label">Visites totales</div>
+          <div class="kpi-value" id="vercel-total">0</div>
+          <div class="kpi-foot">30 derniers jours</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-num">No 02</div>
+          <div class="kpi-label">Sessions uniques</div>
+          <div class="kpi-value" id="vercel-sessions">0</div>
+          <div class="kpi-foot">Visiteurs distincts</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-num">No 03</div>
+          <div class="kpi-label">Aujourd'hui</div>
+          <div class="kpi-value" id="vercel-today">0</div>
+          <div class="kpi-foot">Visites depuis minuit</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-num">No 04</div>
+          <div class="kpi-label">Pages / session</div>
+          <div class="kpi-value" id="vercel-vps">0</div>
+          <div class="kpi-foot">Profondeur de visite</div>
+        </div>
+      </div>
 
-    if(!name){ showFieldError(document.getElementById("f-name"),"Le nom est requis"); valid = false; }
-    if(!phone){ showFieldError(document.getElementById("f-phone"),"Le téléphone est requis"); valid = false; }
-    else if(!/^0[567]\d{8}$/.test(phone.replace(/\s/g,""))){ showFieldError(document.getElementById("f-phone"),"Numéro invalide (ex: 0555123456)"); valid = false; }
-    if(!wilaya){ showFieldError(wilayaSel,"La wilaya est requise"); valid = false; }
-    if(!baladia){ showFieldError(baladiaSel,"La commune est requise"); valid = false; }
+      <div class="chart-panel">
+        <div class="chart-head">
+          <h3>Trafic sur <span class="ital">30 jours</span></h3>
+          <div class="chart-legend">
+            <div class="legend-item"><span class="swatch" style="background:${C.ink}"></span>Visites</div>
+            <div class="legend-item"><span class="swatch" style="background:${C.accent}"></span>Sessions uniques</div>
+          </div>
+        </div>
+        <div class="chart-wrap"><canvas id="vercelChart"></canvas></div>
+      </div>
 
-    if(!valid){ document.querySelector(".field-error")?.scrollIntoView({behavior:"smooth",block:"center"}); return; }
+      <div class="split">
+        <div class="panel">
+          <h3>Top <span class="ital">pages</span></h3>
+          <div id="vercel-pages"></div>
+        </div>
+        <div class="panel">
+          <h3>Sources de <span class="ital">trafic</span></h3>
+          <div id="vercel-refs"></div>
+        </div>
+      </div>
+    `;
 
-    const wOpt = wilayaSel.selectedOptions[0];
-    const ship = fd.get("delivery") === "door" ? +wOpt.dataset.door : +wOpt.dataset.stop;
-    const productsTotal = cart.reduce((s,x) => s + x.subtotal, 0);
-    const grand = productsTotal + ship;
+    // KPIs
+    animateNumber(document.getElementById('vercel-total'), v.total_visits);
+    animateNumber(document.getElementById('vercel-sessions'), v.unique_sessions);
+    animateNumber(document.getElementById('vercel-today'), v.today_visits);
+    animateNumber(document.getElementById('vercel-vps'), v.visits_per_session, { formatter: x => x.toFixed(2) });
 
-    // ── Build payload for Apps Script ──
-    const payload = {
-      source: "nutsa-website",
-      name,
-      phone,
-      wilaya,
-      wilayaName: wOpt.textContent,
-      baladia,
-      address: (fd.get("address") || "").trim(),
-      delivery: fd.get("delivery"),
-      shipping: ship,
-      note:    (fd.get("note")    || "").trim(),
-      cart: cart.map(x => ({
-        id:        x.product.id,
-        name:      x.product.name,
-        weight:    x.product.weight,
-        sheetName: x.product.sheetName,
-        price:     x.product.price,
-        qty:       x.qty
-      })),
-      productsTotal,
-      grandTotal:    grand,
-      submittedAt:   new Date().toISOString(),
-      secret:        INTAKE_SECRET
-    };
-
-    // ── Disable submit while sending ──
-    const submitBtn = e.target.querySelector(".submit-btn");
-    const cancelBtn = document.getElementById("cancel-btn");
-    if(submitBtn){
-      submitBtn.disabled = true;
-      submitBtn.style.opacity = ".7";
-      submitBtn.textContent = "جاري الإرسال…";
-    }
-    if(cancelBtn) cancelBtn.disabled = true;
-
-    // ── Build success recap safely (textContent prevents self-XSS from user input) ──
-    const recapEl = document.getElementById("success-recap");
-    recapEl.innerHTML = ""; // clear
-    const addRecapRow = (labelText, valueText, valueBold) => {
-      const row = document.createElement("div");
-      const l = document.createElement("span");
-      const v = document.createElement("span");
-      l.textContent = labelText;
-      if(valueBold){
-        const b = document.createElement("strong");
-        b.textContent = valueText;
-        v.appendChild(b);
-      } else {
-        v.textContent = valueText;
-      }
-      row.appendChild(l); row.appendChild(v);
-      recapEl.appendChild(row);
-    };
-    cart.forEach(x => {
-      addRecapRow(
-        `Nutsa ${x.product.name} · ${x.product.weight}`,
-        `${x.qty} × ${fmt(x.product.price)} DA = ${fmt(x.subtotal)} DA`
-      );
+    // Trend chart
+    const trend = v.daily_trend || [];
+    const labels = trend.map(d => {
+      const dt = new Date(d.date);
+      return dt.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
     });
-    addRecapRow("Sous-total produits", `${fmt(productsTotal)} DA`);
-    addRecapRow(
-      `Livraison · ${fd.get("delivery")==="door"?"À domicile":"Stop desk"}`,
-      ship===0 ? "Gratuit" : `${fmt(ship)} DA`
-    );
-    addRecapRow("Total à payer", `${fmt(grand)} DA`, true);
-    addRecapRow("Nom",       name);
-    addRecapRow("Téléphone", phone);
-    addRecapRow("Wilaya",    wOpt.textContent);
-    addRecapRow("Commune",   baladia);
+    const ctx = document.getElementById('vercelChart').getContext('2d');
+    const grad = ctx.createLinearGradient(0,0,0,300);
+    grad.addColorStop(0, 'rgba(26,26,26,.16)');
+    grad.addColorStop(1, 'rgba(26,26,26,0)');
 
-    const showSuccess = () => {
-      formView.style.display = "none";
-      successView.style.display = "";
-      if(submitBtn){
-        submitBtn.disabled = false;
-        submitBtn.style.opacity = "";
-        submitBtn.textContent = "تأكيد الطلب";
+    if(charts.vercel) charts.vercel.destroy();
+    charts.vercel = new Chart(ctx, {
+      type:'line',
+      data:{
+        labels,
+        datasets:[
+          {
+            label:'Visites',
+            data: trend.map(d => d.visits),
+            borderColor:C.ink,
+            backgroundColor:grad,
+            borderWidth:2.5,
+            pointRadius:0,
+            pointHoverRadius:6,
+            pointBackgroundColor:'#fff',
+            pointBorderColor:C.ink,
+            pointBorderWidth:2,
+            tension:.35,
+            fill:true
+          },
+          {
+            label:'Sessions',
+            data: trend.map(d => d.sessions),
+            borderColor:C.accent,
+            backgroundColor:'transparent',
+            borderWidth:1.8,
+            borderDash:[4,4],
+            pointRadius:0,
+            pointHoverRadius:5,
+            tension:.35
+          }
+        ]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        interaction:{mode:'index',intersect:false},
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            backgroundColor:'#1A1A1A', titleFont:{family:'Manrope',size:11,weight:600},
+            bodyFont:{family:'Manrope',size:13,weight:500}, padding:14, cornerRadius:8,
+            callbacks:{ label: ctx => '  ' + ctx.dataset.label + ': ' + fmt(ctx.parsed.y) }
+          }
+        },
+        scales:{
+          x:{ grid:{display:false}, border:{color:C.rule}, ticks:{color:C.inkSoft,font:{family:'Manrope',size:11,weight:600},padding:10,maxRotation:0,autoSkipPadding:20} },
+          y:{ grid:{color:C.ruleSoft,drawTicks:false}, border:{display:false}, ticks:{color:C.inkSoft,font:{family:'Manrope',size:11,weight:500},padding:14} }
+        },
+        animation:{duration:1400,easing:'easeOutCubic'}
       }
-      if(cancelBtn) cancelBtn.disabled = false;
-      list.querySelectorAll('input[type="number"]').forEach(inp => {
-        inp.value = 0;
-        updateRow(inp.closest(".row"));
-      });
-      e.target.reset();
-      baladiaSel.innerHTML = '<option value="" disabled selected>Sélectionnez d\'abord une wilaya</option>';
-    };
-
-    // ── Save to localStorage as backup ──
-    const saveLocalBackup = () => {
-      try {
-        const pending = JSON.parse(localStorage.getItem("nutsa_pending_orders") || "[]");
-        pending.push(payload);
-        localStorage.setItem("nutsa_pending_orders", JSON.stringify(pending));
-      } catch(err){ console.warn("localStorage backup failed:", err); }
-    };
-
-    // ── Send to Google Apps Script (fire-and-forget — instant UI feedback) ──
-    if(APPS_SCRIPT_URL && APPS_SCRIPT_URL.indexOf("PASTE_YOUR") === -1){
-      saveLocalBackup();
-
-      // Fire the request — don't wait for the response.
-      // keepalive ensures the browser finishes sending even if the user
-      // closes the page or switches apps right after tapping submit.
-      fetch(APPS_SCRIPT_URL, {
-        method:    "POST",
-        headers:   {"Content-Type": "text/plain"},
-        body:      JSON.stringify(payload),
-        keepalive: true
-      }).then(r => {
-        console.log("Order sent:", r.status);
-      }).catch(err => {
-        console.warn("Order POST failed (saved in localStorage):", err);
-      });
-
-      // Show success immediately — order is on its way to the sheet
-      showSuccess();
-    } else {
-      console.warn("⚠️ APPS_SCRIPT_URL not configured. Order was NOT saved to Google Sheet.");
-      console.log("Payload that would have been sent:", payload);
-      saveLocalBackup();
-      showSuccess();
-    }
-  });
-
-  document.getElementById("ok-btn").onclick = closeModal;
-
-
-  // ── Product detail modal ───────────────────
-  const detailModal   = document.getElementById("detail-modal");
-  const closeDetail   = document.getElementById("close-detail");
-
-  function openDetail(id){
-    const p = products.find(x => x.id === id);
-    if(!p) return;
-    document.getElementById("detail-img").src        = p.img;
-    document.getElementById("detail-img").alt        = "Nutsa " + p.name + " " + p.weight;
-    document.getElementById("detail-num").textContent  = "No " + p.num;
-    document.getElementById("detail-title").textContent = "Nutsa " + p.name;
-    document.getElementById("detail-weight").textContent = p.weight;
-    document.getElementById("detail-desc").textContent  = p.desc || "";
-    const pts = document.getElementById("detail-points");
-    pts.innerHTML = "";
-    (p.details || []).forEach(d => {
-      const li = document.createElement("li");
-      li.textContent = d;
-      pts.appendChild(li);
     });
-    document.getElementById("detail-price-now").textContent = fmt(p.price) + " DA";
-    const wasEl = document.getElementById("detail-price-was");
-    wasEl.textContent = p.was ? fmt(p.was) + " DA" : "";
-    detailModal.classList.add("open");
-    document.body.style.overflow = "hidden";
+
+    // Top pages
+    const pages = (v.top_pages || []).slice(0,8);
+    const maxP = pages.length ? pages[0].visits : 1;
+    document.getElementById('vercel-pages').innerHTML = pages.map((p,i) => `
+      <div class="item-row">
+        <div class="item-rank">No ${String(i+1).padStart(2,'0')}</div>
+        <div class="item-info">
+          <div class="item-name" style="font-size:14px;font-family:var(--body);font-weight:500">${p.page}</div>
+          <div class="item-bar-wrap"><div class="item-bar blue" data-pct="${(p.visits/maxP)*100}"></div></div>
+        </div>
+        <div class="item-stats">
+          <div class="item-revenue" style="font-size:15px">${fmt(p.visits)}</div>
+          <div class="item-meta">visites</div>
+        </div>
+      </div>`).join('');
+    setTimeout(() => document.querySelectorAll('#vercel-pages .item-bar').forEach(b => b.style.width = b.dataset.pct + '%'), 300);
+
+    // Top referrers
+    const refs = (v.top_referrers || []).slice(0,8);
+    const maxR = refs.length ? refs[0].visits : 1;
+    document.getElementById('vercel-refs').innerHTML = refs.map((r,i) => `
+      <div class="item-row">
+        <div class="item-rank">No ${String(i+1).padStart(2,'0')}</div>
+        <div class="item-info">
+          <div class="item-name" style="font-size:14px;font-family:var(--body);font-weight:500">${r.referrer}</div>
+          <div class="item-bar-wrap"><div class="item-bar red" data-pct="${(r.visits/maxR)*100}"></div></div>
+        </div>
+        <div class="item-stats">
+          <div class="item-revenue" style="font-size:15px">${fmt(r.visits)}</div>
+          <div class="item-meta">visites</div>
+        </div>
+      </div>`).join('');
+    setTimeout(() => document.querySelectorAll('#vercel-refs .item-bar').forEach(b => b.style.width = b.dataset.pct + '%'), 350);
   }
 
-  closeDetail.addEventListener("click", () => {
-    detailModal.classList.remove("open");
-    document.body.style.overflow = "";
-  });
-  detailModal.addEventListener("click", e => {
-    if(e.target === detailModal){
-      detailModal.classList.remove("open");
-      document.body.style.overflow = "";
-    }
-  });
+  // ── ANDERSON ────────────────────────────────────────────────
+  function renderAnderson(a){
+    animateNumber(document.getElementById('anderson-sent'), a.sent);
+    animateNumber(document.getElementById('anderson-transit'), a.in_transit);
+    animateNumber(document.getElementById('anderson-delivered'), a.delivered);
+    animateNumber(document.getElementById('anderson-failed'), a.failed);
+    document.getElementById('anderson-delivered-rate').textContent = fmtPct(a.delivery_rate) + '% des envois';
+    document.getElementById('anderson-failed-rate').textContent = fmtPct(a.failure_rate) + '% des envois';
 
-  list.addEventListener("click", e => {
-    const btn = e.target.closest("[data-info]");
-    if(btn) openDetail(+btn.dataset.info);
-  });
+    // Horizontal stacked bar
+    const ctx = document.getElementById('andersonChart').getContext('2d');
+    if(charts.anderson) charts.anderson.destroy();
+    charts.anderson = new Chart(ctx, {
+      type:'bar',
+      data:{
+        labels:['Pipeline'],
+        datasets:[
+          { label:'Livrées', data:[a.delivered], backgroundColor:C.greenDeep, borderWidth:0 },
+          { label:'En transit', data:[a.in_transit], backgroundColor:C.gold, borderWidth:0 },
+          { label:'Échecs', data:[a.failed], backgroundColor:C.red, borderWidth:0 }
+        ]
+      },
+      options:{
+        indexAxis:'y', responsive:true, maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            backgroundColor:'#1A1A1A', titleFont:{family:'Manrope',size:11,weight:600},
+            bodyFont:{family:'Manrope',size:13,weight:500}, padding:12, cornerRadius:8,
+            callbacks:{ label: ctx => '  ' + ctx.dataset.label + ': ' + fmt(ctx.parsed.x) + ' (' + ((ctx.parsed.x/(a.sent||1))*100).toFixed(1) + '%)' }
+          }
+        },
+        scales:{
+          x:{ stacked:true, grid:{display:false}, border:{display:false}, ticks:{display:false} },
+          y:{ stacked:true, grid:{display:false}, border:{display:false}, ticks:{display:false} }
+        },
+        animation:{duration:1400}
+      }
+    });
+  }
 
+  // ── SHEET (Call Center) ─────────────────────────────────────
+  function renderSheet(d){
+    // KPIs
+    animateNumber(document.getElementById('sheet-total'), d.summary.total_orders);
+    animateNumber(document.getElementById('sheet-aov'), d.summary.aov);
+    animateNumber(document.getElementById('sheet-confirm'), d.summary.confirmation_rate, { formatter: v => v.toFixed(1) });
+    animateNumber(document.getElementById('sheet-revenue'), d.summary.confirmed_revenue);
+
+    // Funnel
+    const f = d.funnel;
+    animateNumber(document.getElementById('funnel-total'), f.total);
+    animateNumber(document.getElementById('funnel-confirmed'), f.confirmed);
+    animateNumber(document.getElementById('funnel-delivered'), f.delivered);
+    const r1 = f.total > 0 ? (f.confirmed/f.total)*100 : 0;
+    const r2 = f.confirmed > 0 ? (f.delivered/f.confirmed)*100 : 0;
+    document.getElementById('arrow-1-pct').textContent = fmtPct(r1)+'%';
+    document.getElementById('arrow-2-pct').textContent = fmtPct(r2)+'%';
+    setTimeout(() => {
+      const fills = document.querySelectorAll('.funnel-stage .stage-fill');
+      fills[0].style.width = '100%';
+      fills[1].style.width = (f.total > 0 ? (f.confirmed/f.total)*100 : 0) + '%';
+      fills[2].style.width = (f.total > 0 ? (f.delivered/f.total)*100 : 0) + '%';
+    }, 200);
+
+    // Status strip + cards
+    const sb = d.status_breakdown;
+    const total = STATUS_ORDER.reduce((s, k) => s + ((sb[k] && sb[k].count) || 0), 0);
+    document.getElementById('status-strip').innerHTML = STATUS_ORDER.map(k => {
+      const c = (sb[k] && sb[k].count) || 0;
+      return `<div class="seg" data-status="${k}" data-pct="${total>0 ? (c/total)*100 : 0}"></div>`;
+    }).join('');
+    setTimeout(() => document.querySelectorAll('#status-strip .seg').forEach(s => s.style.width = s.dataset.pct + '%'), 100);
+
+    document.getElementById('status-grid').innerHTML = STATUS_ORDER.map(k => {
+      const c = (sb[k] && sb[k].count) || 0;
+      const r = (sb[k] && sb[k].revenue) || 0;
+      const pct = total > 0 ? (c/total)*100 : 0;
+      const meta = STATUS_META[k] || { ar:'' };
+      return `
+        <div class="status-card" data-status="${k}">
+          <div class="status-head">
+            <div class="status-name">${k}<span class="ar">${meta.ar}</span></div>
+            <div class="status-pct">${fmtPct(pct)}%</div>
+          </div>
+          <div class="status-count">${fmt(c)}</div>
+          <div class="status-rev">Revenu: <strong>${fmt(r)} DA</strong></div>
+        </div>`;
+    }).join('');
+
+    // Communes
+    const communes = (d.communes || []).slice(0,10);
+    const maxC = communes.length ? communes[0].count : 1;
+    document.getElementById('communes-grid').innerHTML = communes.map((w,i) => `
+      <div class="item-row">
+        <div class="item-rank">No ${String(i+1).padStart(2,'0')}</div>
+        <div class="item-info">
+          <div class="item-name" style="font-size:14px">${w.name}</div>
+          <div class="item-bar-wrap"><div class="item-bar green" data-pct="${(w.count/maxC)*100}"></div></div>
+        </div>
+        <div class="item-stats">
+          <div class="item-revenue" style="font-size:15px">${fmt(w.count)}</div>
+        </div>
+      </div>`).join('');
+    setTimeout(() => document.querySelectorAll('#communes-grid .item-bar').forEach(b => b.style.width = b.dataset.pct + '%'), 300);
+
+    // Source breakdown (website vs manual)
+    const src = d.sources || { website:{count:0,revenue:0}, manual:{count:0,revenue:0} };
+    const srcTotal = src.website.revenue + src.manual.revenue;
+    const webPct = srcTotal > 0 ? (src.website.revenue/srcTotal)*100 : 0;
+    document.getElementById('source-breakdown').innerHTML = `
+      <div class="item-row" style="border-top:0">
+        <div class="item-rank" style="color:${C.red}">●</div>
+        <div class="item-info">
+          <div class="item-name">Site web · WEBSITE</div>
+          <div class="item-bar-wrap"><div class="item-bar red" style="width:${webPct}%"></div></div>
+        </div>
+        <div class="item-stats">
+          <div class="item-revenue">${fmt(src.website.revenue)}<span class="da"> DA</span></div>
+          <div class="item-meta">${fmt(src.website.count)} cmdes</div>
+        </div>
+      </div>
+      <div class="item-row">
+        <div class="item-rank" style="color:${C.accent}">●</div>
+        <div class="item-info">
+          <div class="item-name">Manuelles · Téléphone</div>
+          <div class="item-bar-wrap"><div class="item-bar blue" style="width:${100-webPct}%"></div></div>
+        </div>
+        <div class="item-stats">
+          <div class="item-revenue">${fmt(src.manual.revenue)}<span class="da"> DA</span></div>
+          <div class="item-meta">${fmt(src.manual.count)} cmdes</div>
+        </div>
+      </div>
+      <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--rule);font-size:12px;color:var(--ink-soft);line-height:1.6">
+        Le tag <code style="background:var(--paper-warm);padding:2px 6px;border-radius:4px">WEBSITE</code> est ajouté automatiquement dans la colonne Extra par votre Apps Script à chaque commande issue du formulaire en ligne.
+      </div>
+    `;
+
+    // Recent orders
+    const orders = (d.recent_orders || []).slice(0,10);
+    document.getElementById('sheet-orders-body').innerHTML = orders.length === 0
+      ? '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--ink-soft)">Aucune commande.</td></tr>'
+      : orders.map(o => `
+        <tr>
+          <td><span class="order-id">${o.order}</span></td>
+          <td><span class="order-customer">${o.name || '—'}<small>${o.phone || ''}</small></span></td>
+          <td class="hide-mobile">${o.commune || '—'}</td>
+          <td><span class="order-total">${fmt(o.total)}<span class="da"> DA</span></span></td>
+          <td class="hide-mobile"><span class="status-pill" data-st="${o.status}">${o.status}</span></td>
+          <td><span class="order-time">${timeAgo(o.date)}</span></td>
+        </tr>`).join('');
+  }
+
+  // ════════════════════════════════════════════════════════════
+  //  BOOT
+  // ════════════════════════════════════════════════════════════
+  async function load(){
+    const btn = document.getElementById('refresh-btn');
+    btn.classList.add('spinning');
+    const data = await fetchDashboardData();
+    render(data);
+    btn.classList.remove('spinning');
+  }
+
+  document.getElementById('refresh-btn').addEventListener('click', load);
+  window.addEventListener('load', () => setTimeout(load, 100));
 </script>
   <script>
-  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+(function() {
+  // ── CONFIG ─────────────────────────────────────────────────
+  var APPS_SCRIPT_URL = "https://script.google.com/macros/s/PASTE_YOUR_DEPLOYMENT_ID_HERE/exec";
+  var SOURCE_TAG = "vercel"; // change to "shopify-theme" if pasted in Shopify
+ 
+  // ── SESSION ID (per-tab, random, no PII) ──────────────────
+  var sid;
+  try {
+    sid = sessionStorage.getItem("nutsa_sid");
+    if (!sid) {
+      sid = "s_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+      sessionStorage.setItem("nutsa_sid", sid);
+    }
+  } catch (e) { sid = "s_anon_" + Math.random().toString(36).slice(2, 8); }
+ 
+  // ── BUILD PIXEL URL ───────────────────────────────────────
+  // We use a GET request via Image() so there's no CORS issue and
+  // no impact on page load. Apps Script logs the row, returns "ok".
+  var params = [
+    "action=visit",
+    "page=" + encodeURIComponent(location.pathname || "/"),
+    "ref=" + encodeURIComponent(document.referrer || ""),
+    "sid=" + encodeURIComponent(sid),
+    "ua=" + encodeURIComponent((navigator.userAgent || "").slice(0, 200)),
+    "sw=" + (screen.width || 0),
+    "sh=" + (screen.height || 0),
+    "lang=" + encodeURIComponent((navigator.language || "").slice(0, 10)),
+    "src=" + encodeURIComponent(SOURCE_TAG),
+    "t=" + Date.now() // cache buster
+  ].join("&");
+ 
+  // ── FIRE THE BEACON ───────────────────────────────────────
+  // Run after page load so we never delay the user's experience.
+  function ping() {
+    try {
+      var img = new Image(1, 1);
+      img.src = APPS_SCRIPT_URL + "?" + params;
+      img.style.position = "absolute";
+      img.style.left = "-9999px";
+      img.style.width = "1px";
+      img.style.height = "1px";
+    } catch (e) {}
+  }
+  if (document.readyState === "complete") {
+    ping();
+  } else {
+    window.addEventListener("load", ping, { once: true });
+  }
+})();
 </script>
-<script defer src="/_vercel/insights/script.js"></script>
+
 </body>
 </html>
