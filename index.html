@@ -664,11 +664,6 @@
         </div>
 
         <div class="field">
-          <label for="f-address">Adresse complète <span style="text-transform:none;color:var(--ink-soft);font-weight:400">(optionnel)</span></label>
-          <input id="f-address" name="address" type="text" placeholder="Rue, numéro, repère…">
-        </div>
-
-        <div class="field">
           <label>Mode de livraison</label>
           <div class="delivery">
             <label class="sel" id="lab-door">
@@ -683,11 +678,6 @@
             </label>
           </div>
           <div id="delivery-note" style="font-size:12px;color:var(--ink-soft);margin-top:4px;font-weight:500"></div>
-        </div>
-
-        <div class="field">
-          <label for="f-note">Note <span style="text-transform:none;color:var(--ink-soft);font-weight:400">(optionnel)</span></label>
-          <textarea id="f-note" name="note" rows="2" placeholder="ملاحظات…"></textarea>
         </div>
 
         <div class="submit-row">
@@ -1428,10 +1418,8 @@
       wilaya,
       wilayaName: wOpt.textContent,
       baladia,
-      address: (fd.get("address") || "").trim(),
       delivery: fd.get("delivery"),
       shipping: ship,
-      note:    (fd.get("note")    || "").trim(),
       cart: cart.map(x => ({
         id:        x.product.id,
         name:      x.product.name,
