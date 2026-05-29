@@ -8,6 +8,24 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nutsa-dz.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Fraunces:ital,wght@0,300;0,400;0,500;0,700;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- ── Meta Pixel Code ─────────────────────── -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1110960117863852');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1110960117863852&ev=PageView&noscript=1"
+alt=""/></noscript>
+<!-- ── End Meta Pixel Code ─────────────────── -->
 <style>
   :root{
     --paper:#FBFAF7;
@@ -1494,6 +1512,24 @@
         localStorage.setItem("nutsa_pending_orders", JSON.stringify(pending));
       } catch(err){ console.warn("localStorage backup failed:", err); }
     };
+
+    // ── Meta Pixel: track Purchase ──
+    try {
+      if(typeof fbq === "function"){
+        fbq('track', 'Purchase', {
+          value:        grand,
+          currency:     'DZD',
+          num_items:    cart.reduce((s,x) => s + x.qty, 0),
+          content_type: 'product',
+          content_ids:  cart.map(x => String(x.product.id)),
+          contents:     cart.map(x => ({
+            id:         String(x.product.id),
+            quantity:   x.qty,
+            item_price: x.product.price
+          }))
+        });
+      }
+    } catch(err){ console.warn("Pixel track failed:", err); }
 
     // ── Send to Google Apps Script (fire-and-forget — instant UI feedback) ──
     if(APPS_SCRIPT_URL && APPS_SCRIPT_URL.indexOf("PASTE_YOUR") === -1){
