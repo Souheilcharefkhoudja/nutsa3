@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nutsa-dz.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Fraunces:ital,wght@0,300;0,400;0,500;0,700;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
+ 
 <!-- ── Meta Pixel Code ─────────────────────── -->
 <script>
 !function(f,b,e,v,n,t,s)
@@ -45,7 +45,7 @@ alt=""/></noscript>
     --body:"Manrope", ui-sans-serif, system-ui, sans-serif;
     --arabic:"Cairo", "Segoe UI", Tahoma, sans-serif;
   }
-
+ 
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
   body{
@@ -57,10 +57,10 @@ alt=""/></noscript>
     line-height:1.5;
     padding-bottom:180px;
   }
-
+ 
   a{color:inherit}
   button{font-family:inherit}
-
+ 
   /* ── Top ticker ─────────────────────────── */
   .topbar{
     position:relative;z-index:5;
@@ -79,7 +79,7 @@ alt=""/></noscript>
   .lang a{text-decoration:none;opacity:.5;transition:opacity .15s ease}
   .lang a.on{opacity:1;color:var(--red);font-weight:700}
   .lang a:hover{opacity:1}
-
+ 
   /* ── Brand ──────────────────────────────── */
   header.brand{
     background:#fff;
@@ -107,7 +107,7 @@ alt=""/></noscript>
     font-size:10px;letter-spacing:.4em;text-transform:uppercase;
     color:var(--ink-soft);margin-top:8px;
   }
-
+ 
   /* ── Hero ───────────────────────────────── */
   .hero{
     max-width:1240px;margin:0 auto;
@@ -145,7 +145,7 @@ alt=""/></noscript>
   }
   .meta-row span{display:inline-flex;align-items:center;gap:8px;font-weight:600}
   .meta-row span::before{content:"";width:6px;height:6px;background:var(--red);border-radius:50%}
-
+ 
   /* ── Filter chips ───────────────────────── */
   .filters{
     max-width:1240px;margin:0 auto;
@@ -163,7 +163,7 @@ alt=""/></noscript>
   }
   .chip:hover{border-color:var(--ink)}
   .chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-
+ 
   /* ── Product list ───────────────────────── */
   main{
     max-width:1240px;margin:0 auto;
@@ -188,7 +188,7 @@ alt=""/></noscript>
   .row:first-child{border-top:0}
   .row.selected{background:rgba(182,52,43,.04);border-left:3px solid var(--red)}
   .row.selected:first-child{border-top:0}
-
+ 
   .thumb{
     width:120px;height:120px;border-radius:14px;overflow:hidden;
     background:var(--rule-soft);
@@ -196,7 +196,7 @@ alt=""/></noscript>
     display:grid;place-items:center;
   }
   .thumb img{width:100%;height:100%;object-fit:cover;display:block}
-
+ 
   .info .num{
     font-family:var(--display);font-style:italic;font-weight:400;
     font-size:13px;color:var(--accent);letter-spacing:.02em;
@@ -213,7 +213,7 @@ alt=""/></noscript>
   }
   .tag.sale{background:var(--red);color:#fff;border-color:var(--red)}
   .tag.green{background:rgba(126,155,92,.15);border-color:rgba(126,155,92,.35);color:var(--green-deep)}
-
+ 
   .qty{
     display:flex;align-items:center;
     border:1.5px solid var(--ink);border-radius:999px;
@@ -233,7 +233,7 @@ alt=""/></noscript>
   }
   .qty input::-webkit-outer-spin-button,
   .qty input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
-
+ 
   .price-stack .now{
     font-family:var(--display);font-weight:500;font-size:24px;line-height:1.1;
     font-variant-numeric:tabular-nums;color:var(--ink);transition:color .25s ease;
@@ -241,7 +241,7 @@ alt=""/></noscript>
   .price-stack .now.bump{color:var(--red)}
   .price-stack .was{text-decoration:line-through;color:var(--ink-soft);font-size:13px;font-variant-numeric:tabular-nums}
   .price-stack .meta{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-top:4px;font-weight:600}
-
+ 
   /* ── STICKY BOTTOM ORDER BAR ─────────── */
   .order-bar{
     position:fixed;bottom:60px;left:0;right:0;
@@ -283,9 +283,8 @@ alt=""/></noscript>
     font-size:12px;color:var(--ink);white-space:nowrap;
   }
   .bar-pill strong{font-weight:700;color:var(--red)}
-
+ 
   /* ── BIG RED ARABIC BUTTON ──────────────── */
-  /* Uses transform/opacity (GPU-accelerated) instead of box-shadow for better mobile perf + battery */
   @keyframes pulse-glow {
     0%, 100% { transform: scale(1); }
     50%      { transform: scale(1.025); }
@@ -325,13 +324,13 @@ alt=""/></noscript>
     box-shadow:0 3px 0 var(--red-deep), 0 6px 12px -4px rgba(182,52,43,.5);
   }
   .order-btn .icon{display:inline-block;margin-left:10px;font-size:18px;vertical-align:middle}
-
+ 
   /* ── Field validation errors ─────────────── */
   .field-error{
     font-size:12px;color:var(--red);margin-top:4px;font-weight:600;
     animation: fade .2s ease;
   }
-
+ 
   /* ── Modal ──────────────────────────────── */
   .modal-backdrop{
     position:fixed;inset:0;
@@ -359,7 +358,7 @@ alt=""/></noscript>
   .eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);font-weight:700}
   .modal h2{font-family:var(--display);font-weight:400;font-size:30px;letter-spacing:-.02em;margin:6px 0 0;line-height:1.1}
   .modal h2 em{font-style:italic;color:var(--red)}
-
+ 
   /* Multi-item summary */
   .summary-block{
     margin:18px 32px 0;
@@ -381,7 +380,7 @@ alt=""/></noscript>
   }
   .summary-total span:first-child{font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--ink-soft)}
   .summary-total .grand{font-family:var(--display);font-size:26px;font-weight:500;color:var(--ink)}
-
+ 
   form{padding:18px 32px 28px;display:grid;gap:14px}
   .field{display:flex;flex-direction:column;gap:6px}
   .field label{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);font-weight:700}
@@ -396,7 +395,7 @@ alt=""/></noscript>
     border-color:var(--ink);box-shadow:0 0 0 3px rgba(26,26,26,.08);
   }
   .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-
+ 
   .delivery{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
   .delivery label{
     border:1px solid var(--rule);border-radius:12px;
@@ -409,7 +408,17 @@ alt=""/></noscript>
   .delivery label.sel{border-color:var(--red);background:rgba(182,52,43,.04)}
   .delivery .name{font-weight:700;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
   .delivery .price{font-family:var(--display);font-size:18px;color:var(--red)}
-
+ 
+  /* ── Notes field ─────────────────────────── */
+  .field textarea.notes-input{
+    resize:vertical;
+    min-height:84px;
+    line-height:1.55;
+  }
+  .field-notes-hint{
+    font-size:11px;color:var(--ink-soft);letter-spacing:.04em;margin-top:2px;
+  }
+ 
   .submit-row{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:6px}
   .submit-btn{
     flex:1;
@@ -422,7 +431,7 @@ alt=""/></noscript>
   .submit-btn:hover{background:var(--red-deep);transform:translateY(-1px)}
   .cancel{background:transparent;border:0;cursor:pointer;padding:14px;color:var(--ink-soft);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
   .cancel:hover{color:var(--ink)}
-
+ 
   .close{
     position:absolute;top:16px;right:16px;
     width:36px;height:36px;border-radius:50%;
@@ -431,7 +440,7 @@ alt=""/></noscript>
     display:grid;place-items:center;
   }
   .close:hover{background:var(--ink);color:#fff}
-
+ 
   /* ── Success state ──────────────────────── */
   .success{padding:48px 32px 32px;text-align:center}
   .success .badge{
@@ -450,7 +459,7 @@ alt=""/></noscript>
   .success .recap div{display:flex;justify-content:space-between;padding:5px 0;gap:14px}
   .success .recap div + div{border-top:1px dashed var(--rule)}
   .success .recap span:first-child{color:var(--ink-soft);letter-spacing:.04em}
-
+ 
   /* ── Footer ─────────────────────────────── */
   footer{
     border-top:1px solid var(--rule);
@@ -472,7 +481,7 @@ alt=""/></noscript>
     display:flex;justify-content:space-between;font-size:12px;color:rgba(251,250,247,.5);
     letter-spacing:.06em;
   }
-
+ 
   /* ── Responsive ─────────────────────────── */
   @media (max-width:980px){
     .hero{grid-template-columns:1fr;gap:24px;padding:40px 20px 32px}
@@ -500,7 +509,7 @@ alt=""/></noscript>
     .order-btn{font-size:20px;padding:16px 24px;width:100%}
     .bar-summary{flex-direction:row;gap:16px;align-items:baseline}
   }
-
+ 
   /* ── En savoir plus button ──────────────── */
   .btn-info{
     display:inline-flex;align-items:center;gap:7px;
@@ -520,7 +529,7 @@ alt=""/></noscript>
   }
   .btn-info:active{transform:translateY(0)}
   .btn-info svg{width:12px;height:12px;flex-shrink:0}
-
+ 
   /* ── Product detail modal ───────────────── */
   #detail-modal .modal{width:min(540px,100%)}
   .detail-img{
@@ -549,11 +558,11 @@ alt=""/></noscript>
   .detail-price .dp-now{font-family:var(--display);font-size:28px;font-weight:500;color:var(--ink)}
   .detail-price .dp-was{font-size:14px;text-decoration:line-through;color:var(--ink-soft)}
   .detail-price .dp-unit{font-size:12px;color:var(--ink-soft);letter-spacing:.1em;text-transform:uppercase;margin-left:auto;font-weight:600}
-
+ 
 </style>
 </head>
 <body>
-
+ 
 <!-- ─── Top ticker ──────────────────────── -->
 <div class="topbar">
   <div class="topbar-inner">
@@ -569,7 +578,7 @@ alt=""/></noscript>
     </div>
   </div>
 </div>
-
+ 
 <!-- ─── Brand ──────────────────────────── -->
 <header class="brand">
   <div class="brand-inner">
@@ -581,7 +590,7 @@ alt=""/></noscript>
     <div class="brand-right"><strong>05 5543 33 22</strong></strong> · contact@nutsa-dz.com</div>
   </div>
 </header>
-
+ 
 <!-- ─── Filters ────────────────────────── -->
 <div class="filters">
   <div class="label">Filtrer</div>
@@ -590,7 +599,7 @@ alt=""/></noscript>
   <button class="chip" data-filter="pistache">Pistache</button>
   <button class="chip" data-filter="rocher">Rocher</button>
 </div>
-
+ 
 <!-- ─── Product list ───────────────────── -->
 <main>
   <div class="table-wrap">
@@ -603,7 +612,7 @@ alt=""/></noscript>
     <div id="product-list"><!-- rows render here --></div>
   </div>
 </main>
-
+ 
 <!-- ─── STICKY ORDER BAR ─────────────── -->
 <div class="order-bar hidden" id="order-bar">
   <div class="order-bar-inner">
@@ -617,7 +626,7 @@ alt=""/></noscript>
     </button>
   </div>
 </div>
-
+ 
 <!-- ─── Modal ──────────────────────────── -->
 <div class="modal-backdrop" id="modal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
@@ -627,9 +636,9 @@ alt=""/></noscript>
         <div class="eyebrow">Paiement à la livraison · COD</div>
         <h2 id="modal-title">Finalisez votre <em>commande</em></h2>
       </header>
-
+ 
       <div id="modal-summary-block"></div>
-
+ 
       <form id="order-form" autocomplete="on" novalidate>
         <!-- Honeypot: real users never see or fill this. Bots usually do. -->
         <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none">
@@ -645,7 +654,7 @@ alt=""/></noscript>
             <input id="f-phone" name="phone" type="tel" required autocomplete="tel" placeholder="0555 12 34 56">
           </div>
         </div>
-
+ 
         <div class="field-row">
           <div class="field">
             <label for="f-wilaya">Wilaya</label>
@@ -660,7 +669,7 @@ alt=""/></noscript>
             </select>
           </div>
         </div>
-
+ 
         <div class="field">
           <label>Mode de livraison</label>
           <div class="delivery">
@@ -677,14 +686,27 @@ alt=""/></noscript>
           </div>
           <div id="delivery-note" style="font-size:12px;color:var(--ink-soft);margin-top:4px;font-weight:500"></div>
         </div>
-
+ 
+        <!-- ── Notes field ── -->
+        <div class="field">
+          <label for="f-notes">Notes / ملاحظات</label>
+          <textarea
+            id="f-notes"
+            name="notes"
+            class="notes-input"
+            rows="3"
+            placeholder="Informations complémentaires, préférences de livraison, étage, code d'entrée…"
+          ></textarea>
+          <span class="field-notes-hint">Optionnel — toute précision utile pour la livraison ou la commande.</span>
+        </div>
+ 
         <div class="submit-row">
           <button type="button" class="cancel" id="cancel-btn">Annuler</button>
           <button type="submit" class="submit-btn">تأكيد الطلب</button>
         </div>
       </form>
     </div>
-
+ 
     <div id="success-view" style="display:none">
       <div class="success">
         <div class="badge">✓</div>
@@ -696,8 +718,8 @@ alt=""/></noscript>
     </div>
   </div>
 </div>
-
-
+ 
+ 
 <!-- ─── Product Detail Modal ──────────────── -->
 <div class="modal-backdrop" id="detail-modal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="detail-title">
@@ -717,7 +739,7 @@ alt=""/></noscript>
     </div>
   </div>
 </div>
-
+ 
 <!-- ─── Footer ─────────────────────────── -->
 <footer>
   <div class="foot-inner">
@@ -748,18 +770,11 @@ alt=""/></noscript>
     <span>Catalogue Gros &amp; Détail</span>
   </div>
 </footer>
-
+ 
 <script>
-  // ── Apps Script endpoint (paste your Web App URL here after deploying) ──
-  // Should look like: https://script.google.com/macros/s/AKfycby...../exec
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxc8Bxw0eFXX595oSEB02OhPaLRSZAHQ7DUC398bfZKwWm82Tlx5dFqGTi2G-33_zt_/exec";
-
-  // ── Shared secret — must match Script Property `INTAKE_SECRET` ──
-  // This isn't real security (anyone can View Source), but stops drive-by spam
-  // from anyone POSTing directly to the Apps Script endpoint.
   const INTAKE_SECRET = "nutsa_a8K2p9X4mZqL7vR3bN6fT1yH5wQ8jE";
-
-  // ── Data ───────────────────────────────────
+ 
   const CDN = "https://nutsa-dz.com/cdn/shop/files/";
   const products = [
     { id:1,  num:"01", name:"Chococo (raf-aelo)", weight:"1.5 kg", cat:"choco", price:2800, was:null, sheetName:"Nutsa Chococo (raf-aelo) 1,5 kg", img:CDN+"Code_Generated_Image.png?width=400",
@@ -768,7 +783,6 @@ alt=""/></noscript>
     { id:2,  num:"02", name:"Chococo", weight:"2.5 kg", cat:"choco", price:4800, was:null, sheetName:"Nutsa Chococo 2,5 kg", img:CDN+"B4503433-82FC-4B9C-BEC6-9FBF6DC16E61_1e1d7091-98c6-4370-b200-474ee768e66e.png?width=400",
       desc:"La même recette Chococo dans un format plus grand pour ne jamais manquer de gourmandise. Idéale pour les familles nombreuses ou les petits commerces, cette pâte offre une texture soyeuse et une saveur généreuse à chaque tartine.",
       details:["Texture soyeuse et généreuse","Grand format économique","Idéal familles & petits commerces","Format 2,5 kg"] },
-
     { id:3,  num:"03", name:"Chocolat noisettes 700 g", weight:"700g × 6", cat:"choco", price:5040, was:null, sheetName:"Nutsa Chocolate hazelnut – 700g (x6)", img:"https://cdn.shopify.com/s/files/1/0980/0590/9873/files/NUTSA.png?v=1767864821&width=400",
       desc:"Notre pâte à tartiner chocolat-noisettes en pack de 6 pots de 700 g. Onctueuse et intense, elle marie le chocolat et la noisette dans un équilibre parfait. Idéale pour la revente au détail ou pour les familles gourmandes.",
       details:["Pack de 6 pots × 700 g","Chocolat & noisettes intenses","Idéal revente détail","Texture onctueuse"] },
@@ -778,7 +792,6 @@ alt=""/></noscript>
     { id:5,  num:"05", name:"Chocolat noisettes", weight:"12 kg", cat:"choco", price:14400, was:null, sheetName:"Nutsa Chocolate hazelnut – 12 KG", img:"https://cdn.shopify.com/s/files/1/0980/0590/9873/files/NUTSA_-_Choco_Noisette_-_12_KG.jpg?v=1767861832&width=400",
       desc:"Le format professionnel 12 kg de notre pâte chocolat-noisettes. Conçu pour les hôtels, boulangeries, pâtisseries et restaurants. Qualité constante, livraison sur toute l'Algérie.",
       details:["Format industriel 12 kg","Pour hôtels, boulangeries, restaurants","Qualité constante","Livraison 48h"] },
-
     { id:6,  num:"06", name:"Pistachio Crock", weight:"1.5 kg", cat:"pistache", price:3700, was:null, sheetName:"Nutsa Pistachio Crock 1,5 kg", img:CDN+"Gemini_Generated_Image_fefs1dfefs1dfefs.png?width=400",
       desc:"Une expérience unique : la douceur de la pistache rencontre le croquant des éclats de fruits secs. La Pistachio Crock est une pâte premium à la texture inégalée, idéale pour sublimer vos desserts ou se déguster à la cuillère.",
       details:["Éclats croquants de pistache","Recette premium haut de gamme","Idéal pour pâtissiers","Format 1,5 kg"] },
@@ -798,7 +811,7 @@ alt=""/></noscript>
       desc:"La même recette Rocher dans un format plus grand pour les amateurs et les professionnels. Chocolat fondant, noisettes croquantes : une alliance parfaite pour vos préparations sucrées ou pour régaler toute la famille au quotidien.",
       details:["Même recette Rocher premium","Noisettes croquantes & chocolat fondant","Idéal professionnels & familles","Format 2,5 kg"] },
   ];
-
+ 
   const wilayas = [
     {code:"01",name:"Adrar",                door:800, stop:600},
     {code:"02",name:"Chlef",                door:600, stop:450},
@@ -859,29 +872,20 @@ alt=""/></noscript>
     {code:"57",name:"El Menia",             door:1000,stop:800},
     {code:"58",name:"El M'Ghair",           door:800, stop:600},
   ];
-
-  // ── Delivery pricing rules ─────────────────
-  // Only single 1.5 kg items pay delivery.
-  // Multiple items (any) → free delivery.
-  // Alger (wilaya 16) → always free.
+ 
   function getDeliveryCost(wilayaCode, cart){
-    // Alger is always free
     if(wilayaCode === "16") return 0;
-    // Multiple distinct products → free
     if(cart.length > 1) return 0;
-    // Single item that is NOT 1.5 kg → free
     const item = cart[0];
     if(!item) return 0;
     const w = item.product.weight || "";
     const is15 = /^1[,.]5\s*kg/i.test(w);
     if(!is15) return 0;
-    // Single 1.5 kg → pay delivery
     const wData = wilayas.find(x => x.code === wilayaCode);
     if(!wData) return 0;
-    // Default to door price; caller can adjust for stop desk
     return wData.door;
   }
-
+ 
   const communesData = {
     "01":["Adrar","Tamest","Charouine","Reggane","In Zghmir","Tit","Ksar Kaddour","Sali","Bouda","Timokten","Aougrout","Fenoughil","Tamentit","Tamantit","Zaouiet Kounta"],
     "02":["Chlef","Tenes","Benairia","El Karimia","Taougrit","Beni Haoua","Sobha","Harchoun","Ouled Fares","Sidi Akkacha","Boukadir","Beni Rached","Talassa","Herenfa","Oued Goussine"],
@@ -942,11 +946,10 @@ alt=""/></noscript>
     "57":["El Menia","Hassi Fehal","Hassi Gara","Tin El Koum"],
     "58":["El M'Ghair","Oum Touyour","Sidi Khelil","Still","Djamaa","M'Rara","Tendla","Sidi Amrane","Ouled Djellal","Mih Ouensa"]
   };
-
-  // ── Render ─────────────────────────────────
+ 
   const fmt = n => new Intl.NumberFormat("fr-DZ").format(n);
   const list = document.getElementById("product-list");
-
+ 
   function rowHtml(p){
     const sale = "";
     const cat  = p.cat === "pistache" ? `<span class="tag green">Pistache</span>` :
@@ -986,8 +989,7 @@ alt=""/></noscript>
       </article>`;
   }
   list.innerHTML = products.map(rowHtml).join("");
-
-  // ── Quantity interactions ──────────────────
+ 
   list.addEventListener("click", e => {
     const btn = e.target.closest("[data-act]");
     if(!btn) return;
@@ -1006,7 +1008,7 @@ alt=""/></noscript>
       updateRow(row);
     }
   });
-
+ 
   function updateRow(row){
     const id = +row.dataset.id;
     const p  = products.find(x => x.id === id);
@@ -1022,13 +1024,12 @@ alt=""/></noscript>
     row.classList.toggle("selected", q > 0);
     refreshBar();
   }
-
-  // ── Sticky bar ─────────────────────────────
+ 
   const orderBar    = document.getElementById("order-bar");
   const barCount    = document.getElementById("bar-count");
   const barTotal    = document.getElementById("bar-total");
   const barItemsList= document.getElementById("bar-items-list");
-
+ 
   function getCart(){
     return products.map(p => {
       const input = list.querySelector(`input[data-id="${p.id}"]`);
@@ -1036,16 +1037,12 @@ alt=""/></noscript>
       return { product:p, qty:q, subtotal: p.price * q };
     }).filter(x => x.qty > 0);
   }
-
+ 
   function refreshBar(){
     const cart = getCart();
     const totalItems = cart.reduce((s,x) => s + x.qty, 0);
     const totalPrice = cart.reduce((s,x) => s + x.subtotal, 0);
-
-    if(totalItems === 0){
-      orderBar.classList.add("hidden");
-      return;
-    }
+    if(totalItems === 0){ orderBar.classList.add("hidden"); return; }
     orderBar.classList.remove("hidden");
     barCount.textContent = `${totalItems} article${totalItems > 1 ? "s" : ""}`;
     barTotal.textContent = `${fmt(totalPrice)} DA`;
@@ -1053,8 +1050,7 @@ alt=""/></noscript>
       `<span class="bar-pill">${x.product.name} <strong>×${x.qty}</strong></span>`
     ).join("");
   }
-
-  // ── Filters ────────────────────────────────
+ 
   document.querySelectorAll(".chip").forEach(c => {
     c.addEventListener("click", () => {
       document.querySelectorAll(".chip").forEach(x => x.classList.remove("on"));
@@ -1065,14 +1061,13 @@ alt=""/></noscript>
       });
     });
   });
-
-  // ── Modal / order ──────────────────────────
+ 
   const modal       = document.getElementById("modal");
   const formView    = document.getElementById("form-view");
   const successView = document.getElementById("success-view");
   const wilayaSel   = document.getElementById("f-wilaya");
   const summaryBlock= document.getElementById("modal-summary-block");
-
+ 
   wilayas.forEach(w => {
     const o = document.createElement("option");
     o.value = w.code;
@@ -1081,16 +1076,15 @@ alt=""/></noscript>
     o.dataset.stop = w.stop;
     wilayaSel.appendChild(o);
   });
-
-  // Track current cart for live delivery recalculation
+ 
   let currentCart = [];
-
+ 
   document.getElementById("main-order-btn").addEventListener("click", () => {
     const cart = getCart();
     if(!cart.length) return;
     currentCart = cart;
     const productsTotal = cart.reduce((s,x) => s + x.subtotal, 0);
-
+ 
     let itemsHtml = cart.map(x => `
       <div class="summary-item">
         <div class="si-left">
@@ -1099,7 +1093,7 @@ alt=""/></noscript>
         </div>
         <div class="si-right">${fmt(x.subtotal)} DA</div>
       </div>`).join("");
-
+ 
     summaryBlock.innerHTML = `
       <div class="summary-block">
         ${itemsHtml}
@@ -1108,50 +1102,42 @@ alt=""/></noscript>
           <span class="grand">${fmt(productsTotal)} DA</span>
         </div>
       </div>`;
-
+ 
     lastActiveElement = document.activeElement;
     formView.style.display = "";
     successView.style.display = "none";
     modal.classList.add("open");
     document.body.style.overflow = "hidden";
     modal.addEventListener("keydown", trapFocus);
-    formOpenedAt = Date.now(); // anti-bot timing baseline
-    // Show delivery line in summary (will compute once wilaya is selected)
+    formOpenedAt = Date.now();
     setTimeout(()=>{ updateModalDeliveryLine(); document.getElementById("f-name").focus(); }, 250);
   });
-
-  // ── Focus trap for modal ──
+ 
   const focusableSel = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
   let lastActiveElement = null;
-
+ 
   function getFocusable(){
     return Array.from(modal.querySelectorAll(focusableSel)).filter(el => el.offsetParent !== null);
   }
-
   function trapFocus(e){
     if(e.key !== "Tab") return;
     const focusable = getFocusable();
     if(!focusable.length) return;
     const first = focusable[0], last = focusable[focusable.length - 1];
-    if(e.shiftKey){
-      if(document.activeElement === first){ e.preventDefault(); last.focus(); }
-    } else {
-      if(document.activeElement === last){ e.preventDefault(); first.focus(); }
-    }
+    if(e.shiftKey){ if(document.activeElement === first){ e.preventDefault(); last.focus(); } }
+    else { if(document.activeElement === last){ e.preventDefault(); first.focus(); } }
   }
-
   function closeModal(){
     modal.classList.remove("open");
     document.body.style.overflow = "";
     modal.removeEventListener("keydown", trapFocus);
-    // Restore focus to the element that opened the modal
     if(lastActiveElement) lastActiveElement.focus();
   }
   document.getElementById("close-modal").onclick = closeModal;
   document.getElementById("cancel-btn").onclick = closeModal;
   modal.addEventListener("click", e => { if(e.target === modal) closeModal(); });
   document.addEventListener("keydown", e => { if(e.key === "Escape") closeModal(); });
-
+ 
   const labDoor = document.getElementById("lab-door");
   const labStop = document.getElementById("lab-stop");
   document.querySelectorAll('input[name="delivery"]').forEach(r => {
@@ -1163,25 +1149,20 @@ alt=""/></noscript>
       labDoor.style.background = sel === "door" ? "rgba(182,52,43,.04)" : "";
       labStop.style.borderColor = sel === "stop" ? "var(--red)" : "";
       labStop.style.background = sel === "stop" ? "rgba(182,52,43,.04)" : "";
-      // Update the displayed delivery cost in the summary
       updateModalDeliveryLine();
     });
   });
-
-  // ── Update delivery line in modal summary ──
+ 
   function updateModalDeliveryLine(){
     const summaryBlock = document.getElementById("modal-summary-block");
     const existing = summaryBlock.querySelector(".summary-delivery");
     if(existing) existing.remove();
-
     const wilayaCode = wilayaSel.value;
     if(!wilayaCode) return;
-
     const wOpt = wilayaSel.selectedOptions[0];
     const deliveryType = document.querySelector('input[name="delivery"]:checked')?.value || "door";
     const shipCost = deliveryType === "door" ? (+wOpt.dataset.door || 0) : (+wOpt.dataset.stop || 0);
     const productsTotal = currentCart.reduce((s,x) => s + x.subtotal, 0);
-
     const deliveryLine = document.createElement("div");
     deliveryLine.className = "summary-delivery summary-item";
     deliveryLine.style.background = shipCost === 0 ? "rgba(126,155,92,.06)" : "";
@@ -1192,25 +1173,17 @@ alt=""/></noscript>
       </div>
       <div class="si-right" style="color:${shipCost === 0 ? "var(--green)" : "var(--red)"}">${shipCost === 0 ? "Gratuit ✓" : fmt(shipCost) + " DA"}</div>
     `;
-
-    // Insert before the summary-total row
     const totalRow = summaryBlock.querySelector(".summary-total");
     if(totalRow){
-      // Update grand total
       const grandTotal = productsTotal + shipCost;
       const grandEl = totalRow.querySelector(".grand");
       if(grandEl) grandEl.textContent = `${fmt(grandTotal)} DA`;
-
       summaryBlock.querySelector(".summary-block").insertBefore(deliveryLine, totalRow);
     }
   }
-
+ 
   const baladiaSel = document.getElementById("f-baladia");
-
-  // ── Commune lookup (static, no external API) ──
-  // We previously called an external Ecotrack endpoint here with an API token.
-  // The token was visible to anyone viewing source, so we removed it entirely.
-  // The static `communesData` dictionary above covers all 58 wilayas.
+ 
   function fetchWilayaDetails(wilayaCode){
     const staticCommunes = communesData[wilayaCode] || [];
     return Promise.resolve({
@@ -1220,65 +1193,36 @@ alt=""/></noscript>
       hasStopDesk: false
     });
   }
-
-  // ── Compute and display delivery price based on wilaya + cart ──
+ 
   function updateDeliveryDisplay(){
     const wilayaCode = wilayaSel.value || "";
     const cart = currentCart;
     const wData = wilayas.find(w => w.code === wilayaCode);
     const cartHasMultiple = cart.length > 1;
     const isAlger = wilayaCode === "16";
-
     if(!wData || cart.length === 0){
       document.getElementById("price-door").textContent = "— DA";
       document.getElementById("price-stop").textContent = "— DA";
-      const stopContainer = document.getElementById("lab-stop");
-      if(stopContainer) stopContainer.style.display = "";
       return;
     }
-
-    // Compute door & stop prices based on rules
     let doorPrice, stopPrice;
-
-    if(isAlger){
-      // Alger: always free
-      doorPrice = 0;
-      stopPrice = 0;
-    } else if(cartHasMultiple){
-      // Multiple items: free delivery
-      doorPrice = 0;
-      stopPrice = 0;
-    } else {
-      // Single item
+    if(isAlger){ doorPrice = 0; stopPrice = 0; }
+    else if(cartHasMultiple){ doorPrice = 0; stopPrice = 0; }
+    else {
       const item = cart[0];
       if(item && item.product){
         const w = item.product.weight || "";
         const is15 = /^1[,.]5\s*kg/i.test(w);
-        if(is15){
-          // 1.5 kg single → pay delivery
-          doorPrice = wData.door;
-          stopPrice = wData.stop;
-        } else {
-          // Non-1.5kg single → free delivery
-          doorPrice = 0;
-          stopPrice = 0;
-        }
-      } else {
-        doorPrice = 0;
-        stopPrice = 0;
-      }
+        if(is15){ doorPrice = wData.door; stopPrice = wData.stop; }
+        else { doorPrice = 0; stopPrice = 0; }
+      } else { doorPrice = 0; stopPrice = 0; }
     }
-
     document.getElementById("price-door").textContent = doorPrice === 0 ? "Gratuit" : `${fmt(doorPrice)} DA`;
     document.getElementById("price-stop").textContent = stopPrice === 0 ? "Gratuit" : `${fmt(stopPrice)} DA`;
-
-    // Store on options for form submission
     if(wilayaSel.selectedOptions[0]){
       wilayaSel.selectedOptions[0].dataset.door = doorPrice;
       wilayaSel.selectedOptions[0].dataset.stop = stopPrice;
     }
-
-    // Toggle label styling
     const doorLabel = document.getElementById("lab-door");
     const stopLabel = document.getElementById("lab-stop");
     const delNote = document.getElementById("delivery-note");
@@ -1287,18 +1231,10 @@ alt=""/></noscript>
       doorLabel.style.background = "rgba(126,155,92,.06)";
       stopLabel.style.borderColor = "var(--green)";
       stopLabel.style.background = "rgba(126,155,92,.06)";
-      if(isAlger){
-        delNote.textContent = "✅ Livraison gratuite — Alger";
-        delNote.style.color = "var(--green)";
-      } else if(cartHasMultiple){
-        delNote.textContent = "✅ Livraison gratuite — commande multiple";
-        delNote.style.color = "var(--green)";
-      } else {
-        delNote.textContent = "✅ Livraison gratuite — produit non concerné";
-        delNote.style.color = "var(--green)";
-      }
+      if(isAlger){ delNote.textContent = "✅ Livraison gratuite — Alger"; delNote.style.color = "var(--green)"; }
+      else if(cartHasMultiple){ delNote.textContent = "✅ Livraison gratuite — commande multiple"; delNote.style.color = "var(--green)"; }
+      else { delNote.textContent = "✅ Livraison gratuite — produit non concerné"; delNote.style.color = "var(--green)"; }
     } else {
-      // Reset to default selection styling
       const sel = document.querySelector('input[name="delivery"]:checked').value;
       doorLabel.style.borderColor = sel === "door" ? "var(--red)" : "";
       doorLabel.style.background = sel === "door" ? "rgba(182,52,43,.04)" : "";
@@ -1308,7 +1244,7 @@ alt=""/></noscript>
       delNote.style.color = "var(--ink-soft)";
     }
   }
-
+ 
   function populateCommunes(wilayaCode){
     baladiaSel.innerHTML = "";
     const loading = document.createElement("option");
@@ -1316,45 +1252,32 @@ alt=""/></noscript>
     loading.textContent = "جاري التحميل…";
     baladiaSel.appendChild(loading);
     baladiaSel.disabled = true;
-
-    // Always show both delivery options — never hide Stop desk
     const stopContainer = document.getElementById("lab-stop");
-    if(stopContainer){
-      stopContainer.style.display = "";
-      stopContainer.style.opacity = "1";
-      stopContainer.style.pointerEvents = "";
-    }
-
-    fetchWilayaDetails(wilayaCode)
-      .then(({communes}) => {
-        // Update delivery display using cart-based rules
-        updateDeliveryDisplay();
-
-        baladiaSel.innerHTML = "";
-        const ph = document.createElement("option");
-        ph.value = ""; ph.disabled = true; ph.selected = true;
-        ph.textContent = "اختر البلدية";
-        baladiaSel.appendChild(ph);
-        communes.forEach(c => {
-          const o = document.createElement("option");
-          o.value = c.nom; o.textContent = c.nom;
-          baladiaSel.appendChild(o);
-        });
-        baladiaSel.disabled = false;
+    if(stopContainer){ stopContainer.style.display = ""; stopContainer.style.opacity = "1"; stopContainer.style.pointerEvents = ""; }
+    fetchWilayaDetails(wilayaCode).then(({communes}) => {
+      updateDeliveryDisplay();
+      baladiaSel.innerHTML = "";
+      const ph = document.createElement("option");
+      ph.value = ""; ph.disabled = true; ph.selected = true;
+      ph.textContent = "اختر البلدية";
+      baladiaSel.appendChild(ph);
+      communes.forEach(c => {
+        const o = document.createElement("option");
+        o.value = c.nom; o.textContent = c.nom;
+        baladiaSel.appendChild(o);
       });
+      baladiaSel.disabled = false;
+    });
   }
-
+ 
   wilayaSel.addEventListener("change", () => {
     const opt = wilayaSel.selectedOptions[0];
     const code = opt.value;
     populateCommunes(code);
-    // Also update delivery line in modal if open
     updateModalDeliveryLine();
   });
-
-  // ── Form validation helper ──
+ 
   function showFieldError(input, msg){
-    // Remove any existing error for this field
     const existing = input.parentNode.querySelector(".field-error");
     if(existing) existing.remove();
     input.style.borderColor = "var(--red)";
@@ -1374,21 +1297,16 @@ alt=""/></noscript>
     document.querySelectorAll(".field-error").forEach(e => e.remove());
     document.querySelectorAll(".field input, .field select, .field textarea").forEach(i => i.style.borderColor = "");
   }
-
-  // ── Track when the form was first shown (used to detect instant bot submits) ──
+ 
   let formOpenedAt = 0;
-
+ 
   document.getElementById("order-form").addEventListener("submit", e => {
     e.preventDefault();
     clearAllErrors();
-
     const cart = getCart();
     if(!cart.length) return;
     const fd = new FormData(e.target);
-
-    // ── Anti-bot: honeypot must be empty, and form must have been open >2s ──
-    // Real humans take seconds to fill a form; bots POST instantly.
-    // We silently "succeed" so bots don't learn what tripped them.
+ 
     const honeypot = (fd.get("website") || "").trim();
     const elapsed  = Date.now() - formOpenedAt;
     if(honeypot || (formOpenedAt > 0 && elapsed < 2000)){
@@ -1397,28 +1315,26 @@ alt=""/></noscript>
       successView.style.display = "";
       return;
     }
-
-    // ── Validate required fields ──
+ 
     const name    = (fd.get("name")    || "").trim();
     const phone   = (fd.get("phone")   || "").trim();
     const wilaya  = fd.get("wilaya")   || "";
-    const baladia = (fd.get("baladia")  || "").trim();
+    const baladia = (fd.get("baladia") || "").trim();
+    const notes   = (fd.get("notes")   || "").trim();
     let valid = true;
-
+ 
     if(!name){ showFieldError(document.getElementById("f-name"),"Le nom est requis"); valid = false; }
     if(!phone){ showFieldError(document.getElementById("f-phone"),"Le téléphone est requis"); valid = false; }
     else if(!/^0[567]\d{8}$/.test(phone.replace(/\s/g,""))){ showFieldError(document.getElementById("f-phone"),"Numéro invalide (ex: 0555123456)"); valid = false; }
     if(!wilaya){ showFieldError(wilayaSel,"La wilaya est requise"); valid = false; }
     if(!baladia){ showFieldError(baladiaSel,"La commune est requise"); valid = false; }
-
     if(!valid){ document.querySelector(".field-error")?.scrollIntoView({behavior:"smooth",block:"center"}); return; }
-
+ 
     const wOpt = wilayaSel.selectedOptions[0];
     const ship = fd.get("delivery") === "door" ? +wOpt.dataset.door : +wOpt.dataset.stop;
     const productsTotal = cart.reduce((s,x) => s + x.subtotal, 0);
     const grand = productsTotal + ship;
-
-    // ── Build payload for Apps Script ──
+ 
     const payload = {
       source: "nutsa-website",
       name,
@@ -1428,6 +1344,7 @@ alt=""/></noscript>
       baladia,
       delivery: fd.get("delivery"),
       shipping: ship,
+      notes,
       cart: cart.map(x => ({
         id:        x.product.id,
         name:      x.product.name,
@@ -1441,70 +1358,46 @@ alt=""/></noscript>
       submittedAt:   new Date().toISOString(),
       secret:        INTAKE_SECRET
     };
-
-    // ── Disable submit while sending ──
+ 
     const submitBtn = e.target.querySelector(".submit-btn");
     const cancelBtn = document.getElementById("cancel-btn");
-    if(submitBtn){
-      submitBtn.disabled = true;
-      submitBtn.style.opacity = ".7";
-      submitBtn.textContent = "جاري الإرسال…";
-    }
+    if(submitBtn){ submitBtn.disabled = true; submitBtn.style.opacity = ".7"; submitBtn.textContent = "جاري الإرسال…"; }
     if(cancelBtn) cancelBtn.disabled = true;
-
-    // ── Build success recap safely (textContent prevents self-XSS from user input) ──
+ 
     const recapEl = document.getElementById("success-recap");
-    recapEl.innerHTML = ""; // clear
+    recapEl.innerHTML = "";
     const addRecapRow = (labelText, valueText, valueBold) => {
       const row = document.createElement("div");
       const l = document.createElement("span");
       const v = document.createElement("span");
       l.textContent = labelText;
-      if(valueBold){
-        const b = document.createElement("strong");
-        b.textContent = valueText;
-        v.appendChild(b);
-      } else {
-        v.textContent = valueText;
-      }
+      if(valueBold){ const b = document.createElement("strong"); b.textContent = valueText; v.appendChild(b); }
+      else { v.textContent = valueText; }
       row.appendChild(l); row.appendChild(v);
       recapEl.appendChild(row);
     };
     cart.forEach(x => {
-      addRecapRow(
-        `Nutsa ${x.product.name} · ${x.product.weight}`,
-        `${x.qty} × ${fmt(x.product.price)} DA = ${fmt(x.subtotal)} DA`
-      );
+      addRecapRow(`Nutsa ${x.product.name} · ${x.product.weight}`, `${x.qty} × ${fmt(x.product.price)} DA = ${fmt(x.subtotal)} DA`);
     });
     addRecapRow("Sous-total produits", `${fmt(productsTotal)} DA`);
-    addRecapRow(
-      `Livraison · ${fd.get("delivery")==="door"?"À domicile":"Stop desk"}`,
-      ship===0 ? "Gratuit" : `${fmt(ship)} DA`
-    );
+    addRecapRow(`Livraison · ${fd.get("delivery")==="door"?"À domicile":"Stop desk"}`, ship===0 ? "Gratuit" : `${fmt(ship)} DA`);
     addRecapRow("Total à payer", `${fmt(grand)} DA`, true);
     addRecapRow("Nom",       name);
     addRecapRow("Téléphone", phone);
     addRecapRow("Wilaya",    wOpt.textContent);
     addRecapRow("Commune",   baladia);
-
+    if(notes) addRecapRow("Notes", notes);
+ 
     const showSuccess = () => {
       formView.style.display = "none";
       successView.style.display = "";
-      if(submitBtn){
-        submitBtn.disabled = false;
-        submitBtn.style.opacity = "";
-        submitBtn.textContent = "تأكيد الطلب";
-      }
+      if(submitBtn){ submitBtn.disabled = false; submitBtn.style.opacity = ""; submitBtn.textContent = "تأكيد الطلب"; }
       if(cancelBtn) cancelBtn.disabled = false;
-      list.querySelectorAll('input[type="number"]').forEach(inp => {
-        inp.value = 0;
-        updateRow(inp.closest(".row"));
-      });
+      list.querySelectorAll('input[type="number"]').forEach(inp => { inp.value = 0; updateRow(inp.closest(".row")); });
       e.target.reset();
       baladiaSel.innerHTML = '<option value="" disabled selected>Sélectionnez d\'abord une wilaya</option>';
     };
-
-    // ── Save to localStorage as backup ──
+ 
     const saveLocalBackup = () => {
       try {
         const pending = JSON.parse(localStorage.getItem("nutsa_pending_orders") || "[]");
@@ -1512,8 +1405,7 @@ alt=""/></noscript>
         localStorage.setItem("nutsa_pending_orders", JSON.stringify(pending));
       } catch(err){ console.warn("localStorage backup failed:", err); }
     };
-
-    // ── Meta Pixel: track Purchase ──
+ 
     try {
       if(typeof fbq === "function"){
         fbq('track', 'Purchase', {
@@ -1522,89 +1414,55 @@ alt=""/></noscript>
           num_items:    cart.reduce((s,x) => s + x.qty, 0),
           content_type: 'product',
           content_ids:  cart.map(x => String(x.product.id)),
-          contents:     cart.map(x => ({
-            id:         String(x.product.id),
-            quantity:   x.qty,
-            item_price: x.product.price
-          }))
+          contents:     cart.map(x => ({ id: String(x.product.id), quantity: x.qty, item_price: x.product.price }))
         });
       }
     } catch(err){ console.warn("Pixel track failed:", err); }
-
-    // ── Send to Google Apps Script (fire-and-forget — instant UI feedback) ──
+ 
     if(APPS_SCRIPT_URL && APPS_SCRIPT_URL.indexOf("PASTE_YOUR") === -1){
       saveLocalBackup();
-
-      // Fire the request — don't wait for the response.
-      // keepalive ensures the browser finishes sending even if the user
-      // closes the page or switches apps right after tapping submit.
       fetch(APPS_SCRIPT_URL, {
-        method:    "POST",
-        headers:   {"Content-Type": "text/plain"},
-        body:      JSON.stringify(payload),
-        keepalive: true
-      }).then(r => {
-        console.log("Order sent:", r.status);
-      }).catch(err => {
-        console.warn("Order POST failed (saved in localStorage):", err);
-      });
-
-      // Show success immediately — order is on its way to the sheet
+        method: "POST", headers: {"Content-Type": "text/plain"},
+        body: JSON.stringify(payload), keepalive: true
+      }).then(r => { console.log("Order sent:", r.status); })
+        .catch(err => { console.warn("Order POST failed (saved in localStorage):", err); });
       showSuccess();
     } else {
-      console.warn("⚠️ APPS_SCRIPT_URL not configured. Order was NOT saved to Google Sheet.");
-      console.log("Payload that would have been sent:", payload);
+      console.warn("⚠️ APPS_SCRIPT_URL not configured.");
+      console.log("Payload:", payload);
       saveLocalBackup();
       showSuccess();
     }
   });
-
+ 
   document.getElementById("ok-btn").onclick = closeModal;
-
-
-  // ── Product detail modal ───────────────────
-  const detailModal   = document.getElementById("detail-modal");
-  const closeDetail   = document.getElementById("close-detail");
-
+ 
+  const detailModal = document.getElementById("detail-modal");
+  const closeDetail = document.getElementById("close-detail");
+ 
   function openDetail(id){
     const p = products.find(x => x.id === id);
     if(!p) return;
-    document.getElementById("detail-img").src        = p.img;
-    document.getElementById("detail-img").alt        = "Nutsa " + p.name + " " + p.weight;
+    document.getElementById("detail-img").src         = p.img;
+    document.getElementById("detail-img").alt         = "Nutsa " + p.name + " " + p.weight;
     document.getElementById("detail-num").textContent  = "No " + p.num;
     document.getElementById("detail-title").textContent = "Nutsa " + p.name;
     document.getElementById("detail-weight").textContent = p.weight;
     document.getElementById("detail-desc").textContent  = p.desc || "";
     const pts = document.getElementById("detail-points");
     pts.innerHTML = "";
-    (p.details || []).forEach(d => {
-      const li = document.createElement("li");
-      li.textContent = d;
-      pts.appendChild(li);
-    });
+    (p.details || []).forEach(d => { const li = document.createElement("li"); li.textContent = d; pts.appendChild(li); });
     document.getElementById("detail-price-now").textContent = fmt(p.price) + " DA";
     const wasEl = document.getElementById("detail-price-was");
     wasEl.textContent = p.was ? fmt(p.was) + " DA" : "";
     detailModal.classList.add("open");
     document.body.style.overflow = "hidden";
   }
-
-  closeDetail.addEventListener("click", () => {
-    detailModal.classList.remove("open");
-    document.body.style.overflow = "";
-  });
-  detailModal.addEventListener("click", e => {
-    if(e.target === detailModal){
-      detailModal.classList.remove("open");
-      document.body.style.overflow = "";
-    }
-  });
-
-  list.addEventListener("click", e => {
-    const btn = e.target.closest("[data-info]");
-    if(btn) openDetail(+btn.dataset.info);
-  });
-
+ 
+  closeDetail.addEventListener("click", () => { detailModal.classList.remove("open"); document.body.style.overflow = ""; });
+  detailModal.addEventListener("click", e => { if(e.target === detailModal){ detailModal.classList.remove("open"); document.body.style.overflow = ""; } });
+  list.addEventListener("click", e => { const btn = e.target.closest("[data-info]"); if(btn) openDetail(+btn.dataset.info); });
+ 
 </script>
   <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -1613,41 +1471,21 @@ alt=""/></noscript>
   <script>
 (function() {
   var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxc8Bxw0eFXX595oSEB02OhPaLRSZAHQ7DUC398bfZKwWm82Tlx5dFqGTi2G-33_zt_/exec";
-
   var sid;
   try {
     sid = sessionStorage.getItem("nutsa_sid");
-    if (!sid) {
-      sid = "s_" + Math.random().toString(36).slice(2,10) + Date.now().toString(36);
-      sessionStorage.setItem("nutsa_sid", sid);
-    }
+    if (!sid) { sid = "s_" + Math.random().toString(36).slice(2,10) + Date.now().toString(36); sessionStorage.setItem("nutsa_sid", sid); }
   } catch(e) { sid = "s_" + Math.random().toString(36).slice(2,8); }
-
   var payload = JSON.stringify({
-    action: "visit",
-    page:  location.pathname || "/",
-    ref:   document.referrer || "",
-    sid:   sid,
-    ua:    (navigator.userAgent || "").slice(0,200),
-    sw:    screen.width  || 0,
-    sh:    screen.height || 0,
-    lang:  (navigator.language || "").slice(0,10),
-    src:   "vercel"
+    action: "visit", page: location.pathname || "/", ref: document.referrer || "",
+    sid: sid, ua: (navigator.userAgent || "").slice(0,200),
+    sw: screen.width || 0, sh: screen.height || 0, lang: (navigator.language || "").slice(0,10), src: "vercel"
   });
-
   function ping() {
     if (navigator.sendBeacon) {
-      try {
-        var blob = new Blob([payload], { type: "text/plain;charset=UTF-8" });
-        if (navigator.sendBeacon(APPS_SCRIPT_URL, blob)) return;
-      } catch(e) {}
+      try { var blob = new Blob([payload], { type: "text/plain;charset=UTF-8" }); if (navigator.sendBeacon(APPS_SCRIPT_URL, blob)) return; } catch(e) {}
     }
-    try {
-      fetch(APPS_SCRIPT_URL, {
-        method: "POST", mode: "no-cors", keepalive: true,
-        headers: { "Content-Type": "text/plain" }, body: payload
-      }).catch(function(){});
-    } catch(e) {}
+    try { fetch(APPS_SCRIPT_URL, { method: "POST", mode: "no-cors", keepalive: true, headers: { "Content-Type": "text/plain" }, body: payload }).catch(function(){}); } catch(e) {}
   }
   if (document.readyState === "complete") ping();
   else window.addEventListener("load", ping, { once: true });
